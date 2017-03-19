@@ -9,12 +9,16 @@ Helpers
   ff = 0x000c;
   ht = 0x0009; 
   line_terminator = lf | cr | cr lf;
+  input_comment = [unicode_input_character - '$'];
+  input_character = [unicode_input_character - [cr + lf]];
   white_space = (sp | ht | ff | line_terminator)*;
   digit = ['0' .. '9'];
   escape_sequence = '\t' | '\n' | '\r' | '\0' | '\\' | '\' ''' | '\"' | '\xnn' ;
+  letter=['a' .. 'z'] | ['A' .. 'Z'] ;
   char_literal = ' ' | '!' | '"' | '#' | '$' | '%' | '&' | '(' | ')' 
         | '*' | '+' | ',' | '-' | '.' | '/' | ':' | ';' | '<' | '=' | '>' 
-        | '?' | '@' | '[' | ']' | '^' | '_' | '`' | '{' | '|' | '}' | '~' | ['a' .. 'z'] | ['A' .. 'Z'] | digit | escape_sequence;
+        | '?' | '@' | '[' | ']' | '^' | '_' | '`' | '{' | '|' | '}' | '~' | letter | digit | escape_sequence;
+  char_or_digit =letter | digit |'_';
 
   unicode_letter =
     [0x0041..0x005a] | [0x0061..0x007a] | [0x00aa..0x00aa] | [0x00b5..0x00b5] |
@@ -80,6 +84,7 @@ Helpers
 Tokens
   white_space = white_space;
   escape_sequence=escape_sequence;
+  variables = letter char_or_digit*;
   //keywords
 
   and	= 'and';
@@ -102,6 +107,7 @@ Tokens
   
   integer=digit+;
   string_lit ='"'char_literal*'"';
+  const_char='''char_literal''';
   //operators
 
   minus = '-';
@@ -128,6 +134,11 @@ Tokens
   semi  = ';';
   colon = ':';
   arrow = '<-';  
+
+  //comments
+
+  end_of_line_comment = '$' input_character* line_terminator?;
+  big_comment = '$$' input_comment* '$$';
 
 Ignored Tokens
   white_space,
