@@ -137,10 +137,16 @@ Tokens
 
   //comments
 
-  end_of_line_comment = '$' input_character* line_terminator?;
-  big_comment = '$$' input_comment* '$$';
-
+  end_of_line_comment = '$' input_comment input_character* line_terminator?;
+  big_comment = '$$' input_comment* ('$' (input_comment+))* '$$';
 Ignored Tokens
   white_space,
   escape_sequence;
   
+Productions
+expr ={factor} factor | {plus} expr plus factor | {minus} expr minus factor;
+factor ={term} term |{star} factor star term | {slash} factor slash term;
+term = {integer} integer | {expr} l_par expr r_par; 
+
+::= {int-const} | {char-const} | {l-value} | {func-call} | “(” {expr} “)”
+| ( “+” | “-” ) {expr} | {expr} ( “+” | “-” | “*” | “div” | “mod” ) {expr}
