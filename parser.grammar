@@ -10,7 +10,7 @@ Helpers
   ht = 0x0009; 
   line_terminator = lf | cr | cr lf;
   input_comment = [unicode_input_character - '$'];
-  input_character = [unicode_input_character - [cr + lf]];
+  input_character = [unicode_input_character - [cr + lf ]];
   white_space = (sp | ht | ff | line_terminator)*;
   digit = ['0' .. '9'];
   escape_sequence = '\t' | '\n' | '\r' | '\0' | '\\' | '\' ''' | '\"' | '\xnn' ;
@@ -84,7 +84,7 @@ Helpers
 Tokens
   white_space = white_space;
   escape_sequence=escape_sequence;
-  variables = letter char_or_digit*;
+  variable = letter char_or_digit*;
   //keywords
 
   and	= 'and';
@@ -104,6 +104,9 @@ Tokens
   then	= 'then';
   var	= 'var';
   while = 'while';
+
+
+
   
   integer=digit+;
   string_lit ='"'char_literal*'"';
@@ -154,7 +157,11 @@ func_def =
  header  local_def* block;
 
 header =
- fun variable l_par fpar_def  semi [fpar_defs]:fpar_def* r_par colon ret_type;
+ fun  variable l_par argument_list r_par colon ret_type;
+
+argument_list =
+{one_argument} fpar_def |
+{many_arguments} argument_list semi fpar_def;
 
 fpar_def =
  ref? variable [variables]:extra_variables* colon fpar_type;
@@ -179,14 +186,14 @@ func_decl =
  header semi;
 
 stmt =
- semi |
- l_value arrow expr semi |
- block |
- func_call semi| 
- if_then_statement|
- if_then_else_statement| 
- while_statement|
- return expr? semi;
+ {empty} semi |
+ {expr} l_value arrow expr semi |
+ {block} block |
+ {func_call} func_call semi| 
+ {if_then} if_then_statement|
+ {if_then_else} if_then_else_statement| 
+ {while_statement} while_statement|
+ {return} return expr? semi;
 
 if_then_statement =
  if cond then stmt; 
@@ -197,7 +204,7 @@ if_then_else_statement=
 while_statement =
  while cond do stmt;
 
-else_statement=
+else_statement =
  else stmt;
 
 
@@ -206,48 +213,57 @@ block =
 
 
 
-func_call = variable l_par [params]:fun_param* r_par;
+func_call = variable l_par fun_param* r_par;  //variable l_par [params]:fun_param* r_par
 
-fun_param= expr [params]:extra_param*;
-
-extra_param= comma expr;
-
-
+fun_param = 
+{one} expr |
+{many} fun_param comma expr;
 
 l_value =
- variable |
- string_lit | 
- l_value_array;
+ {id} variable |
+ {string_lit} string_lit | 
+ {l_value_array} l_value_array;
 
 l_value_array=l_value l_bkt expr r_bkt;
 
-expr = 
- integer | 
- const_char | 
- l_value | 
- func_call | 
- l_par expr r_par| 
- plus_minus expr | 
- expr operators expr;
 
 cond = 
- l_par cond r_par | 
- not cond | 
- cond binary_operators cond | 
- expr compare_operators expr;
+ {cond_block} l_par cond r_par | 
+ {not_cond} not cond | 
+ {cond_and_or_cond} cond_and_or_cond | 
+ {expr_comparison} expr_comparison;
+
+cond_and_or_cond=cond binary_operators cond_comparison ;
+
+cond_comparison= cond;
+
+expr_comparison=expr compare_operators expr_comparison2;
+
+expr_comparison2=expr;
+
+expr = 
+ {integer} integer | 
+ {const_char} const_char | 
+ {l_value} l_value | 
+ {func_call} func_call | 
+ {expr} l_par expr r_par| 
+ {plus_minus_exp} plus_minus expr | 
+ {exp_op_exp} expr operators op_expr;
+
+op_expr= expr;
 
 data_type = 
- int | 
- char;
+ {int} int | 
+ {char} char;
 
-ret_type = data_type | nothing;
+ret_type = {data_type} data_type |{nothing} nothing;
 
-local_def = func_def | func_decl | var_def;
+local_def = {func_def} func_def | {func_decl} func_decl | {var_def} var_def;
 
-plus_minus = plus | minus;
+plus_minus = {plus} plus | {minus} minus;
 
-operators = plus | minus | star | div | mod ;
+operators = {plus} plus | {minus} minus | {star}star |{div} div |{mod} mod ;
 
-compare_operators = eq | hashtag | lt | gt | lteq | gteq ;
+compare_operators = {eq} assign |{hashtag} hashtag |{lt} lt |{gt} gt |{lteq} lteq |{gteq} gteq ;
 
-binary_operators = and | or;
+binary_operators = {and} and |{or} or;
