@@ -141,12 +141,113 @@ Tokens
   big_comment = '$$' input_comment* ('$' (input_comment+))* '$$';
 Ignored Tokens
   white_space,
+  end_of_line_comment,
+  big_comment,
   escape_sequence;
   
 Productions
-expr ={factor} factor | {plus} expr plus factor | {minus} expr minus factor;
-factor ={term} term |{star} factor star term | {slash} factor slash term;
-term = {integer} integer | {expr} l_par expr r_par; 
 
-::= {int-const} | {char-const} | {l-value} | {func-call} | “(” {expr} “)”
-| ( “+” | “-” ) {expr} | {expr} ( “+” | “-” | “*” | “div” | “mod” ) {expr}
+program = 
+ func_def;
+
+func_def = 
+ header  local_def* block;
+
+header =
+ fun variable l_par fpar_def  semi [fpar_defs]:fpar_def* r_par colon ret_type;
+
+fpar_def =
+ ref? variable [variables]:extra_variables* colon fpar_type;
+
+extra_variables =
+ comma variable;
+
+type =
+ data_type array_num*;
+
+array_num =
+ l_bkt integer r_bkt; 
+
+
+fpar_type =
+ data_type [array_def]:array_num*;
+
+var_def =
+ var variable [variables]:extra_variables* colon type semi;
+
+func_decl =
+ header semi;
+
+stmt =
+ semi |
+ l_value arrow expr semi |
+ block |
+ func_call semi| 
+ if_then_statement|
+ if_then_else_statement| 
+ while_statement|
+ return expr? semi;
+
+if_then_statement =
+ if cond then stmt; 
+
+if_then_else_statement=
+ if cond then stmt else_statement;
+
+while_statement =
+ while cond do stmt;
+
+else_statement=
+ else stmt;
+
+
+block = 
+ l_brc [statements]:stmt* r_brc;
+
+
+
+func_call = variable l_par [params]:fun_param* r_par;
+
+fun_param= expr [params]:extra_param*;
+
+extra_param= comma expr;
+
+
+
+l_value =
+ variable |
+ string_lit | 
+ l_value_array;
+
+l_value_array=l_value l_bkt expr r_bkt;
+
+expr = 
+ integer | 
+ const_char | 
+ l_value | 
+ func_call | 
+ l_par expr r_par| 
+ plus_minus expr | 
+ expr operators expr;
+
+cond = 
+ l_par cond r_par | 
+ not cond | 
+ cond binary_operators cond | 
+ expr compare_operators expr;
+
+data_type = 
+ int | 
+ char;
+
+ret_type = data_type | nothing;
+
+local_def = func_def | func_decl | var_def;
+
+plus_minus = plus | minus;
+
+operators = plus | minus | star | div | mod ;
+
+compare_operators = eq | hashtag | lt | gt | lteq | gteq ;
+
+binary_operators = and | or;
