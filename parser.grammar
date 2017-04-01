@@ -55,7 +55,7 @@ Tokens
   lt 	= '<';
   lteq 	= '<=';
   slash = '/';
-  assign= '=';
+  equal = '=';
   neq 	= '<>';
   
   // separators
@@ -156,7 +156,10 @@ if_statement=
 
 stmt_with_else = {noop} semi
     | {if} if_else_stmt
-    |{return_else} return expr? semi
+    | {return_else} return expr? semi
+    | {then_expr} l_value arrow expr semi 
+    | {then_func_call} func_call semi 
+	| {then_while_statement} while cond do stmt_with_else
     | {block_else} block;
 
 if_else_stmt = 
@@ -167,37 +170,32 @@ if_else_stmt =
  	{while_statement}while cond do stmt;
 
 func_call = 
-{func_call} variable l_par fun_param r_par;
+	{func_call} variable l_par fun_param r_par;
 
 fun_param = 
 	{one} expr |
 	{many} fun_param comma expr|
 	{none} ;
 
-
 cond = 
-	//{cond_block} l_par cond r_par | 
-	{not_cond} not cond | 
-	{cond_expr} condition_and_expr;
+	{cond_or} cond or cond_and|
+	{condition_or_expr}cond_and;
+	
+cond_and=
+	{comp_and} cond_and and cond_not|
+ 	{comp_eq_expr} cond_not;
 
-condition_and_expr=
- 	{comp_eq_expr} comp_eq_expr|
- 	{comp_or} condition_and_expr or comp_eq_expr|
- 	{comp_and} condition_and_expr and comp_eq_expr;
+cond_not=
+	{comp_not_eq} not cond_not|
+ 	{comp_not_expr} cond_eq;
 
-comp_eq_expr=
-	{comp_eq_rel} comp_rel_expr|
-	{comp_eq} comp_eq_expr compare_eq_operators comp_rel_expr;
-
-comp_rel_expr=
-	{cond_expr} expr |
-	{co}comp_rel_expr compare_rel_operators expr;
-
-compare_eq_operators=
-	{eq}assign|
-	{neq}neq;
+cond_eq=
+	{comp_eq} [left]:expr compare_rel_operators [right]:expr|
+	{cond_block} l_par cond r_par;
 
 compare_rel_operators = 
+	{eq}equal |
+	{neq}neq|
 	{hashtag} hashtag |
 	{lt} lt |
 	{gt} gt |
