@@ -102,7 +102,7 @@ header =
 	{header} fun  variable l_par fpar_def r_par colon ret_type;
 
 fpar_def =
-    {fpar_def1} ref? variable colon type fpar_def|
+    {fpar_def1} ref? variable colon type|
     {fpar_def2} ref? variable comma fpar_def |
     {fpar_def3} ref? variable colon type comma fpar_def |
     {fpar_def4} semi fpar_def |
