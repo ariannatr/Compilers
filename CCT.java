@@ -51,8 +51,6 @@ public class CCT extends DepthFirstAdapter
         outALineLine(node);
     }
 
-
-
     @Override
     public void caseAFuncDefFuncDef(AFuncDefFuncDef node)
     {
@@ -544,8 +542,6 @@ public class CCT extends DepthFirstAdapter
         outAExprStmt(node);
     }
 
-
-
     @Override
     public void caseABlockStmt(ABlockStmt node)
     {
@@ -556,7 +552,6 @@ public class CCT extends DepthFirstAdapter
         }
         outABlockStmt(node);
     }
-
 
     @Override
     public void caseAFuncCallStmt(AFuncCallStmt node)
@@ -577,8 +572,6 @@ public class CCT extends DepthFirstAdapter
         outAFuncCallStmt(node);
     }
 
-
-
     @Override
     public void caseAIfStatementStmt(AIfStatementStmt node)
     {
@@ -589,8 +582,6 @@ public class CCT extends DepthFirstAdapter
         }
         outAIfStatementStmt(node);
     }
-
-
 
     @Override
     public void caseAWhileStatementStmt(AWhileStatementStmt node)
@@ -609,6 +600,7 @@ public class CCT extends DepthFirstAdapter
         inAReturnStmt(node);
         if(node.getReturn() != null)
         {
+            System.out.print("Return:");
             node.getReturn().apply(this);
         }
         if(node.getExpr() != null)
@@ -655,14 +647,15 @@ public class CCT extends DepthFirstAdapter
         outABlockBlock(node);
     }
 
-
-
     @Override
     public void caseANoElseIfStatement(ANoElseIfStatement node)
     {
         inANoElseIfStatement(node);
         if(node.getIf() != null)
         {
+            printtabs();
+            System.out.print("If: ");
+            indent++;
             node.getIf().apply(this);
         }
         if(node.getCond() != null)
@@ -671,11 +664,17 @@ public class CCT extends DepthFirstAdapter
         }
         if(node.getThen() != null)
         {
+            System.out.println();
+            indent--;
+            printtabs();
+            System.out.print("Then:");
+            indent++;
             node.getThen().apply(this);
         }
         if(node.getThenStmt() != null)
         {
             node.getThenStmt().apply(this);
+            indent--;
         }
         outANoElseIfStatement(node);
     }
@@ -687,6 +686,9 @@ public class CCT extends DepthFirstAdapter
         inAWithElseIfStatement(node);
         if(node.getIf() != null)
         {
+            printtabs();
+            System.out.print("If: ");
+            indent++;
             node.getIf().apply(this);
         }
         if(node.getCond() != null)
@@ -695,6 +697,11 @@ public class CCT extends DepthFirstAdapter
         }
         if(node.getThen() != null)
         {
+            System.out.println();
+            indent--;
+            printtabs();
+            System.out.print("Then:");
+            indent++;
             node.getThen().apply(this);
         }
         if(node.getThenStmt() != null)
@@ -703,11 +710,17 @@ public class CCT extends DepthFirstAdapter
         }
         if(node.getElse() != null)
         {
+            System.out.println();
+            indent--;
+            printtabs();
+            System.out.print("Else:");
+            indent++;
             node.getElse().apply(this);
         }
         if(node.getElseStmt() != null)
         {
             node.getElseStmt().apply(this);
+            indent--;
         }
         outAWithElseIfStatement(node);
     }
@@ -740,6 +753,7 @@ public class CCT extends DepthFirstAdapter
         inAReturnElseStmtWithElse(node);
         if(node.getReturn() != null)
         {
+            System.out.print("Return: ");
             node.getReturn().apply(this);
         }
         if(node.getExpr() != null)
@@ -831,6 +845,9 @@ public class CCT extends DepthFirstAdapter
         inAIfElseIfElseStmt(node);
         if(node.getIf() != null)
         {
+            printtabs();
+            System.out.print("If: ");
+            indent++;
             node.getIf().apply(this);
         }
         if(node.getCond() != null)
@@ -839,6 +856,11 @@ public class CCT extends DepthFirstAdapter
         }
         if(node.getThen() != null)
         {
+            System.out.println();
+            indent--;
+            printtabs();
+            System.out.print("Then:");
+            indent++;
             node.getThen().apply(this);
         }
         if(node.getThenStmt() != null)
@@ -847,11 +869,17 @@ public class CCT extends DepthFirstAdapter
         }
         if(node.getElse() != null)
         {
+            System.out.println();
+            indent--;
+            printtabs();
+            System.out.print("Else:");
+            indent++;
             node.getElse().apply(this);
         }
         if(node.getElseStmt() != null)
         {
             node.getElseStmt().apply(this);
+            indent--;
         }
         outAIfElseIfElseStmt(node);
     }
@@ -862,6 +890,9 @@ public class CCT extends DepthFirstAdapter
         inAWhileStatementWhileStatement(node);
         if(node.getWhile() != null)
         {
+            printtabs();
+            System.out.print("While: ");
+            indent++;
             node.getWhile().apply(this);
         }
         if(node.getCond() != null)
@@ -870,11 +901,17 @@ public class CCT extends DepthFirstAdapter
         }
         if(node.getDo() != null)
         {
+            indent--;
+            System.out.println();
+            printtabs();
+            System.out.println("Do: ");
+            indent++;
             node.getDo().apply(this);
         }
         if(node.getStmt() != null)
         {
             node.getStmt().apply(this);
+            indent--;
         }
         outAWhileStatementWhileStatement(node);
     }
@@ -954,10 +991,13 @@ public class CCT extends DepthFirstAdapter
         inACondOrCond(node);
         if(node.getCond() != null)
         {
+            System.out.print("( ");
             node.getCond().apply(this);
         }
         if(node.getOr() != null)
         {
+            System.out.print(" )");
+            System.out.print(" or ");
             node.getOr().apply(this);
         }
         if(node.getCondAnd() != null)
@@ -990,6 +1030,7 @@ public class CCT extends DepthFirstAdapter
         }
         if(node.getAnd() != null)
         {
+             System.out.print(" and ");
             node.getAnd().apply(this);
         }
         if(node.getCondNot() != null)
@@ -1046,20 +1087,23 @@ public class CCT extends DepthFirstAdapter
         inACompEqCondEq(node);
         if(node.getLeft() != null)
         {
+            System.out.print("( ");
             node.getLeft().apply(this);
+            System.out.print(" ) ");
         }
         if(node.getCompareRelOperators() != null)
         {
+            System.out.print(node.getCompareRelOperators());
             node.getCompareRelOperators().apply(this);
         }
         if(node.getRight() != null)
         {
+            System.out.print(" ( ");
             node.getRight().apply(this);
+            System.out.print(" )");
         }
         outACompEqCondEq(node);
     }
-
-
 
     @Override
     public void caseACondBlockCondEq(ACondBlockCondEq node)
@@ -1067,6 +1111,7 @@ public class CCT extends DepthFirstAdapter
         inACondBlockCondEq(node);
         if(node.getLPar() != null)
         {
+            System.out.print(" ( ");
             node.getLPar().apply(this);
         }
         if(node.getCond() != null)
@@ -1076,6 +1121,7 @@ public class CCT extends DepthFirstAdapter
         if(node.getRPar() != null)
         {
             node.getRPar().apply(this);
+            System.out.print(" ) ");
         }
         outACondBlockCondEq(node);
     }
@@ -1114,8 +1160,6 @@ public class CCT extends DepthFirstAdapter
         outAHashtagCompareRelOperators(node);
     }
 
-
-
     @Override
     public void caseALtCompareRelOperators(ALtCompareRelOperators node)
     {
@@ -1126,8 +1170,6 @@ public class CCT extends DepthFirstAdapter
         }
         outALtCompareRelOperators(node);
     }
-
-
 
     @Override
     public void caseAGtCompareRelOperators(AGtCompareRelOperators node)
@@ -1171,7 +1213,7 @@ public class CCT extends DepthFirstAdapter
         inAIdLValue(node);
         if(node.getVariable() != null)
         {
-            System.out.print(node.getVariable());
+            System.out.print("Identifier: "+node.getVariable());
             node.getVariable().apply(this);
         }
         outAIdLValue(node);
@@ -1184,11 +1226,10 @@ public class CCT extends DepthFirstAdapter
         if(node.getStringLit() != null)
         {
             node.getStringLit().apply(this);
-            System.out.println(node.getStringLit());
+            System.out.println("String Literal: "+node.getStringLit());
         }
         outAStringLitLValue(node);
     }
-
 
     @Override
     public void caseALValueArrayLValue(ALValueArrayLValue node)
@@ -1202,8 +1243,6 @@ public class CCT extends DepthFirstAdapter
         outALValueArrayLValue(node);
     }
 
-
-
     @Override
     public void caseALValueArrrayLValueArray(ALValueArrrayLValueArray node)
     {
@@ -1211,7 +1250,6 @@ public class CCT extends DepthFirstAdapter
         if(node.getLValue() != null)
         {
             printtabs();
-            System.out.print("Id:");
             node.getLValue().apply(this);
         }
         if(node.getLBkt() != null)
@@ -1235,8 +1273,6 @@ public class CCT extends DepthFirstAdapter
         outALValueArrrayLValueArray(node);
     }
 
-
-
     @Override
     public void caseAFactorExpr(AFactorExpr node)
     {
@@ -1252,8 +1288,6 @@ public class CCT extends DepthFirstAdapter
         outAFactorExpr(node);
     }
 
-
-
     @Override
     public void caseAPlusExpr(APlusExpr node)
     {
@@ -1265,7 +1299,7 @@ public class CCT extends DepthFirstAdapter
         }
         if(node.getPlus() != null)
         {
-            System.out.print("+");
+            System.out.print(" + ");
             node.getPlus().apply(this);
         }
         if(node.getFactor() != null)
@@ -1275,8 +1309,6 @@ public class CCT extends DepthFirstAdapter
         }
         outAPlusExpr(node);
     }
-
-
 
     @Override
     public void caseAMinusExpr(AMinusExpr node)
@@ -1289,7 +1321,7 @@ public class CCT extends DepthFirstAdapter
         }
         if(node.getMinus() != null)
         {
-            System.out.print("-");
+            System.out.print(" - ");
             node.getMinus().apply(this);
         }
         if(node.getFactor() != null)
@@ -1299,7 +1331,6 @@ public class CCT extends DepthFirstAdapter
         }
         outAMinusExpr(node);
     }
-
 
     @Override
     public void caseAFuncCallExpr(AFuncCallExpr node)
@@ -1313,9 +1344,6 @@ public class CCT extends DepthFirstAdapter
         outAFuncCallExpr(node);
     }
 
-
-
-
     @Override
     public void caseAFactorTermFactor(AFactorTermFactor node)
     {
@@ -1326,8 +1354,6 @@ public class CCT extends DepthFirstAdapter
         }
         outAFactorTermFactor(node);
     }
-
-
 
     @Override
     public void caseAMultFactor(AMultFactor node)
@@ -1341,7 +1367,7 @@ public class CCT extends DepthFirstAdapter
         if(node.getStar() != null)
         {
           
-            System.out.print("*");
+            System.out.print(" * ");
             node.getStar().apply(this);
         }
         if(node.getTerm() != null)
@@ -1351,8 +1377,6 @@ public class CCT extends DepthFirstAdapter
         }
         outAMultFactor(node);
     }
-
-
 
     @Override
     public void caseASlashFactor(ASlashFactor node)
@@ -1365,7 +1389,7 @@ public class CCT extends DepthFirstAdapter
         }
         if(node.getSlash() != null)
         {
-            System.out.print("/");
+            System.out.print(" / ");
             node.getSlash().apply(this);
         }
         if(node.getTerm() != null)
@@ -1375,7 +1399,6 @@ public class CCT extends DepthFirstAdapter
         }
         outASlashFactor(node);
     }
-
 
     @Override
     public void caseAModFactor(AModFactor node)
@@ -1399,8 +1422,6 @@ public class CCT extends DepthFirstAdapter
         outAModFactor(node);
     }
 
-
-
     @Override
     public void caseADivFactor(ADivFactor node)
     {
@@ -1423,8 +1444,6 @@ public class CCT extends DepthFirstAdapter
         outADivFactor(node);
     }
 
-
-
     @Override
     public void caseATermIntTerm(ATermIntTerm node)
     {
@@ -1436,8 +1455,6 @@ public class CCT extends DepthFirstAdapter
         }
         outATermIntTerm(node);
     }
-
-
 
     @Override
     public void caseATermCharTerm(ATermCharTerm node)
@@ -1451,13 +1468,13 @@ public class CCT extends DepthFirstAdapter
         outATermCharTerm(node);
     }
 
-
     @Override
     public void caseATermValTerm(ATermValTerm node)
     {
         inATermValTerm(node);
         if(node.getLValue() != null)
         {
+             System.out.print("Lvalue: ");
             node.getLValue().apply(this);
         }
         outATermValTerm(node);
@@ -1480,7 +1497,6 @@ public class CCT extends DepthFirstAdapter
         outAPlusMinusExpTerm(node);
     }
 
-
     @Override
     public void caseATermExprTerm(ATermExprTerm node)
     {
@@ -1500,7 +1516,6 @@ public class CCT extends DepthFirstAdapter
         outATermExprTerm(node);
     }
 
-
     @Override
     public void caseAPlusPlusMinus(APlusPlusMinus node)
     {
@@ -1512,7 +1527,6 @@ public class CCT extends DepthFirstAdapter
         }
         outAPlusPlusMinus(node);
     }
-
 
     @Override
     public void caseAMinusPlusMinus(AMinusPlusMinus node)
