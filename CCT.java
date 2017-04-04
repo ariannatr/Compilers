@@ -114,6 +114,7 @@ public class CCT extends DepthFirstAdapter
         }
         if(node.getRetType() != null)
         {
+            System.out.println();
             printtabs();
         	System.out.print("ReturnType: ");
             node.getRetType().apply(this);       
@@ -966,18 +967,36 @@ public class CCT extends DepthFirstAdapter
         inACondOrCond(node);
         if(node.getCond() != null)
         {
+            System.out.println();
+            printtabs();
+            System.out.println("Left:");
+            indent++;
+            printtabs();
             System.out.print("( ");
             node.getCond().apply(this);
+            System.out.println();
+            printtabs();
+            System.out.println(" ) ");
+             indent--;
         }
         if(node.getOr() != null)
         {
-            System.out.print(" )");
-            System.out.print(" or ");
+            printtabs();
+            System.out.println(" Operator: or ");
             node.getOr().apply(this);
         }
         if(node.getCondAnd() != null)
         {
+            printtabs();
+            System.out.println("Right:");
+            indent++;
+            printtabs();
+            System.out.print(" ( ");
             node.getCondAnd().apply(this);
+            System.out.println();
+            printtabs();
+            System.out.println(" ) ");
+            indent--;
         }
         outACondOrCond(node);
     }
@@ -999,18 +1018,37 @@ public class CCT extends DepthFirstAdapter
         inACompAndCondAnd(node);
         if(node.getCondAnd() != null)
         {
+            System.out.println();
+            printtabs();
+            System.out.println("Left:");
+            indent++;
+            printtabs();
             System.out.print("( ");
             node.getCondAnd().apply(this);
+            System.out.println();
+            printtabs();
+            System.out.println(" ) ");
+             indent--;
         }
         if(node.getAnd() != null)
         {
-            System.out.print(" )");
-            System.out.print(" and ");
+            printtabs();
+            System.out.println("Operator: and ");
             node.getAnd().apply(this);
         }
         if(node.getCondNot() != null)
         {
+            printtabs();
+            System.out.println("Right:");
+            indent++;
+            printtabs();
+            System.out.print(" ( ");
             node.getCondNot().apply(this);
+            System.out.println();
+            printtabs();
+            System.out.println(" ) ");
+            indent--;
+           
         }
         outACompAndCondAnd(node);
     }
@@ -1060,20 +1098,37 @@ public class CCT extends DepthFirstAdapter
         inACompEqCondEq(node);
         if(node.getLeft() != null)
         {
+            System.out.println();
+            printtabs();
+            System.out.println("Left:");
+            indent++;
+            printtabs();
             System.out.print("( ");
             node.getLeft().apply(this);
-            System.out.print(" ) ");
+            System.out.println();
+            printtabs();
+            System.out.println(" ) ");
+            indent--;
         }
         if(node.getCompareRelOperators() != null)
         {
-            System.out.print(node.getCompareRelOperators());
+            printtabs();
+            System.out.println("Operator: "+node.getCompareRelOperators());
             node.getCompareRelOperators().apply(this);
         }
         if(node.getRight() != null)
         {
+            printtabs();
+            System.out.println("Right:");
+            indent++;
+            printtabs();
             System.out.print(" ( ");
             node.getRight().apply(this);
+            System.out.println();
+            printtabs();
             System.out.print(" )");
+            indent--;
+            
         }
         outACompEqCondEq(node);
     }
