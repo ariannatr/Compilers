@@ -153,8 +153,7 @@ public class CCT extends DepthFirstAdapter
     @Override
     public void caseAFparDef2FparDef(AFparDef2FparDef node)
     {
-        for (int i = 0; i < indent; i++)
-            System.out.print('\t');
+        printtabs();
         System.out.print("Name :");
         inAFparDef2FparDef(node);
         if(node.getRef() != null)
@@ -181,8 +180,7 @@ public class CCT extends DepthFirstAdapter
     @Override
     public void caseAFparDef3FparDef(AFparDef3FparDef node)
     {
-        for (int i = 0; i < indent; i++)
-            System.out.print('\t');
+        printtabs();
         System.out.print("Name :");
         inAFparDef3FparDef(node);
         if(node.getRef() != null)
@@ -201,8 +199,7 @@ public class CCT extends DepthFirstAdapter
         }
         if(node.getType() != null)
         {
-            for (int i = 0; i < indent; i++)
-               System.out.print('\t');
+           printtabs();
             System.out.println("Type :"+node.getType());
             node.getType().apply(this);
         }
@@ -217,10 +214,32 @@ public class CCT extends DepthFirstAdapter
         outAFparDef3FparDef(node);
     }
 
-    @Override
+ @Override
     public void caseAFparDef4FparDef(AFparDef4FparDef node)
     {
         inAFparDef4FparDef(node);
+        printtabs();
+        System.out.print("Name :");
+        if(node.getRef() != null)
+        {
+            System.out.print("ref ");
+            node.getRef().apply(this);
+        }
+        if(node.getVariable() != null)
+        {
+             System.out.println(node.getVariable());
+            node.getVariable().apply(this);
+        }
+        if(node.getColon() != null)
+        {
+            node.getColon().apply(this);
+        }
+        if(node.getType() != null)
+        {
+            printtabs();
+            System.out.println("Type :"+node.getType());
+            node.getType().apply(this);
+        }
         if(node.getSemi() != null)
         {
             node.getSemi().apply(this);
@@ -236,28 +255,11 @@ public class CCT extends DepthFirstAdapter
     public void caseAFparDef5FparDef(AFparDef5FparDef node)
     {
         inAFparDef5FparDef(node);
+        printtabs();
+        System.out.println("None");
         outAFparDef5FparDef(node);
     }
 
-    @Override
-    public void caseAFparTyprFparType(AFparTyprFparType node)
-    {
-        inAFparTyprFparType(node);
-        if(node.getDataType() != null)
-        {
-            printtabs();
-            System.out.print("Fpartype:");
-            node.getDataType().apply(this);
-        }
-        {
-            List<PArrayNum> copy = new ArrayList<PArrayNum>(node.getArrayDef());
-            for(PArrayNum e : copy)
-            {
-                e.apply(this);
-            }
-        }
-        outAFparTyprFparType(node);
-    }
 
     @Override
     public void caseAIntDataType(AIntDataType node)
@@ -478,6 +480,7 @@ public class CCT extends DepthFirstAdapter
         inAExprStmt(node);
         if(node.getLValue() != null)
         {
+            System.out.println();
             printtabs();
             System.out.println("Assignment:");
             indent++;
@@ -937,11 +940,13 @@ public class CCT extends DepthFirstAdapter
         }
         if(node.getComma() != null)
         {
-            System.out.print(" , ");
+            System.out.print(" ,");
             node.getComma().apply(this);
         }
         if(node.getExpr() != null)
         {
+            System.out.println();
+            printtabs();
             node.getExpr().apply(this);
         }
         outAManyFunParam(node);
@@ -1190,7 +1195,7 @@ public class CCT extends DepthFirstAdapter
         if(node.getStringLit() != null)
         {
             node.getStringLit().apply(this);
-            System.out.println("String Literal: "+node.getStringLit());
+            System.out.print("String Literal:"+node.getStringLit());
         }
         outAStringLitLValue(node);
     }
@@ -1244,9 +1249,7 @@ public class CCT extends DepthFirstAdapter
         if(node.getFactor() != null)
         {
             System.out.print("Factor:");
-           // indent++;
             node.getFactor().apply(this);
-           // indent--;
         }
         outAFactorExpr(node);
     }
