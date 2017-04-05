@@ -10,7 +10,9 @@ import compiler.parser.Parser;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 
 class Main { 
 
@@ -21,8 +23,11 @@ class Main {
 		System.out.println("Compiler started");
 		Parser p = new Parser(new Lexer(new PushbackReader(new InputStreamReader(myfile), 1024)));
         try {
+        	PrintStream out = new PrintStream(new FileOutputStream("output.txt"));
+            System.setOut(out);
             Start tree = p.parse();
             tree.apply(new CCT());
+            out.close();
         } catch (Exception e) 
         {
         	
