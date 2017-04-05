@@ -18,7 +18,7 @@ Helpers
   escape_sequence = '\t' | '\n' | '\r' | '\0' | '\\' | '\' sq | '\"' | '\x'nn ;
   letter=['a' .. 'z'] | ['A' .. 'Z'] ;
   char_or_digit =letter | digit |'_';
-  char_literal = ' ' | '!' | '"' | '#' | '$' | '%' | '&' | '(' | ')' 
+  char_literal = ' ' | '!'| '#' | '$' | '%' | '&' | '(' | ')' 
         | '*' | '+' | ',' | '-' | '.' | '/' | ':' | ';' | '<' | '=' | '>' 
         | '?' | '@' | '[' | ']' | '^' | '_' | '`' | '{' | '|' | '}' | '~' | letter | digit | escape_sequence;
 
@@ -105,11 +105,9 @@ fpar_def =
     {fpar_def1} ref? variable colon type|
     {fpar_def2} ref? variable comma fpar_def |
     {fpar_def3} ref? variable colon type comma fpar_def |
-    {fpar_def4} semi fpar_def |
+    {fpar_def4} ref? variable colon type semi fpar_def |
     {fpar_def5} ;
 
-fpar_type =
-	{fpar_typr}data_type [array_def]:array_num*;
 
 data_type = 
 	{int} int | {char} char;
@@ -159,7 +157,7 @@ stmt_with_else = {noop} semi
     | {return_else} return expr? semi
     | {then_expr} l_value arrow expr semi 
     | {then_func_call} func_call semi 
-	| {then_while_statement} while cond do stmt_with_else
+	  | {then_while_statement} while cond do stmt_with_else
     | {block_else} block;
 
 if_else_stmt = 
@@ -213,20 +211,20 @@ l_value_array=
 expr =
 	{factor}factor|
 	{plus}expr plus factor|
-	{minus}expr minus factor|
-	{func_call} func_call;
+	{minus}expr minus factor;
 
 factor={factor_term}term|
 	{mult} factor star term |
 	{slash}  factor slash term|
 	{mod}  factor mod term|
-    {div}  factor div term;
+  {div}  factor div term;
 
 term =
 	{term_int} integer | 
 	{term_char} const_char | 
 	{term_val} l_value |
 	{plus_minus_exp} plus_minus term|
+  {func_call} func_call|
 	{term_expr} l_par expr r_par;
 
 plus_minus = 

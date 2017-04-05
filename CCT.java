@@ -1107,7 +1107,7 @@ public class CCT extends DepthFirstAdapter
             node.getLeft().apply(this);
             System.out.println();
             printtabs();
-            System.out.println(" ) ");
+            System.out.println(") ");
             indent--;
         }
         if(node.getCompareRelOperators() != null)
@@ -1354,15 +1354,15 @@ public class CCT extends DepthFirstAdapter
     }
 
     @Override
-    public void caseAFuncCallExpr(AFuncCallExpr node)
+    public void caseAFuncCallTerm(AFuncCallTerm node)
     {
-        inAFuncCallExpr(node);
+        inAFuncCallTerm(node);
         if(node.getFuncCall() != null)
         {
             System.out.print("FunctionCall:");
             node.getFuncCall().apply(this);
         }
-        outAFuncCallExpr(node);
+        outAFuncCallTerm(node);
     }
 
     @Override
