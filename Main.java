@@ -1,4 +1,3 @@
-
 package compiler;
 
 
@@ -13,28 +12,40 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.io.FileDescriptor;
 
 class Main { 
 
 	public static void main(String args[]) throws FileNotFoundException
 	{ 
-		FileInputStream myfile = null;
-		myfile=new FileInputStream("C:\\Users\\span9\\workspace2\\Compilers\\src\\compiler\\myfile.txt");
+		if(args.length <1)
+        {	
+      			System.err.println("Not enough arguments");
+      			System.exit(1);
+      	}
+      	System.out.println("Have to compile "+args.length+" files ");
 		System.out.println("Compiler started");
-		Parser p = new Parser(new Lexer(new PushbackReader(new InputStreamReader(myfile), 1024)));
-        try {
-        	PrintStream out = new PrintStream(new FileOutputStream("output.txt"));
-            System.setOut(out);
-            Start tree = p.parse();
-            tree.apply(new CCT());
-            out.close();
-        } catch (Exception e) 
-        {
-        	
-            e.printStackTrace();
-        }
-	    System.exit(0);
+		PrintStream out = new PrintStream(new FileOutputStream("output.txt"));
+		int i;
+		for(i=0;i<args.length;i++)		
+		{		
+			System.out.println("Compiling file "+args[i]);
+			FileInputStream myfile = null;
+			myfile=new FileInputStream(args[i]);
+			Parser p = new Parser(new Lexer(new PushbackReader(new InputStreamReader(myfile), 1024)));
+        	try {
+	  			System.setOut(out);
+    			Start tree = p.parse();
+    			tree.apply(new CCT());
+        	} catch (Exception e) 
+    		{	
+    		    e.printStackTrace();
+    		}
+    		System.out.println("------------------------------------------------------------------------------------------");
+    		System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out)));
 		}
-	
-
+		System.out.println("Finished all the files ");
+		out.close();
+		System.exit(0);
+	}
 }
