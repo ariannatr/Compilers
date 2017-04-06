@@ -956,7 +956,7 @@ public class CCT extends DepthFirstAdapter
     @Override
     public void caseANoneFunParam(ANoneFunParam node)
     {
-        System.out.print("No Paramater Given");
+        System.out.print("No Parameter Given");
         inANoneFunParam(node);
         outANoneFunParam(node);
     }
