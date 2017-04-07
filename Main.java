@@ -34,8 +34,8 @@ class Main {
 			myfile=new FileInputStream(args[i]);
 			Parser p = new Parser(new Lexer(new PushbackReader(new InputStreamReader(myfile), 1024)));
         	try {
-	  			System.setOut(out);
     			Start tree = p.parse();
+    			System.setOut(out);
     			tree.apply(new CCT());
         	} catch (Exception e) 
     		{	
