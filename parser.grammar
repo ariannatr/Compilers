@@ -90,10 +90,7 @@ Ignored Tokens
 Productions
 
 programm = 
-	{programm}line+;
-
-line=
-	{line}func_def;
+	func_def;
 
 func_def = 
 	{func_def}header local_def* block;
@@ -108,19 +105,20 @@ fpar_def =
     {fpar_def4} ref? variable colon type semi fpar_def |
     {fpar_def5} ;
 
-
+/*types*/
 data_type = 
-	{int} int | {char} char;
+	{int} int{->New data_type.int(int)}| 
+  {char} char{->New data_type.char(char)};
 
 type = 
-	{type}data_type array_num*;
+	{type}data_type array_num*{->New type.type(data_type,[array_num])};
 
 ret_type = 
-	{data_typ} data_type |{nothing} nothing;
-
+	{data_type} data_type {->New ret_type.data_type(data_type)}|
+  {nothing} nothing {->New ret_type.nothing(nothing)};
 
 array_num =
-	{array_nu} l_bkt integer? r_bkt;
+	{array_num} l_bkt integer? r_bkt{->New array_num(l_bkt,integer,r_bkt)};
 
 local_def = 
 	{func_de} func_def | 
@@ -167,12 +165,12 @@ if_else_stmt =
  while_statement =
  	{while_statement}while cond do stmt;
 
-func_call = 
-	{func_call} variable l_par fun_param r_par;
+func_call= 
+	{func_call} variable l_par fun_param r_par {-> New func_call(variable,[fun_param.expr])};
 
-fun_param = 
-	{one} expr |
-	{many} fun_param comma expr|
+fun_param{->expr*} = 
+	{one} expr{->expr} |
+	{many} fun_param comma expr{->[fun_param.expr,expr]}|
 	{none} ;
 
 cond = 
@@ -201,44 +199,102 @@ compare_rel_operators =
 	{gteq} gteq ;
 
 l_value =
-	{id} variable |
-	{string_lit} string_lit | 
-	{l_value_array} l_value_array;
+	{id} variable {->New l_value.id(variable)} |
+	{string_lit} string_lit{->New l_value.string_lit(string_lit)} | 
+	{l_value_array} l_value_array{->l_value_array};
 
 l_value_array=
-	{l_value_arrray}l_value l_bkt expr r_bkt;
+	{l_value_arrray}l_value l_bkt expr r_bkt{-> New l_value_array(l_value,expr)};
 
-expr =
-	{factor}factor|
-	{plus}expr plus factor|
-	{minus}expr minus factor;
+/* Expressions */
+expr  =
+  {factor} factor {->factor.expr}|
+  {plus}expr plus factor{->New expr.plus(expr,factor.expr)}|
+  {minus}expr minus factor{->New expr.minus(expr,factor.expr)};
 
-factor={factor_term}term|
-	{mult} factor star term |
-	{slash}  factor slash term|
-	{mod}  factor mod term|
-  {div}  factor div term;
+factor{->expr} =
+  {factor_term}term {->term.expr}|
+  {mult} factor star term {->New expr.mult(factor.expr,term.expr)} |
+  {slash}  factor slash term {->New expr.slash(factor.expr,term.expr)}|
+  {mod}  factor mod term {->New expr.mod(factor.expr,term.expr)}|
+  {div}  factor div term {->New expr.div(factor.expr,term.expr)};
 
-term =
-	{term_int} integer | 
-	{term_char} const_char | 
-	{term_val} l_value |
-	{plus_minus_exp} plus_minus term|
-  {func_call} func_call|
-	{term_expr} l_par expr r_par;
+term {->expr} =
+  {term_int} integer {-> New expr.term_int(integer)} | 
+  {term_char} const_char {-> New expr.term_char(const_char)} | 
+  {term_val} l_value {-> New expr.term_val(l_value)} |
+  {plus_minus_exp} plus_minus term {-> New expr.plus_minus_exp(term.expr)}|
+  {func_call} func_call {-> New expr.func_call(func_call)}|
+  {term_expr} l_par expr r_par {-> expr.expr};
 
 plus_minus = 
-	{plus} plus|
-	{minus} minus;
+  {plus} plus|
+  {minus} minus;
 
 operators = 
-	{plus} plus | 
-	{minus} minus | 
-	{star}star |
-	{div} div |
-	{mod} mod ;
+  {plus} plus | 
+  {minus} minus | 
+  {star}star |
+  {div} div |
+  {mod} mod ;
 
 binary_operators = 
-	{and} and |
-	{or} or;
+  {and} and |
+  {or} or;
 
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+Abstract Syntax Tree
+
+
+programm=expr;
+
+func_call = 
+{func_call} variable fun_param ;
+
+fun_param = 
+  {one} expr |
+  {many} expr*|
+  {none} ;
+  
+/*types*/
+
+type = 
+  {type}data_type array_num*;
+
+ret_type = 
+  {data_type} data_type 
+  |{nothing} nothing;
+
+array_num =
+  {array_num} l_bkt integer? r_bkt;
+
+data_type = 
+  {int} int | 
+  {char} char;
+
+/*l_value*/
+
+l_value =
+{id} variable |
+{string_lit} string_lit | 
+{l_value_array} l_value_array;
+
+l_value_array=
+  {l_value_arrray}l_value expr ;
+
+/* Expressions */
+
+expr =
+  {plus}[left]:expr plus [right]:expr|
+  {minus}[left]:expr minus [right]:expr|
+  {mult} [left]:expr star [right]:expr |
+  {slash} [left]:expr slash [right]:expr|
+  {mod}  [left]:expr mod [right]:expr|
+  {div} [left]:expr div [right]:expr|
+  {term_int} integer | 
+  {term_char} const_char | 
+  {term_val} l_value |
+  {plus_minus_exp} expr|
+  {func_call} func_call|
+  {term_expr} expr;
