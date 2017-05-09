@@ -74,6 +74,7 @@ Tokens
   variable = letter char_or_digit*;
 
   integer=digit+;
+  no_integer=digit+ (letter|'_')+;
   string_lit ='"'char_literal*'"';
   const_char=sq char_literal sq;
 
@@ -90,19 +91,22 @@ Ignored Tokens
 Productions
 
 programm = 
-	func_def;
+{programm}func_def{->New programm.func_def(func_def)};
 
 func_def = 
-	{func_def}header local_def* block;
+	{func_def}header local_def* block{->New func_def.func_def(header,[local_def],[block.stmt])};
 
 header =
-	{header} fun  variable l_par fpar_def r_par colon ret_type;
+	{header} fun  variable l_par fpar_def r_par colon ret_type{->New header.header(variable,fpar_def,ret_type)};
+
+block{->stmt*}= 
+  {block}l_brc [statements]:stmt* r_brc{->[statements]};
 
 fpar_def =
-    {fpar_def1} ref? variable colon type|
-    {fpar_def2} ref? variable comma fpar_def |
-    {fpar_def3} ref? variable colon type comma fpar_def |
-    {fpar_def4} ref? variable colon type semi fpar_def |
+    {fpar_def1} ref? variable colon type{-> New fpar_def1.fpar_def1(ref,variable,type)}|
+    {fpar_def2} ref? variable comma fpar_def{-> New fpar_def2.fpar_def2(ref,variable,fpar_def)} |
+    {fpar_def3} ref? variable colon type comma fpar_def{-> New fpar_def3.fpar_def3(ref,variable,fpar_def)} |
+    {fpar_def4} ref? variable colon type semi fpar_def{-> New fpar_def4.fpar_def4(ref,variable,type,fpar_def)} |
     {fpar_def5} ;
 
 /*types*/
@@ -129,22 +133,20 @@ extra_variables =
 	{extra_variable}comma variable;
 
 var_def =
-	{var_def}var variable [variables]:extra_variables* colon type semi;
+	{var_def}var variable [variables]:extra_variables* colon type semi{-> New var_def.var_def(variable,[variables],type);
 
 func_decl =
  {func_decl}header semi;
 
 stmt =
-	{empty} semi |
-	{expr} l_value arrow expr semi |
-	{block} block |
-	{func_call} func_call semi| 
-	{if_statement} if_statement|
-	{while_statement} while_statement|
-	{return} return expr? semi;
+	{empty} semi{->New stmt.empty()} |
+	{expr} l_value arrow expr semi{->New stmt.expr(l_value,expr)} |
+	{block} block{->New stmt.block([block.stmt])} |
+	{func_call} func_call semi{->New stmt.func_call(func_call)}| 
+	{if_statement} if_statement{->New stmt.if_statement(if_statement)}|
+	{while_statement} while_statement{->New stmt.while_statement(while_statement)}|
+	{return} return expr? semi{->New stmt.return(expr)}|;
 
-block = 
-	{block}l_brc [statements]:stmt* r_brc;
 
 if_statement=
 	{no_else}if cond then [then_stmt]:stmt |
@@ -246,11 +248,44 @@ binary_operators =
 /*-----------------------------------------------------------------*/
 Abstract Syntax Tree
 
+programm = 
+  {programm}func_def;
 
-programm=expr;
+
+header =
+  {header} fun  variable l_par fpar_def r_par ret_type;
+
+local_def = 
+  {func_de} func_def | 
+  {func_dec} func_decl|
+  {var_def} var_def;
+
+fpar_def =
+    {fpar_def1} ref? variable type|
+    {fpar_def2} ref? variable fpar_def |
+    {fpar_def3} ref? variable type  fpar_def |
+    {fpar_def4} ref? variable type  fpar_def |
+    {fpar_def5} ;
+
+var_def =
+  {var_def}var variable [variables]:extra_variables* type semi;
+extra_variables = 
+  {extra_variable}comma variable;
+
+func_decl =
+ {func_decl}header semi;
+
+func_def = 
+  {func_def}header local_def* block;
+stmt =
+  {semi} |
+  {block}l_brc [statements]:stmt* r_brc|
+  {while_statement} while cond do [stmt]:stmt|
+  {no_else}if cond then [then_stmt]:stmt ;
+
 
 func_call = 
-{func_call} variable fun_param ;
+  {func_call} variable fun_param ;
 
 fun_param = 
   {one} expr |
