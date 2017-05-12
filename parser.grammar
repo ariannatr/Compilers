@@ -91,7 +91,7 @@ Ignored Tokens
 Productions
 
 programm = 
-{programm}func_def{->New programm.func_def(func_def)};
+  {programm}func_def{->New programm(func_def)};
 
 func_def = 
 	{func_def}header local_def* block{->New func_def.func_def(header,[local_def],[block.stmt])};
@@ -103,10 +103,10 @@ block{->stmt*}=
   {block}l_brc [statements]:stmt* r_brc{->[statements]};
 
 fpar_def =
-    {fpar_def1} ref? variable colon type{-> New fpar_def1.fpar_def1(ref,variable,type)}|
-    {fpar_def2} ref? variable comma fpar_def{-> New fpar_def2.fpar_def2(ref,variable,fpar_def)} |
-    {fpar_def3} ref? variable colon type comma fpar_def{-> New fpar_def3.fpar_def3(ref,variable,fpar_def)} |
-    {fpar_def4} ref? variable colon type semi fpar_def{-> New fpar_def4.fpar_def4(ref,variable,type,fpar_def)} |
+    {fpar_def1} ref? variable colon type{-> New fpar_def.fpar_def1(ref,variable,type)}|
+    {fpar_def2} ref? variable comma fpar_def{-> New fpar_def.fpar_def2(ref,variable,fpar_def)} |
+    {fpar_def3} ref? variable colon type comma fpar_def{-> New fpar_def.fpar_def3(ref,variable,type,fpar_def)} |
+    {fpar_def4} ref? variable colon type semi fpar_def{-> New fpar_def.fpar_def4(ref,variable,type,fpar_def)} |
     {fpar_def5} ;
 
 /*types*/
@@ -122,74 +122,76 @@ ret_type =
   {nothing} nothing {->New ret_type.nothing(nothing)};
 
 array_num =
-	{array_num} l_bkt integer? r_bkt{->New array_num(l_bkt,integer,r_bkt)};
+	{array_num} l_bkt integer? r_bkt{->New array_num.array_num(l_bkt,integer,r_bkt)};
 
 local_def = 
-	{func_de} func_def | 
-	{func_dec} func_decl|
-	{var_def} var_def;
+	{func_def} func_def{-> New local_def.func_def(func_def)} | 
+	{func_decl} func_decl{-> New local_def.func_decl(func_decl)}|
+	{var_def} var_def{-> New local_def.var_def(var_def)};
 
-extra_variables = 
-	{extra_variable}comma variable;
+extra_variables{->variable*} = 
+	{extra_variable}comma variable{->[variable]};
 
 var_def =
-	{var_def}var variable [variables]:extra_variables* colon type semi{-> New var_def.var_def(variable,[variables],type);
+	{var_def}var variable [variables]:extra_variables* colon type semi{-> New var_def.var_def(variable,[variables.variable],type)};
 
 func_decl =
- {func_decl}header semi;
+ {func_decl}header semi{->New func_decl.func_decl(header)};
 
 stmt =
 	{empty} semi{->New stmt.empty()} |
 	{expr} l_value arrow expr semi{->New stmt.expr(l_value,expr)} |
 	{block} block{->New stmt.block([block.stmt])} |
 	{func_call} func_call semi{->New stmt.func_call(func_call)}| 
-	{if_statement} if_statement{->New stmt.if_statement(if_statement)}|
-	{while_statement} while_statement{->New stmt.while_statement(while_statement)}|
-	{return} return expr? semi{->New stmt.return(expr)}|;
+	{if_statement} if_statement{->if_statement.stmt}|
+	{while_statement} while_statement{->while_statement.stmt}|
+	{return} return expr? semi{->New stmt.return(expr)};
 
 
-if_statement=
-	{no_else}if cond then [then_stmt]:stmt |
-	{with_else}if cond then [then_stmt]:stmt_with_else else [else_stmt]:stmt;
+if_statement{->stmt}=
+	{no_else}if cond then [then_stmt]:stmt{->New stmt.if(cond.expr,then_stmt.stmt)} |
+	{with_else}if cond then [then_stmt]:stmt_with_else 
+    else [else_stmt]:stmt{->New stmt.if_else(cond.expr,then_stmt.stmt,else_stmt.stmt)};
 
-stmt_with_else = {noop} semi
-    | {if} if_else_stmt
-    | {return_else} return expr? semi
-    | {then_expr} l_value arrow expr semi 
-    | {then_func_call} func_call semi 
-	  | {then_while_statement} while cond do stmt_with_else
-    | {block_else} block;
+stmt_with_else{->stmt} = 
+     {noop} semi {->New stmt.empty()}
+    | {if} if_else_stmt {->if_else_stmt.stmt}
+    | {return_else} return expr? semi{->New stmt.return(expr)}
+    | {then_expr} l_value arrow expr semi {->New stmt.expr(l_value,expr)}
+    | {then_func_call} func_call semi {->New stmt.func_call(func_call)}
+	  | {then_while_statement} while cond do stmt_with_else{->New stmt.while_statement(cond.expr,stmt_with_else.stmt)}
+    | {block_else} block{->New stmt.block([block.stmt])};
 
-if_else_stmt = 
+if_else_stmt{->stmt} = 
  	{if_else}if cond then [then_stmt]:stmt_with_else 
- 	else [else_stmt]:stmt_with_else;
+ 	else [else_stmt]:stmt_with_else{->New stmt.if_else(cond.expr,then_stmt.stmt,else_stmt.stmt)};
 
- while_statement =
- 	{while_statement}while cond do stmt;
+ while_statement{->stmt}=
+ 	{while_statement}while cond do stmt{->New stmt.while_statement(cond.expr,stmt)};
 
 func_call= 
-	{func_call} variable l_par fun_param r_par {-> New func_call(variable,[fun_param.expr])};
+	{func_call} variable l_par [fun]:fun_param r_par {-> New func_call.func_call(variable,[fun.expr])};
 
 fun_param{->expr*} = 
-	{one} expr{->expr} |
+	{one} expr{->[expr]} |
 	{many} fun_param comma expr{->[fun_param.expr,expr]}|
-	{none} ;
+	{none} {->[]};
 
-cond = 
-	{cond_or} cond or cond_and|
-	{condition_or_expr}cond_and;
+cond{->expr} = 
+	{cond_or} cond or cond_and{->New expr.cond_or(cond.expr,cond_and.expr)}|
+	{condition_or_expr}cond_and{->cond_and.expr};
 	
-cond_and=
-	{comp_and} cond_and and cond_not|
- 	{comp_eq_expr} cond_not;
+cond_and{->expr}=
+	{comp_and} cond_and and cond_not{->New expr.comp_and(cond_and.expr,cond_not.expr)}|
+ 	{comp_eq_expr} cond_not{->cond_not.expr};
 
-cond_not=
-	{comp_not_eq} not cond_not|
- 	{comp_not_expr} cond_eq;
+cond_not{->expr}=
+	{comp_not_eq} not cond_not{->New expr.comp_not_eq(cond_not.expr)}|
+ 	{comp_not_expr} cond_eq {->cond_eq.expr};
 
-cond_eq=
-	{comp_eq} [left]:expr compare_rel_operators [right]:expr|
-	{cond_block} l_par cond r_par;
+cond_eq{->expr}=
+	{comp_eq} [left]:expr compare_rel_operators [right]:expr{->New expr.comp_eq(left.expr,right.expr)}|
+	{cond_block} l_par cond r_par{-> cond.expr};
 
 compare_rel_operators = 
 	{eq}equal |
@@ -203,10 +205,10 @@ compare_rel_operators =
 l_value =
 	{id} variable {->New l_value.id(variable)} |
 	{string_lit} string_lit{->New l_value.string_lit(string_lit)} | 
-	{l_value_array} l_value_array{->l_value_array};
+	{l_value_array} l_value_array{->New l_value.l_value_array(l_value_array)};
 
 l_value_array=
-	{l_value_arrray}l_value l_bkt expr r_bkt{-> New l_value_array(l_value,expr)};
+	{l_value_arrray}l_value l_bkt expr r_bkt{-> New l_value_array.l_value_array(l_value,expr)};
 
 /* Expressions */
 expr  =
@@ -249,16 +251,21 @@ binary_operators =
 Abstract Syntax Tree
 
 programm = 
-  {programm}func_def;
+  func_def;
 
+func_def = 
+  {func_def}header local_def* stmt*;
 
 header =
-  {header} fun  variable l_par fpar_def r_par ret_type;
+  {header}  variable  fpar_def  ret_type;
 
 local_def = 
-  {func_de} func_def | 
-  {func_dec} func_decl|
+  {func_def} func_def | 
+  {func_decl} func_decl|
   {var_def} var_def;
+
+func_decl =
+ {func_decl}header;
 
 fpar_def =
     {fpar_def1} ref? variable type|
@@ -268,30 +275,24 @@ fpar_def =
     {fpar_def5} ;
 
 var_def =
-  {var_def}var variable [variables]:extra_variables* type semi;
-extra_variables = 
-  {extra_variable}comma variable;
+  {var_def} variable [variables]:variable* type;
 
-func_decl =
- {func_decl}header semi;
 
-func_def = 
-  {func_def}header local_def* block;
 stmt =
+  {empty}|
   {semi} |
-  {block}l_brc [statements]:stmt* r_brc|
-  {while_statement} while cond do [stmt]:stmt|
-  {no_else}if cond then [then_stmt]:stmt ;
+  {expr} l_value expr|
+  {block} [statements]:stmt*|
+  {func_call} func_call| 
+  {while_statement} expr  [stmt]:stmt|
+  {return}expr?|
+  {if}  [condition]:expr [statement]:stmt |
+  {if_else} [condition]:expr [then]:stmt [else]:stmt ;
 
 
 func_call = 
-  {func_call} variable fun_param ;
+  {func_call} variable expr* ;
 
-fun_param = 
-  {one} expr |
-  {many} expr*|
-  {none} ;
-  
 /*types*/
 
 type = 
@@ -316,17 +317,22 @@ l_value =
 {l_value_array} l_value_array;
 
 l_value_array=
-  {l_value_arrray}l_value expr ;
+  {l_value_array}l_value expr ;
 
 /* Expressions */
 
 expr =
-  {plus}[left]:expr plus [right]:expr|
-  {minus}[left]:expr minus [right]:expr|
-  {mult} [left]:expr star [right]:expr |
-  {slash} [left]:expr slash [right]:expr|
-  {mod}  [left]:expr mod [right]:expr|
-  {div} [left]:expr div [right]:expr|
+  {cond_or} [left]:expr [right]:expr|
+  {comp_and} [left]:expr [right]:expr|
+  {comp_eq} [left]:expr [right]:expr|
+  {comp_not_eq} expr |
+  {cond_block} expr |
+  {plus}[left]:expr  [right]:expr|
+  {minus}[left]:expr [right]:expr|
+  {mult} [left]:expr [right]:expr |
+  {slash} [left]:expr [right]:expr|
+  {mod}  [left]:expr [right]:expr|
+  {div} [left]:expr  [right]:expr|
   {term_int} integer | 
   {term_char} const_char | 
   {term_val} l_value |
