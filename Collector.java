@@ -6,7 +6,14 @@ import compiler.node.*;
 public class Collector extends DepthFirstAdapter {
 
 	public FunctionSum f;
-
+	public FunctionSum current;
+	public FunctionSum previous;
+	public String vartype="";
+	public String name="";
+	public String type="";
+	public String ref="";
+	
+	int first_time=0;
 	    @Override
 	    public void caseStart(Start node)
 	    {
@@ -24,6 +31,14 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	            node.getFuncDef().apply(this);
 	        }
+	        for(VarSum va : current.arg)
+	       {
+	    	   System.out.println(va.ref+" "+va.name+" "+va.type);
+	       }
+	       for(VarSum va : current.vars)
+	       {
+	    	   System.out.println(va.ref+" "+va.name+" "+va.type);
+	       }
 	        outAProgramm(node);
 	    }
 
@@ -58,15 +73,29 @@ public class Collector extends DepthFirstAdapter {
 	        inAHeaderHeader(node);
 	        if(node.getVariable() != null)
 	        {
-	            node.getVariable().apply(this);
+	            name=node.getVariable().toString();
+	        }
+	        if(first_time==0)
+	        {
+	        	f=new FunctionSum(name);
+	        	f.belongs="";
+	        	current=f;
+	        	first_time=1;
+	        }    
+	        else
+	        {
+	        	FunctionSum fa=new FunctionSum(name);
+	        	fa.belongs=current.name;
+	        	current=fa;
 	        }
 	        if(node.getFparDef() != null)
 	        {
-	            node.getFparDef().apply(this);
+	           node.getFparDef().apply(this);
 	        }
 	        if(node.getRetType() != null)
 	        {
-	            node.getRetType().apply(this);
+	            type=node.getRetType().toString();
+	            current.type=type;
 	        }
 	        outAHeaderHeader(node);
 	    }
@@ -118,84 +147,100 @@ public class Collector extends DepthFirstAdapter {
 	    @Override
 	    public void caseAFparDef1FparDef(AFparDef1FparDef node)
 	    {
+	    	String varname="";
 	        inAFparDef1FparDef(node);
 	        if(node.getRef() != null)
 	        {
-	            node.getRef().apply(this);
+	           ref=node.getRef().toString();
 	        }
 	        if(node.getVariable() != null)
 	        {
-	            node.getVariable().apply(this);
+	            varname=node.getVariable().toString();
 	        }
 	        if(node.getType() != null)
 	        {
-	            node.getType().apply(this);
+	            vartype=node.getType().toString();
 	        }
+	        VarSum v=new VarSum(varname,vartype);
+	        v.ref=ref;
+	        current.arg.add(v);
 	        outAFparDef1FparDef(node);
 	    }
 
 	    @Override
 	    public void caseAFparDef2FparDef(AFparDef2FparDef node)
 	    {
+	    	String varname="";
 	        inAFparDef2FparDef(node);
 	        if(node.getRef() != null)
 	        {
-	            node.getRef().apply(this);
+	           ref=node.getRef().toString();
 	        }
 	        if(node.getVariable() != null)
 	        {
-	            node.getVariable().apply(this);
+	            varname=node.getVariable().toString();
 	        }
 	        if(node.getFparDef() != null)
 	        {
 	            node.getFparDef().apply(this);
 	        }
+	        VarSum v=new VarSum(varname,vartype);
+	        v.ref=ref;
+	        current.arg.add(v);
 	        outAFparDef2FparDef(node);
 	    }
 
 	    @Override
 	    public void caseAFparDef3FparDef(AFparDef3FparDef node)
 	    {
+	    	String varname="";
 	        inAFparDef3FparDef(node);
 	        if(node.getRef() != null)
 	        {
-	            node.getRef().apply(this);
+	        	 ref=node.getRef().toString();
 	        }
 	        if(node.getVariable() != null)
 	        {
-	            node.getVariable().apply(this);
+	            varname=node.getVariable().toString();
 	        }
 	        if(node.getType() != null)
 	        {
-	            node.getType().apply(this);
+	           vartype= node.getType().toString();
 	        }
 	        if(node.getFparDef() != null)
 	        {
 	            node.getFparDef().apply(this);
 	        }
+	        VarSum v=new VarSum(varname,vartype);
+	        v.ref=ref;
+	        current.arg.add(v);
 	        outAFparDef3FparDef(node);
 	    }
 
 	    @Override
 	    public void caseAFparDef4FparDef(AFparDef4FparDef node)
 	    {
+	    	String varname="";
 	        inAFparDef4FparDef(node);
 	        if(node.getRef() != null)
 	        {
-	            node.getRef().apply(this);
+	        	 ref=node.getRef().toString();
 	        }
 	        if(node.getVariable() != null)
 	        {
-	            node.getVariable().apply(this);
+	            varname=node.getVariable().toString();
 	        }
 	        if(node.getType() != null)
 	        {
-	            node.getType().apply(this);
+	            vartype=node.getType().toString();
 	        }
 	        if(node.getFparDef() != null)
 	        {
 	            node.getFparDef().apply(this);
 	        }
+	        VarSum v=new VarSum(varname,vartype);
+	        v.ref=ref;
+	        current.arg.add(v);
 	        outAFparDef4FparDef(node);
 	    }
 
@@ -209,21 +254,26 @@ public class Collector extends DepthFirstAdapter {
 	    @Override
 	    public void caseAVarDefVarDef(AVarDefVarDef node)
 	    {
+	    	String name="";
 	        inAVarDefVarDef(node);
 	        if(node.getVariable() != null)
 	        {
-	            node.getVariable().apply(this);
+	            name=node.getVariable().toString();
 	        }
+	        if(node.getType() != null)
+	        {
+	            vartype=node.getType().toString();
+	        }
+	        VarSum va=new VarSum(name,vartype);
+	        current.vars.add(va);
 	        {
 	            List<TVariable> copy = new ArrayList<TVariable>(node.getVariables());
 	            for(TVariable e : copy)
 	            {
-	                e.apply(this);
+	               name=e.toString();
+	               VarSum v1=new VarSum(name,vartype);
+	   	           current.vars.add(v1);
 	            }
-	        }
-	        if(node.getType() != null)
-	        {
-	            node.getType().apply(this);
 	        }
 	        outAVarDefVarDef(node);
 	    }

@@ -25,27 +25,27 @@ class Main {
       	}
       	System.out.println("Have to compile "+args.length+" files ");
 		System.out.println("Compiler started");
-		PrintStream out = new PrintStream(new FileOutputStream("output.txt"));
+	//	PrintStream out = new PrintStream(new FileOutputStream("output.txt"));
 		int i;
 		for(i=0;i<args.length;i++)		
 		{		
-			System.out.println("Compiling file "+args[i]);
+			//System.out.println("Compiling file "+args[i]);
 			FileInputStream myfile = null;
 			myfile=new FileInputStream(args[i]);
 			Parser p = new Parser(new Lexer(new PushbackReader(new InputStreamReader(myfile), 1024)));
         	try {
     			Start tree = p.parse();
-    			System.setOut(out);
-    			tree.apply(new CCT());
+    			//System.setOut(out);
+    			tree.apply(new Collector());
         	} catch (Exception e) 
     		{	
     		    e.printStackTrace();
     		}
-    		System.out.println("------------------------------------------------------------------------------------------");
-    		System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out)));
+    		//System.out.println("------------------------------------------------------------------------------------------");
+    		//System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out)));
 		}
 		System.out.println("Finished all the files ");
-		out.close();
+		//out.close();
 		System.exit(0);
 	}
 }
