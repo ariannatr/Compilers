@@ -7,7 +7,6 @@ public class Collector extends DepthFirstAdapter {
 
 	public FunctionSum f;
 	public FunctionSum current;
-	public FunctionSum previous;
 	public String vartype="";
 	public String name="";
 	public String type="";
@@ -31,14 +30,19 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	            node.getFuncDef().apply(this);
 	        }
-	        for(VarSum va : current.arg)
-	       {
-	    	   System.out.println(va.ref+" "+va.name+" "+va.type);
-	       }
-	       for(VarSum va : current.vars)
-	       {
-	    	   System.out.println(va.ref+" "+va.name+" "+va.type);
-	       }
+	        
+	        for(FunctionSum fa:f.fun)
+	        {
+	        	System.out.println(fa.name+" <--");
+		        for(VarSum va : fa.arg)
+		       {
+		    	   System.out.println(va.ref+" "+va.name+" "+va.type);
+		       }
+		       for(VarSum va : fa.vars)
+		       {
+		    	   System.out.println(va.ref+" "+va.name+" "+va.type);
+		       }
+	        }
 	        outAProgramm(node);
 	    }
 
@@ -46,8 +50,12 @@ public class Collector extends DepthFirstAdapter {
 	    public void caseAFuncDefFuncDef(AFuncDefFuncDef node)
 	    {
 	        inAFuncDefFuncDef(node);
+	    	FunctionSum previous=null;
+	        if(current!=null)
+	        	previous=current;
 	        if(node.getHeader() != null)
 	        {
+	        	
 	            node.getHeader().apply(this);
 	        }
 	        {
@@ -64,6 +72,8 @@ public class Collector extends DepthFirstAdapter {
 	                e.apply(this);
 	            }
 	        }
+	        if(previous!=null)
+	        	current=previous;
 	        outAFuncDefFuncDef(node);
 	    }
 
@@ -75,19 +85,6 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	            name=node.getVariable().toString();
 	        }
-	        if(first_time==0)
-	        {
-	        	f=new FunctionSum(name);
-	        	f.belongs="";
-	        	current=f;
-	        	first_time=1;
-	        }    
-	        else
-	        {
-	        	FunctionSum fa=new FunctionSum(name);
-	        	fa.belongs=current.name;
-	        	current=fa;
-	        }
 	        if(node.getFparDef() != null)
 	        {
 	           node.getFparDef().apply(this);
@@ -95,7 +92,20 @@ public class Collector extends DepthFirstAdapter {
 	        if(node.getRetType() != null)
 	        {
 	            type=node.getRetType().toString();
-	            current.type=type;
+	        }
+	        if(first_time==0)
+	        {
+	        	f=new FunctionSum(name);
+	        	f.type=type;
+	        	current=f;
+	        	first_time=1;
+	        }    
+	        else
+	        {
+	        	FunctionSum fa=new FunctionSum(name);
+	        	fa.type=type;
+	        	current.fun.add(fa);
+	        	current=fa;
 	        }
 	        outAHeaderHeader(node);
 	    }
@@ -137,10 +147,13 @@ public class Collector extends DepthFirstAdapter {
 	    public void caseAFuncDeclFuncDecl(AFuncDeclFuncDecl node)
 	    {
 	        inAFuncDeclFuncDecl(node);
+	        FunctionSum prev;
+	        prev=current;
 	        if(node.getHeader() != null)
 	        {
 	            node.getHeader().apply(this);
 	        }
+	        current=prev;
 	        outAFuncDeclFuncDecl(node);
 	    }
 
