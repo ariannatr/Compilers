@@ -33,7 +33,6 @@ public class Collector extends DepthFirstAdapter {
 	        
 	        for(FunctionSum fa:f.fun)
 	        {
-	        	System.out.println(fa.name+" <--");
 		        for(VarSum va : fa.arg)
 		       {
 		    	   System.out.println(va.ref+" "+va.name+" "+va.type);
@@ -85,10 +84,6 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	            name=node.getVariable().toString();
 	        }
-	        if(node.getFparDef() != null)
-	        {
-	           node.getFparDef().apply(this);
-	        }
 	        if(node.getRetType() != null)
 	        {
 	            type=node.getRetType().toString();
@@ -106,6 +101,10 @@ public class Collector extends DepthFirstAdapter {
 	        	fa.type=type;
 	        	current.fun.add(fa);
 	        	current=fa;
+	        }
+	        if(node.getFparDef() != null)
+	        {
+	           node.getFparDef().apply(this);
 	        }
 	        outAHeaderHeader(node);
 	    }
@@ -177,6 +176,7 @@ public class Collector extends DepthFirstAdapter {
 	        VarSum v=new VarSum(varname,vartype);
 	        v.ref=ref;
 	        current.arg.add(v);
+	        System.out.println(v.name+current.name+" <-");
 	        outAFparDef1FparDef(node);
 	    }
 
