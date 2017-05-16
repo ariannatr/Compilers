@@ -60,5 +60,16 @@ public class FunctionSum
 		}
 		return false;
 	}
+	public boolean exist_name(String na)
+	{
+		if(name.equals(na))
+			return true;
+		for(FunctionSum fa:fun)
+		{
+			if(fa.name.equals(na))
+				return true;
+		}
+		return false;
+	}
 
 }

@@ -39,7 +39,6 @@ public class Collector extends DepthFirstAdapter {
 	        
 	        for(FunctionSum fa:f.fun)
 	        {
-	        	System.out.println(fa.name+" <--");
 		        for(VarSum va : fa.arg)
 		       {
 		    	   System.out.println(va.ref+" "+va.name+" "+va.type);
@@ -123,7 +122,7 @@ public class Collector extends DepthFirstAdapter {
 	        	}
 	        	else
 	        	{
-	        		System.out.println("Eimai stin sunartisi "+current.name+"kai prosthetw tin sunartisi "+ fa.name);
+	        		//System.out.println("Eimai stin sunartisi "+current.name+"kai prosthetw tin sunartisi "+ fa.name);
 	        		current.fun.add(fa);
 	        	}
 	        	current=fa;
@@ -482,15 +481,23 @@ public class Collector extends DepthFirstAdapter {
 	    @Override
 	    public void caseAFuncCallFuncCall(AFuncCallFuncCall node)
 	    {
+	    	String name="";
 	        inAFuncCallFuncCall(node);
 	        if(node.getVariable() != null)
 	        {
-	            node.getVariable().apply(this);
+	            name=node.getVariable().toString();
 	        }
+	        if(!current.exist_name(name))
+        	{
+        		error+="Error:The function "+name+" doesnt exits to be called!\n";
+        		System.out.println("Erroraaa:The function "+name+"  doesnt exits to be called!!");
+        	}
+	        
 	        {
 	            List<PExpr> copy = new ArrayList<PExpr>(node.getExpr());
 	            for(PExpr e : copy)
 	            {
+	                System.out.println(e.toString());
 	                e.apply(this);
 	            }
 	        }
@@ -699,6 +706,7 @@ public class Collector extends DepthFirstAdapter {
 	        inAPlusExpr(node);
 	        if(node.getLeft() != null)
 	        {
+	        	
 	            node.getLeft().apply(this);
 	        }
 	        if(node.getRight() != null)
