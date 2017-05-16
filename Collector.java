@@ -11,6 +11,12 @@ public class Collector extends DepthFirstAdapter {
 	public String name="";
 	public String type="";
 	public String ref="";
+	public String error="";
+
+	public void print_errors()
+	{
+		System.out.println("The errors found: \n"+error);
+	}
 	
 	int first_time=0;
 	    @Override
@@ -33,6 +39,7 @@ public class Collector extends DepthFirstAdapter {
 	        
 	        for(FunctionSum fa:f.fun)
 	        {
+	        	System.out.println(fa.name+" <--");
 		        for(VarSum va : fa.arg)
 		       {
 		    	   System.out.println(va.ref+" "+va.name+" "+va.type);
@@ -99,7 +106,26 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	        	FunctionSum fa=new FunctionSum(name);
 	        	fa.type=type;
-	        	current.fun.add(fa);
+	        	if(current.findfunction(fa))
+	        	{
+	        		error+="Error:The function "+fa.name+" already exists !\n";
+	        		System.out.println("Error:The function "+fa.name+" already exists !");
+	        	}
+	        	else if(current.findparameter(fa.name) )
+	        	{
+	        		error+="Error:The name "+fa.name+" already exists for parameter name!\n";
+	        		System.out.println("Error:The name "+fa.name+" already exists for parameter name!");
+	        	}
+	        	else if(current.findvariable(fa.name))
+	        	{
+					error+="Error:The name "+fa.name+" already exists for variable name!\n";
+	        		System.out.println("Error:The name "+fa.name+" already exists for variable name!");
+	        	}
+	        	else
+	        	{
+	        		System.out.println("Eimai stin sunartisi "+current.name+"kai prosthetw tin sunartisi "+ fa.name);
+	        		current.fun.add(fa);
+	        	}
 	        	current=fa;
 	        }
 	        if(node.getFparDef() != null)
@@ -175,8 +201,15 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        VarSum v=new VarSum(varname,vartype);
 	        v.ref=ref;
-	        current.arg.add(v);
-	        System.out.println(v.name+current.name+" <-");
+	        if(!current.findparameter(v.name))
+	        {
+	        	current.arg.add(v);
+	        }
+	        else
+	        {
+	        	error+="Error:The parameter "+v.name+" already exists !\n";
+	        	System.out.println("Error:The parameter "+v.name+" already exists !");
+	        }
 	        outAFparDef1FparDef(node);
 	    }
 
@@ -199,7 +232,16 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        VarSum v=new VarSum(varname,vartype);
 	        v.ref=ref;
-	        current.arg.add(v);
+	        if(!current.findparameter(v.name))
+	        {
+	        	current.arg.add(v);
+	        }
+	        else
+	        {
+	        	error+="Error:The parameter "+v.name+" already exists !\n";
+
+	        	System.out.println("Error:The parameter "+v.name+" already exists !");
+	        }
 	        outAFparDef2FparDef(node);
 	    }
 
@@ -226,7 +268,15 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        VarSum v=new VarSum(varname,vartype);
 	        v.ref=ref;
-	        current.arg.add(v);
+	       	if(!current.findparameter(v.name))
+	        {
+	        	current.arg.add(v);
+	        }
+	        else
+	        {
+	           	error+="Error:The parameter "+v.name+" already exists !\n";
+	        	System.out.println("Error:The parameter "+v.name+" already exists !");
+	        }
 	        outAFparDef3FparDef(node);
 	    }
 
@@ -253,7 +303,15 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        VarSum v=new VarSum(varname,vartype);
 	        v.ref=ref;
-	        current.arg.add(v);
+	        if(!current.findparameter(v.name))
+	        {
+	        	current.arg.add(v);
+	        }
+	        else
+	        {
+	        	error+="Error:The parameter "+v.name+" already exists !\n";
+	        	System.out.println("Error :The parameter "+v.name+" already exists !");
+	        }
 	        outAFparDef4FparDef(node);
 	    }
 
@@ -278,15 +336,31 @@ public class Collector extends DepthFirstAdapter {
 	            vartype=node.getType().toString();
 	        }
 	        VarSum va=new VarSum(name,vartype);
-	        current.vars.add(va);
+	       	if(!current.findvariable(va.name) && !current.findparameter(va.name))
+	       	{
+	       		current.vars.add(va);
+	       	}
+	       	else
+	       	{
+	       		error+="Error :This variable name "+va.name+" is already used !\n";
+	       		System.out.println("Error :This variable name "+va.name+" is already used !");
+	       	}
 	        {
 	            List<TVariable> copy = new ArrayList<TVariable>(node.getVariables());
 	            for(TVariable e : copy)
 	            {
 	               name=e.toString();
 	               VarSum v1=new VarSum(name,vartype);
-	   	           current.vars.add(v1);
-	            }
+	               if(!current.findvariable(v1.name) && !current.findparameter(v1.name))
+	        		{
+		   	           	current.vars.add(v1);
+	        		}
+	        		else
+	        		{
+	        			error+="Error :This variable name "+v1.name+" is already used !\n";
+	       				System.out.println("Error :This variable name "+v1.name+" is already used !");
+	        		}
+	        	}
 	        }
 	        outAVarDefVarDef(node);
 	    }
