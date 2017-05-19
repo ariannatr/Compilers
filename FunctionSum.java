@@ -86,6 +86,19 @@ public class FunctionSum
 		}
 		return false;
 	}
+	public FunctionSum getFunction(String name)
+	{
+		Iterator<FunctionSum> itr=this.fun.iterator();
+		while(itr.hasNext())
+		{
+			FunctionSum ret=itr.next();
+			if(ret.name.equals(name))
+			{
+				return ret;
+			}   
+		}
+		return null;
+	}
 	public boolean exist_name(String na)
 	{
 		if(name.equals(na))
