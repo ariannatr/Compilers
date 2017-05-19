@@ -12,7 +12,10 @@ public class Collector extends DepthFirstAdapter {
 	public String type="";
 	public String ref="";
 	public String error="";
-
+	
+	public String exprtype="";
+	public String mtype="";
+	
 	public void print_errors()
 	{
 		System.out.println("The errors found: \n"+error);
@@ -296,10 +299,6 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	            vartype=node.getType().toString();
 	        }
-	        if(node.getFparDef() != null)
-	        {
-	            node.getFparDef().apply(this);
-	        }
 	        VarSum v=new VarSum(varname,vartype);
 	        v.ref=ref;
 	        if(!current.findparameter(v.name))
@@ -310,6 +309,10 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	        	error+="Error:The parameter "+v.name+" already exists !\n";
 	        	System.out.println("Error :The parameter "+v.name+" already exists !");
+	        }
+	        if(node.getFparDef() != null)
+	        {
+	            node.getFparDef().apply(this);
 	        }
 	        outAFparDef4FparDef(node);
 	    }
@@ -357,7 +360,6 @@ public class Collector extends DepthFirstAdapter {
 	        		else
 	        		{
 	        			error+="Error :This variable name "+v1.name+" is already used !\n";
-	       				System.out.println("Error :This variable name "+v1.name+" is already used !");
 	        		}
 	        	}
 	        }
@@ -490,15 +492,22 @@ public class Collector extends DepthFirstAdapter {
 	        if(!current.exist_name(name))
         	{
         		error+="Error:The function "+name+" doesnt exits to be called!\n";
-        		System.out.println("Erroraaa:The function "+name+"  doesnt exits to be called!!");
         	}
 	        
 	        {
 	            List<PExpr> copy = new ArrayList<PExpr>(node.getExpr());
 	            for(PExpr e : copy)
 	            {
-	                System.out.println(e.toString());
+	              
 	                e.apply(this);
+	                String varname=e.toString();
+	                
+	                String temp=exprtype;
+	                String currenttype=current.findparametertype(name);
+	                System.out.println("agg "+temp+currenttype);
+	                if(!temp.equals(currenttype))
+	                	error+="Different expression type in argument "+varname+" in function "+current.name+"\n";
+	                
 	            }
 	        }
 	        outAFuncCallFuncCall(node);
@@ -591,7 +600,16 @@ public class Collector extends DepthFirstAdapter {
 	        inAIdLValue(node);
 	        if(node.getVariable() != null)
 	        {
-	            node.getVariable().apply(this);
+	        	String var= node.getVariable().toString();
+	            System.out.println("VAR :"+var);
+	            mtype=current.findparametertype(var);
+	            if(mtype.equals("NULL"))
+	            {
+	            	mtype=current.findvariabletype(var);
+	            	if(mtype.equals("NULL"))
+	            		error+="Var: "+var+" not exist!\n";
+	            }
+	            System.out.println("m "+mtype);
 	        }
 	        outAIdLValue(node);
 	    }
@@ -603,6 +621,7 @@ public class Collector extends DepthFirstAdapter {
 	        if(node.getStringLit() != null)
 	        {
 	            node.getStringLit().apply(this);
+	            mtype="StringLit";
 	        }
 	        outAStringLitLValue(node);
 	    }
@@ -636,15 +655,20 @@ public class Collector extends DepthFirstAdapter {
 	    @Override
 	    public void caseACondOrExpr(ACondOrExpr node)
 	    {
+	    	
 	        inACondOrExpr(node);
 	        if(node.getLeft() != null)
 	        {
 	            node.getLeft().apply(this);
 	        }
+	        String left=exprtype;
 	        if(node.getRight() != null)
 	        {
 	            node.getRight().apply(this);
 	        }
+	        String right=exprtype;
+	        if(!left.equals(right))
+	        	error+="Wrong exprtypes in Or expression\n";
 	        outACondOrExpr(node);
 	    }
 
@@ -656,10 +680,15 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	            node.getLeft().apply(this);
 	        }
+	        String left=exprtype;
 	        if(node.getRight() != null)
 	        {
 	            node.getRight().apply(this);
 	        }
+	        String right=exprtype;
+	        
+	        if(!left.equals(right))
+	        	error+="Wrong exprtypes in And expression\n";
 	        outACompAndExpr(node);
 	    }
 
@@ -671,10 +700,15 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	            node.getLeft().apply(this);
 	        }
+	        String left=mtype;
 	        if(node.getRight() != null)
 	        {
 	            node.getRight().apply(this);
 	        }
+	        String right=mtype;
+	        if(!left.equals(right))
+	        	error+="Wrong on CompareExpression\n";
+	        exprtype="logic";
 	        outACompEqExpr(node);
 	    }
 
@@ -709,10 +743,15 @@ public class Collector extends DepthFirstAdapter {
 	        	
 	            node.getLeft().apply(this);
 	        }
+	        String left=mtype;
 	        if(node.getRight() != null)
 	        {
 	            node.getRight().apply(this);
 	        }
+	        String right=mtype;
+	        if(!left.equals(right))
+	        	error+="Wrong Plus Expression!\n";
+	        exprtype="numeric";
 	        outAPlusExpr(node);
 	    }
 
@@ -724,10 +763,15 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	            node.getLeft().apply(this);
 	        }
+	        String left=mtype;
 	        if(node.getRight() != null)
 	        {
 	            node.getRight().apply(this);
 	        }
+	        String right=mtype;
+	        if(!left.equals(right))
+	        	error+="Wrong Minus Expression!"+left+right+"\n";
+	        exprtype="numeric";
 	        outAMinusExpr(node);
 	    }
 
@@ -739,10 +783,15 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	            node.getLeft().apply(this);
 	        }
+	        String left=mtype;
 	        if(node.getRight() != null)
 	        {
 	            node.getRight().apply(this);
 	        }
+	        String right=mtype;
+	        if(!left.equals(right))
+	        	error+="Wrong Mult Expression!\n";
+	        exprtype="numeric";
 	        outAMultExpr(node);
 	    }
 
@@ -754,10 +803,15 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	            node.getLeft().apply(this);
 	        }
+	        String left=mtype;
 	        if(node.getRight() != null)
 	        {
 	            node.getRight().apply(this);
 	        }
+	        String right=mtype;
+	        if(!left.equals(right))
+	        	error+="Wrong Slash Expression!\n";
+	        exprtype="numeric";
 	        outASlashExpr(node);
 	    }
 
@@ -769,10 +823,15 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	            node.getLeft().apply(this);
 	        }
+	        String left=mtype;
 	        if(node.getRight() != null)
 	        {
 	            node.getRight().apply(this);
 	        }
+	        String right=mtype;
+	        if(!left.equals(right))
+	        	error+="Wrong Mod Expression!\n";
+	        exprtype="numeric";
 	        outAModExpr(node);
 	    }
 
@@ -784,10 +843,15 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	            node.getLeft().apply(this);
 	        }
+	        String left=mtype;
 	        if(node.getRight() != null)
 	        {
 	            node.getRight().apply(this);
 	        }
+	        String right=mtype;
+	        if(!left.equals(right))
+	        	error+="Wrong Div Expression!\n";
+	        exprtype="numeric";
 	        outADivExpr(node);
 	    }
 
@@ -798,6 +862,7 @@ public class Collector extends DepthFirstAdapter {
 	        if(node.getInteger() != null)
 	        {
 	            node.getInteger().apply(this);
+	            mtype="int ";
 	        }
 	        outATermIntExpr(node);
 	    }
@@ -809,6 +874,7 @@ public class Collector extends DepthFirstAdapter {
 	        if(node.getConstChar() != null)
 	        {
 	            node.getConstChar().apply(this);
+	            mtype="char";
 	        }
 	        outATermCharExpr(node);
 	    }

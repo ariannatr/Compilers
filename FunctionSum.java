@@ -32,7 +32,33 @@ public class FunctionSum
 		}
 		return false;
 	}
+	public String findparametertype(String var)
+	{
+		Iterator<VarSum> itr=this.arg.iterator();
+		while(itr.hasNext())
+		{
+			VarSum ret=itr.next();
+			if(ret.name.equals(var))
+			{
+				return ret.type;
+			}   
+		}
+		return "NULL";
+	}
 
+	public String findvariabletype(String var)
+	{
+		Iterator<VarSum> itr=this.vars.iterator();
+		while(itr.hasNext())
+		{
+			VarSum ret=itr.next();
+			if(ret.name.equals(var))
+			{
+				return ret.type;
+			}   
+		}
+		return "NULL";
+	}
 	public boolean findvariable(String var)
 	{
 		Iterator<VarSum> itr=this.vars.iterator();
