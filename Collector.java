@@ -384,14 +384,23 @@ public class Collector extends DepthFirstAdapter {
 	    public void caseAExprStmt(AExprStmt node)
 	    {
 	        inAExprStmt(node);
+	        String left="";
+	        String right="";
+	        String t="";
 	        if(node.getLValue() != null)
 	        {
-	            node.getLValue().apply(this);
+	            t=node.getLValue().toString();
+	            left=current.findparametertype(t);
+	            if(left.equals("null"))
+	            	left=current.findvariabletype(t);
 	        }
 	        if(node.getExpr() != null)
 	        {
 	            node.getExpr().apply(this);
+	            right=mtype;
 	        }
+	        if(!left.equals(right))
+	        	error+="Wrong on Lvalue "+left+"<-"+right+"\n";
 	        outAExprStmt(node);
 	    }
 
@@ -442,6 +451,14 @@ public class Collector extends DepthFirstAdapter {
 	        if(node.getExpr() != null)
 	        {
 	            node.getExpr().apply(this);
+	            String topic=exprtype;
+	            if(!topic.equals(current.type))
+	            	error+="Wrong return statement in function "+current.name;
+	        }
+	        else
+	        {
+	        	if(!current.type.equals("nothing "))
+	        		error+="Wrong return statement in function "+current.name+"\n";
 	        }
 	        outAReturnStmt(node);
 	    }
@@ -877,7 +894,9 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	            node.getInteger().apply(this);
 	            mtype="int ";
+	            exprtype="int ";
 	        }
+	        
 	        outATermIntExpr(node);
 	    }
 
@@ -889,6 +908,7 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	            node.getConstChar().apply(this);
 	            mtype="char";
+	            exprtype="char";
 	        }
 	        outATermCharExpr(node);
 	    }
