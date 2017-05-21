@@ -37,6 +37,7 @@ class Main {
 	  			System.setOut(out);
     			Start tree = p.parse();
     			Collector symboltable= new Collector();
+    			symboltable.create_standar_libary();
     			tree.apply(symboltable);
     			symboltable.print_errors();
         	} catch (Exception e) 

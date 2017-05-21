@@ -12,6 +12,90 @@ public class Collector extends DepthFirstAdapter {
 	public String type="";
 	public String ref="";
 	public String error="";
+	public FunctionSum standar_library= new FunctionSum("standard");
+
+	public void create_standar_libary()
+	{
+		FunctionSum fun1=new FunctionSum("puti");
+		fun1.type="nothing";
+		VarSum var1=new VarSum("n","int");
+		fun1.arg.add(var1);
+		standar_library.fun.add(fun1);
+		FunctionSum fun2 = new FunctionSum("puts");
+		fun2.type="nothing";
+		VarSum var2=new VarSum("s","char[]");
+		var2.ref="char";//
+		fun2.arg.add(var2);
+		standar_library.fun.add(fun2);
+		FunctionSum fun3 = new FunctionSum("putc");
+		VarSum var3=new VarSum("c","char");
+		fun3.arg.add(var3);
+		standar_library.fun.add(fun3);
+		FunctionSum fun4 = new FunctionSum("geti");
+		fun4.type="int";
+		standar_library.fun.add(fun4);
+		FunctionSum fun5 = new FunctionSum("gets");
+		fun5.type="nothing";
+		VarSum var5a=new VarSum("n","int");
+		fun5.arg.add(var5a);
+		VarSum var5b=new VarSum("s","char[]");
+		var5b.ref="char";//
+		fun5.arg.add(var5b);
+		standar_library.fun.add(fun5);
+		FunctionSum fun6 = new FunctionSum("getc");
+		fun6.type="char";
+		standar_library.fun.add(fun6);
+		FunctionSum fun7 = new FunctionSum("abs");
+		fun7.type="int";
+		VarSum var7=new VarSum("n","int");
+		fun7.arg.add(var7);
+		standar_library.fun.add(fun7);
+		FunctionSum fun8 = new FunctionSum("ord");
+		fun8.type="int";
+		VarSum var8=new VarSum("n","int");
+		fun8.arg.add(var8);
+		standar_library.fun.add(fun8);
+		FunctionSum fun9 = new FunctionSum("chr");
+		fun9.type="char";
+		VarSum var9=new VarSum("c","char");
+		fun9.arg.add(var9);
+		standar_library.fun.add(fun9);
+		FunctionSum fun10 = new FunctionSum("strlen");
+		fun10.type="int";
+		VarSum var10=new VarSum("s","char");
+		var10.ref="char";//
+		fun10.arg.add(var10);
+		standar_library.fun.add(fun10);
+		FunctionSum fun11 = new FunctionSum("strcmp");
+		fun11.type="int";
+		VarSum var11a=new VarSum("s1","char");
+		var11a.ref="char";//
+		fun11.arg.add(var11a);
+		VarSum var11b=new VarSum("s2","char");
+		var11b.ref="char";//
+		fun11.arg.add(var11b);
+		standar_library.fun.add(fun11);
+		FunctionSum fun12 = new FunctionSum("strcpy");
+		fun12.type="nothing";
+		VarSum var12a=new VarSum("s1","char");
+		var12a.ref="char";//
+		fun12.arg.add(var12a);
+		VarSum var12b=new VarSum("s2","char");
+		var12b.ref="char";//
+		fun12.arg.add(var12b);
+		standar_library.fun.add(fun12);
+		FunctionSum fun13 = new FunctionSum("strcat");
+		fun13.type="nothing";
+		VarSum var13a=new VarSum("s1","char");
+		var13a.ref="char";//
+		fun13.arg.add(var13a);
+		VarSum var13b=new VarSum("s2","char");
+		var13b.ref="char";//
+		fun13.arg.add(var13b);
+		standar_library.fun.add(fun13);
+	}
+
+
 	
 	public String exprtype="";
 	public String mtype="";
@@ -108,6 +192,8 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	        	FunctionSum fa=new FunctionSum(name);
 	        	fa.type=type;
+	        	fa.belongs=current.name;
+	        	System.out.println("Mother funtion of "+fa.name+" is function "+ current.name);
 	        	if(current.findfunction(fa))
 	        	{
 	        		error+="Error:The function "+fa.name+" already exists !\n";
@@ -506,9 +592,9 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	            name=node.getVariable().toString();
 	        }
-	        if(!current.exist_name(name))
+	        if((!current.exist_name(name)) && (!standar_library.exist_name(name)))
         	{
-        		error+="Error:The function "+name+" doesnt exits to be called!\n";
+        		error+="Error:The function "+name+" doesn't exist to be called!\n";
         		return;
         	}
 	        
@@ -533,7 +619,8 @@ public class Collector extends DepthFirstAdapter {
 	                temp=temp.replaceAll(" ","");
 	                if(!temp.equals(currenttype))
 	                {
-	                	error+="Different expression type in argument "+" in function "+current.name+"\n";
+	                	int num=i+1;
+	                	error+="Different expression type in argument "+num+" in function "+current.name+"\n";
 	                System.out.println("->>> "+currenttype+temp); 
 	                }
 	                i++;
@@ -801,7 +888,7 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        String right=mtype;
 	        if(!left.equals(right))
-	        	error+="Wrong Minus Expression!"+left+right+"\n";
+	        	error+="Wrong Minus Expression!"+left+" "+right+"\n";
 	        exprtype="int";
 	        outAMinusExpr(node);
 	    }

@@ -105,8 +105,13 @@ public class FunctionSum
 			return true;
 		for(FunctionSum fa:fun)
 		{
-			if(fa.name.equals(na))
+			System.out.println("fun1 "+fa.name+ " to compare "+na);
+			String comp=fa.name;
+			if(comp.equals(na))
+			{
+				System.out.println("found");
 				return true;
+			}
 		}
 		return false;
 	}
