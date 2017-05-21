@@ -12,9 +12,13 @@ public class Collector extends DepthFirstAdapter {
 	public String type="";
 	public String ref="";
 	public String error="";
+	public boolean flag=false;
+	public boolean reflag=false;
+	public String exprtype="";
+	public String mtype="";
 	public FunctionSum standar_library= new FunctionSum("standard");
 
-	public void create_standar_libary()
+	public void create_standar_library()
 	{
 		FunctionSum fun1=new FunctionSum("puti");
 		fun1.type="nothing";
@@ -95,10 +99,6 @@ public class Collector extends DepthFirstAdapter {
 		standar_library.fun.add(fun13);
 	}
 
-
-	
-	public String exprtype="";
-	public String mtype="";
 	
 	public void print_errors()
 	{
@@ -158,11 +158,16 @@ public class Collector extends DepthFirstAdapter {
 	            }
 	        }
 	        {
+
 	            List<PStmt> copy = new ArrayList<PStmt>(node.getStmt());
 	            for(PStmt e : copy)
 	            {
 	                e.apply(this);
 	            }
+	            String ctype=current.type;
+		        if(reflag==false && !ctype.equals("nothing "))
+		        	error+="No return statement for function "+current.name+" found\n";
+		        reflag=false;
 	        }
 	        if(previous!=null)
 	        	current=previous;
@@ -192,10 +197,15 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	        	FunctionSum fa=new FunctionSum(name);
 	        	fa.type=type;
-	        	fa.belongs=current.name;
+	        	fa.belongs=current;
+	        	fa.dec=flag;
 	        	System.out.println("Mother funtion of "+fa.name+" is function "+ current.name);
 	        	if(current.findfunction(fa))
 	        	{
+	        		if(flag==false)
+	        		{
+	        			
+	        		}
 	        		error+="Error:The function "+fa.name+" already exists !\n";
 	        		System.out.println("Error:The function "+fa.name+" already exists !");
 	        	}
@@ -260,13 +270,12 @@ public class Collector extends DepthFirstAdapter {
 	    public void caseAFuncDeclFuncDecl(AFuncDeclFuncDecl node)
 	    {
 	        inAFuncDeclFuncDecl(node);
-	        FunctionSum prev;
-	        prev=current;
+	        flag=true;
 	        if(node.getHeader() != null)
 	        {
 	            node.getHeader().apply(this);
 	        }
-	        current=prev;
+	        flag=false;
 	        outAFuncDeclFuncDecl(node);
 	    }
 
@@ -431,7 +440,6 @@ public class Collector extends DepthFirstAdapter {
 	       	else
 	       	{
 	       		error+="Error :This variable name "+va.name+" is already used !\n";
-	       		System.out.println("Error :This variable name "+va.name+" is already used !");
 	       	}
 	        {
 	            List<TVariable> copy = new ArrayList<TVariable>(node.getVariables());
@@ -472,13 +480,10 @@ public class Collector extends DepthFirstAdapter {
 	        inAExprStmt(node);
 	        String left="";
 	        String right="";
-	        String t="";
 	        if(node.getLValue() != null)
 	        {
-	            t=node.getLValue().toString();
-	            left=current.findparametertype(t);
-	            if(left.equals("null"))
-	            	left=current.findvariabletype(t);
+	        	node.getLValue().apply(this);
+	            left=mtype;
 	        }
 	        if(node.getExpr() != null)
 	        {
@@ -501,6 +506,7 @@ public class Collector extends DepthFirstAdapter {
 	                e.apply(this);
 	            }
 	        }
+	        
 	        outABlockStmt(node);
 	    }
 
@@ -534,16 +540,19 @@ public class Collector extends DepthFirstAdapter {
 	    public void caseAReturnStmt(AReturnStmt node)
 	    {
 	        inAReturnStmt(node);
+	        reflag=true;
+	        System.out.println("---aa");
 	        if(node.getExpr() != null)
 	        {
 	            node.getExpr().apply(this);
 	            String topic=exprtype;
+	           
 	            if(!topic.equals(current.type))
-	            	error+="Wrong return statement in function "+current.name;
+	            	error+="Wrong return statement in function "+current.name+"\n";
 	        }
 	        else
 	        {
-	        	if(!current.type.equals("nothing "))
+	        	if(!current.type.equals("nothing"))
 	        		error+="Wrong return statement in function "+current.name+"\n";
 	        }
 	        outAReturnStmt(node);
@@ -625,6 +634,7 @@ public class Collector extends DepthFirstAdapter {
 	                }
 	                i++;
 	            }
+	            mtype=ftemp.type;
 	        }
 	        outAFuncCallFuncCall(node);
 	    }
@@ -717,13 +727,21 @@ public class Collector extends DepthFirstAdapter {
 	        if(node.getVariable() != null)
 	        {
 	        	String var= node.getVariable().toString();
-	            System.out.println("VAR :"+var);
 	            mtype=current.findparametertype(var);
 	            if(mtype.equals("NULL"))
 	            {
 	            	mtype=current.findvariabletype(var);
 	            	if(mtype.equals("NULL"))
-	            		error+="Var: "+var+" not exist!\n";
+	            	{
+	            		FunctionSum ftemp=current.belongs;
+	            		mtype=ftemp.findvariabletype(var);
+	            		if(mtype.equals("NULL"))
+	            		{
+	            			mtype=ftemp.findparametertype(var);
+	            			if(mtype.equals("NULL"))
+	            			error+="Variable "+var+" isnt declared!\n";
+	            		}
+	            	}
 	            }
 	            exprtype=mtype;
 	           
