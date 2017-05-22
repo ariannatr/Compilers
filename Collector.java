@@ -688,19 +688,38 @@ public class Collector extends DepthFirstAdapter {
 	    public void caseATypeType(ATypeType node)
 	    {
 	        inATypeType(node);
-	        if(node.getDataType() != null)
+	        if(node.getArrayNum() != null)
+	        {
+	            node.getArrayNum().apply(this);
+	        }
+	       /* {
+	            List<PArrayNum> copy = new ArrayList<PArrayNum>(node.getArrayNum());
+	            for(PArrayNum e : copy)
+	            {
+	                e.apply(this);
+	            }
+	        }*/
+	        outATypeType(node);
+	    }
+
+
+	   /*  @Override
+	    public void caseATypeType2(ATypeType2 node)
+	    {
+	        inATypeType2(node);
+	        /*if(node.getDataType() != null)
 	        {
 	            node.getDataType().apply(this);
 	        }
-	        {
+	        {	        {
 	            List<PArrayNum> copy = new ArrayList<PArrayNum>(node.getArrayNum());
 	            for(PArrayNum e : copy)
 	            {
 	                e.apply(this);
 	            }
 	        }
-	        outATypeType(node);
-	    }
+	        outATypeType2(node);
+	    }*/
 
 	    @Override
 	    public void caseADataTypeRetType(ADataTypeRetType node)
