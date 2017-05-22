@@ -7,7 +7,8 @@ public class FunctionSum
 {
 	public String name;
 	public String type;
-	public String belongs;
+	public FunctionSum belongs;
+	public boolean dec;
 	public ArrayList<FunctionSum> fun;
 	public ArrayList<VarSum> arg;
 	public ArrayList<VarSum> vars;
@@ -99,19 +100,15 @@ public class FunctionSum
 		}
 		return null;
 	}
+	
 	public boolean exist_name(String na)
 	{
 		if(name.equals(na))
 			return true;
 		for(FunctionSum fa:fun)
 		{
-			System.out.println("fun1 "+fa.name+ " to compare "+na);
-			String comp=fa.name;
-			if(comp.equals(na))
-			{
-				System.out.println("found");
+			if(fa.name.equals(na))
 				return true;
-			}
 		}
 		return false;
 	}
