@@ -123,10 +123,10 @@ ret_type =
   {nothing} nothing {->New ret_type.nothing(nothing)};
 
 array_num =
-  |{array_num} l_bkt integer? r_bkt {->New array_num.array_num(l_bkt,integer,r_bkt)};
+  {array_num} l_bkt integer? r_bkt {->New array_num.array_num(l_bkt,integer,r_bkt)};
 
 array_num_defined=
- |{array_num_defined} l_bkt integer r_bkt {->New array_num_defined.array_num_defined(l_bkt,integer,r_bkt)};
+ {array_num_defined} l_bkt integer r_bkt {->New array_num_defined.array_num_defined(l_bkt,integer,r_bkt)};
 
 
 local_def = 
@@ -312,7 +312,7 @@ array_num =
   {array_num} l_bkt integer? r_bkt;
 
 array_num_defined =
- {array_num_defined} l_bkt integer r_bkt;
+{array_num_defined} l_bkt integer r_bkt;
 
 
 data_type = 
