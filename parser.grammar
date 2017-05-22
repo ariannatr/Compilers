@@ -26,37 +26,37 @@ Tokens
   white_space = white_space;
   escape_sequence=escape_sequence;
  
-  and	= 'and';
-  char	= 'char';
-  div	= 'div';
-  do	= 'do';
-  else 	= 'else';
-  fun 	= 'fun';
-  if 	= 'if';
-  int 	= 'int';
-  mod 	= 'mod';
-  not 	= 'not';
+  and = 'and';
+  char  = 'char';
+  div = 'div';
+  do  = 'do';
+  else  = 'else';
+  fun   = 'fun';
+  if  = 'if';
+  int   = 'int';
+  mod   = 'mod';
+  not   = 'not';
   nothing= 'nothing';
-  or	= 'or';
-  ref	= 'ref';
+  or  = 'or';
+  ref = 'ref';
   return= 'return';
-  then	= 'then';
-  var	= 'var';
+  then  = 'then';
+  var = 'var';
   while = 'while';
 
   //operators
 
   minus = '-';
-  plus	= '+';
-  star	= '*';
+  plus  = '+';
+  star  = '*';
   hashtag = '#';
-  gt	= '>';
-  gteq 	= '>=';
-  lt 	= '<';
-  lteq 	= '<=';
+  gt  = '>';
+  gteq  = '>=';
+  lt  = '<';
+  lteq  = '<=';
   slash = '/';
   equal = '=';
-  neq 	= '<>';
+  neq   = '<>';
   
   // separators
 
@@ -94,10 +94,10 @@ programm =
   {programm}func_def{->New programm(func_def)};
 
 func_def = 
-	{func_def}header local_def* block{->New func_def.func_def(header,[local_def],[block.stmt])};
+  {func_def}header local_def* block{->New func_def.func_def(header,[local_def],[block.stmt])};
 
 header =
-	{header} fun  variable l_par fpar_def r_par colon ret_type{->New header.header(variable,fpar_def,ret_type)};
+  {header} fun  variable l_par fpar_def r_par colon ret_type{->New header.header(variable,fpar_def,ret_type)};
 
 block{->stmt*}= 
   {block}l_brc [statements]:stmt* r_brc{->[statements]};
@@ -111,46 +111,47 @@ fpar_def =
 
 /*types*/
 data_type = 
-	{int} int{->New data_type.int(int)}| 
+  {int} int{->New data_type.int(int)}| 
   {char} char{->New data_type.char(char)};
 
 type = 
-	{type}data_type array_num*{->New type.type(data_type,[array_num])};
+  {type}char array_num?{->New type.type(char,array_num)}
+  |{type2} int array_num* {->New type.type2(int,[array_num])};//++
 
 ret_type = 
-	{data_type} data_type {->New ret_type.data_type(data_type)}|
+  {data_type} data_type {->New ret_type.data_type(data_type)}|
   {nothing} nothing {->New ret_type.nothing(nothing)};
 
 array_num =
-	{array_num} l_bkt integer? r_bkt{->New array_num.array_num(l_bkt,integer,r_bkt)};
+  {array_num} l_bkt integer? r_bkt{->New array_num.array_num(l_bkt,integer,r_bkt)};
 
 local_def = 
-	{func_def} func_def{-> New local_def.func_def(func_def)} | 
-	{func_decl} func_decl{-> New local_def.func_decl(func_decl)}|
-	{var_def} var_def{-> New local_def.var_def(var_def)};
+  {func_def} func_def{-> New local_def.func_def(func_def)} | 
+  {func_decl} func_decl{-> New local_def.func_decl(func_decl)}|
+  {var_def} var_def{-> New local_def.var_def(var_def)};
 
 extra_variables{->variable*} = 
-	{extra_variable}comma variable{->[variable]};
+  {extra_variable}comma variable{->[variable]};
 
 var_def =
-	{var_def}var variable [variables]:extra_variables* colon type semi{-> New var_def.var_def(variable,[variables.variable],type)};
+  {var_def}var variable [variables]:extra_variables* colon type semi{-> New var_def.var_def(variable,[variables.variable],type)};
 
 func_decl =
  {func_decl}header semi{->New func_decl.func_decl(header)};
 
 stmt =
-	{empty} semi{->New stmt.empty()} |
-	{expr} l_value arrow expr semi{->New stmt.expr(l_value,expr)} |
-	{block} block{->New stmt.block([block.stmt])} |
-	{func_call} func_call semi{->New stmt.func_call(func_call)}| 
-	{if_statement} if_statement{->if_statement.stmt}|
-	{while_statement} while_statement{->while_statement.stmt}|
-	{return} return expr? semi{->New stmt.return(expr)};
+  {empty} semi{->New stmt.empty()} |
+  {expr} l_value arrow expr semi{->New stmt.expr(l_value,expr)} |
+  {block} block{->New stmt.block([block.stmt])} |
+  {func_call} func_call semi{->New stmt.func_call(func_call)}| 
+  {if_statement} if_statement{->if_statement.stmt}|
+  {while_statement} while_statement{->while_statement.stmt}|
+  {return} return expr? semi{->New stmt.return(expr)};
 
 
 if_statement{->stmt}=
-	{no_else}if cond then [then_stmt]:stmt{->New stmt.if(cond.expr,then_stmt.stmt)} |
-	{with_else}if cond then [then_stmt]:stmt_with_else 
+  {no_else}if cond then [then_stmt]:stmt{->New stmt.if(cond.expr,then_stmt.stmt)} |
+  {with_else}if cond then [then_stmt]:stmt_with_else 
     else [else_stmt]:stmt{->New stmt.if_else(cond.expr,then_stmt.stmt,else_stmt.stmt)};
 
 stmt_with_else{->stmt} = 
@@ -159,56 +160,56 @@ stmt_with_else{->stmt} =
     | {return_else} return expr? semi{->New stmt.return(expr)}
     | {then_expr} l_value arrow expr semi {->New stmt.expr(l_value,expr)}
     | {then_func_call} func_call semi {->New stmt.func_call(func_call)}
-	  | {then_while_statement} while cond do stmt_with_else{->New stmt.while_statement(cond.expr,stmt_with_else.stmt)}
+    | {then_while_statement} while cond do stmt_with_else{->New stmt.while_statement(cond.expr,stmt_with_else.stmt)}
     | {block_else} block{->New stmt.block([block.stmt])};
 
 if_else_stmt{->stmt} = 
- 	{if_else}if cond then [then_stmt]:stmt_with_else 
- 	else [else_stmt]:stmt_with_else{->New stmt.if_else(cond.expr,then_stmt.stmt,else_stmt.stmt)};
+  {if_else}if cond then [then_stmt]:stmt_with_else 
+  else [else_stmt]:stmt_with_else{->New stmt.if_else(cond.expr,then_stmt.stmt,else_stmt.stmt)};
 
  while_statement{->stmt}=
- 	{while_statement}while cond do stmt{->New stmt.while_statement(cond.expr,stmt)};
+  {while_statement}while cond do stmt{->New stmt.while_statement(cond.expr,stmt)};
 
 func_call= 
-	{func_call} variable l_par [fun]:fun_param r_par {-> New func_call.func_call(variable,[fun.expr])};
+  {func_call} variable l_par [fun]:fun_param r_par {-> New func_call.func_call(variable,[fun.expr])};
 
 fun_param{->expr*} = 
-	{one} expr{->[expr]} |
-	{many} fun_param comma expr{->[fun_param.expr,expr]}|
-	{none} {->[]};
+  {one} expr{->[expr]} |
+  {many} fun_param comma expr{->[fun_param.expr,expr]}|
+  {none} {->[]};
 
 cond{->expr} = 
-	{cond_or} cond or cond_and{->New expr.cond_or(cond.expr,cond_and.expr)}|
-	{condition_or_expr}cond_and{->cond_and.expr};
-	
+  {cond_or} cond or cond_and{->New expr.cond_or(cond.expr,cond_and.expr)}|
+  {condition_or_expr}cond_and{->cond_and.expr};
+  
 cond_and{->expr}=
-	{comp_and} cond_and and cond_not{->New expr.comp_and(cond_and.expr,cond_not.expr)}|
- 	{comp_eq_expr} cond_not{->cond_not.expr};
+  {comp_and} cond_and and cond_not{->New expr.comp_and(cond_and.expr,cond_not.expr)}|
+  {comp_eq_expr} cond_not{->cond_not.expr};
 
 cond_not{->expr}=
-	{comp_not_eq} not cond_not{->New expr.comp_not_eq(cond_not.expr)}|
- 	{comp_not_expr} cond_eq {->cond_eq.expr};
+  {comp_not_eq} not cond_not{->New expr.comp_not_eq(cond_not.expr)}|
+  {comp_not_expr} cond_eq {->cond_eq.expr};
 
 cond_eq{->expr}=
-	{comp_eq} [left]:expr compare_rel_operators [right]:expr{->New expr.comp_eq(left.expr,right.expr)}|
-	{cond_block} l_par cond r_par{-> cond.expr};
+  {comp_eq} [left]:expr compare_rel_operators [right]:expr{->New expr.comp_eq(left.expr,right.expr)}|
+  {cond_block} l_par cond r_par{-> cond.expr};
 
 compare_rel_operators = 
-	{eq}equal |
-	{neq}neq|
-	{hashtag} hashtag |
-	{lt} lt |
-	{gt} gt |
-	{lteq} lteq |
-	{gteq} gteq ;
+  {eq}equal |
+  {neq}neq|
+  {hashtag} hashtag |
+  {lt} lt |
+  {gt} gt |
+  {lteq} lteq |
+  {gteq} gteq ;
 
 l_value =
-	{id} variable {->New l_value.id(variable)} |
-	{string_lit} string_lit{->New l_value.string_lit(string_lit)} | 
-	{l_value_array} l_value_array{->New l_value.l_value_array(l_value_array)};
+  {id} variable {->New l_value.id(variable)} |
+  {string_lit} string_lit{->New l_value.string_lit(string_lit)} | 
+  {l_value_array} l_value_array{->New l_value.l_value_array(l_value_array)};
 
 l_value_array=
-	{l_value_arrray}l_value l_bkt expr r_bkt{-> New l_value_array.l_value_array(l_value,expr)};
+  {l_value_arrray}l_value l_bkt expr r_bkt{-> New l_value_array.l_value_array(l_value,expr)};
 
 /* Expressions */
 expr  =
@@ -296,7 +297,8 @@ func_call =
 /*types*/
 
 type = 
-  {type}data_type array_num*;
+  {type}char array_num?
+  |{type2} int array_num*;
 
 ret_type = 
   {data_type} data_type 
