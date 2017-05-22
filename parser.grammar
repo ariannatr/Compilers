@@ -115,15 +115,19 @@ data_type =
   {char} char{->New data_type.char(char)};
 
 type = 
-  {type}char array_num?{->New type.type(char,array_num)}
-  |{type2} int array_num* {->New type.type2(int,[array_num])};//++
+  {type }data_type array_num?{->New type.type(data_type,array_num)}
+  |{type2} data_type array_num array_num_defined+ {-> New type.type2(data_type,array_num,[array_num_defined])};
 
 ret_type = 
   {data_type} data_type {->New ret_type.data_type(data_type)}|
   {nothing} nothing {->New ret_type.nothing(nothing)};
 
 array_num =
-  {array_num} l_bkt integer? r_bkt{->New array_num.array_num(l_bkt,integer,r_bkt)};
+  |{array_num} l_bkt integer? r_bkt {->New array_num.array_num(l_bkt,integer,r_bkt)};
+
+array_num_defined=
+ |{array_num_defined} l_bkt integer r_bkt {->New array_num_defined.array_num_defined(l_bkt,integer,r_bkt)};
+
 
 local_def = 
   {func_def} func_def{-> New local_def.func_def(func_def)} | 
@@ -297,8 +301,8 @@ func_call =
 /*types*/
 
 type = 
-  {type}char array_num?
-  |{type2} int array_num*;
+  {type}data_type array_num?
+  |{type2} data_type array_num array_num_defined+ ;
 
 ret_type = 
   {data_type} data_type 
@@ -306,6 +310,10 @@ ret_type =
 
 array_num =
   {array_num} l_bkt integer? r_bkt;
+
+array_num_defined =
+ {array_num_defined} l_bkt integer r_bkt;
+
 
 data_type = 
   {int} int | 

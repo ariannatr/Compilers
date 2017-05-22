@@ -688,22 +688,22 @@ public class Collector extends DepthFirstAdapter {
 	    public void caseATypeType(ATypeType node)
 	    {
 	        inATypeType(node);
-	        if(node.getArrayNum() != null)
+	        if(node.getDataType() != null)
 	        {
-	            node.getArrayNum().apply(this);
+	            node.getDataType().apply(this);
 	        }
-	       /* {
+	       {
 	            List<PArrayNum> copy = new ArrayList<PArrayNum>(node.getArrayNum());
 	            for(PArrayNum e : copy)
 	            {
 	                e.apply(this);
 	            }
-	        }*/
+	        }
 	        outATypeType(node);
 	    }
 
 
-	   /*  @Override
+	    /* @Override
 	    public void caseATypeType2(ATypeType2 node)
 	    {
 	        inATypeType2(node);
@@ -711,7 +711,7 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	            node.getDataType().apply(this);
 	        }
-	        {	        {
+	        {
 	            List<PArrayNum> copy = new ArrayList<PArrayNum>(node.getArrayNum());
 	            for(PArrayNum e : copy)
 	            {
