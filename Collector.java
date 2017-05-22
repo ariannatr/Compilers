@@ -16,6 +16,7 @@ public class Collector extends DepthFirstAdapter {
 	public boolean reflag=false;
 	public String exprtype="";
 	public String mtype="";
+	public ArrayList<VarSum> paramtemp=null;
 	public FunctionSum standar_library= new FunctionSum("standard");
 
 	public void create_standar_library()
@@ -169,6 +170,11 @@ public class Collector extends DepthFirstAdapter {
 		        	error+="No return statement for function "+current.name+" found\n";
 		        reflag=false;
 	        }
+	      	for(FunctionSum ftemp:current.fun)
+	      	{
+	      		if(ftemp.dec==true)
+	      			error+="Function "+ftemp.name+" was declared but not defined \n";
+	      	}
 	        if(previous!=null)
 	        	current=previous;
 	        outAFuncDefFuncDef(node);
@@ -178,6 +184,9 @@ public class Collector extends DepthFirstAdapter {
 	    public void caseAHeaderHeader(AHeaderHeader node)
 	    {
 	        inAHeaderHeader(node);
+	        boolean fparam=false;
+	        FunctionSum ftemp=null;
+	        FunctionSum prev=null;
 	        if(node.getVariable() != null)
 	        {
 	            name=node.getVariable().toString();
@@ -199,37 +208,70 @@ public class Collector extends DepthFirstAdapter {
 	        	fa.type=type;
 	        	fa.belongs=current;
 	        	fa.dec=flag;
-	        	System.out.println("Mother funtion of "+fa.name+" is function "+ current.name);
+	        	System.out.println("Mother funtion of "+fa.name+" is function "+ current.name+flag);
 	        	if(current.findfunction(fa))
 	        	{
-	        		if(flag==false)
-	        		{
-	        			
-	        		}
-	        		error+="Error:The function "+fa.name+" already exists !\n";
-	        		System.out.println("Error:The function "+fa.name+" already exists !");
+	    	        if(flag==false)
+	    	        {
+	        			ftemp=current.getFunction(name);
+	        			if(ftemp.dec==false)
+	        			{
+	        				error+="Error:The function "+fa.name+" has been already defined exists !\n";
+	        				return;
+	        			}
+	        			if(!ftemp.type.equals(fa.type))
+	        			{
+	        				error+="Error:The function "+fa.name+" has been defined with different return type !\n";
+	        				return;
+	        			}
+	        			ftemp.dec=false;
+	        			fparam=true;
+	    	        }
+	    	        else
+	    	        	error+="Error:The function "+fa.name+" has beens already declared !\n";
+	    	              		
 	        	}
 	        	else if(current.findparameter(fa.name) )
 	        	{
 	        		error+="Error:The name "+fa.name+" already exists for parameter name!\n";
-	        		System.out.println("Error:The name "+fa.name+" already exists for parameter name!");
 	        	}
 	        	else if(current.findvariable(fa.name))
 	        	{
 					error+="Error:The name "+fa.name+" already exists for variable name!\n";
-	        		System.out.println("Error:The name "+fa.name+" already exists for variable name!");
 	        	}
 	        	else
 	        	{
-	        		//System.out.println("Eimai stin sunartisi "+current.name+"kai prosthetw tin sunartisi "+ fa.name);
-	        		current.fun.add(fa);
+	        		if(fparam==false)
+	        			current.fun.add(fa);
 	        	}
+	        	if(flag==true)
+	        		prev=current;
 	        	current=fa;
 	        }
+	        System.out.println("EIMAI STIN "+current.name);
 	        if(node.getFparDef() != null)
 	        {
 	           node.getFparDef().apply(this);
 	        }
+	        if(ftemp!=null)
+	        {
+	        	System.out.println(ftemp.arg.size()+current.arg.size());
+	        	if(ftemp.arg.size()!=current.arg.size())
+	        		error+="Amount of args differ between definition and declaration in " +current.name+"\n";
+	        	Iterator<VarSum> itr=current.arg.iterator();
+	        	Iterator<VarSum> itr2=ftemp.arg.iterator();
+	    		while(itr.hasNext() && itr2.hasNext())
+	    		{
+	    			VarSum ret=itr.next();
+	    			VarSum ret2=itr2.next();
+	    			if(!ret.name.equals(ret2.name))
+	    				error+="Different name in argument "+ret.name+"in function "+current.name+" between definiton and declaration "+ret.name+"-"+ret2.name+"\n";
+	    			if(!ret.type.equals(ret2.type))
+	    				error+="Different type in argument "+ret.name+"in function "+current.name+" between definiton and declaration "+ret.type+"-"+ret2.type+"\n";
+	    		}
+	        }
+	        if(flag==true)
+	        	current=prev;
 	        outAHeaderHeader(node);
 	    }
 
@@ -541,7 +583,6 @@ public class Collector extends DepthFirstAdapter {
 	    {
 	        inAReturnStmt(node);
 	        reflag=true;
-	        System.out.println("---aa");
 	        if(node.getExpr() != null)
 	        {
 	            node.getExpr().apply(this);
