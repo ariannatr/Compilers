@@ -8,10 +8,10 @@ public class FunctionSum
 	public String name;
 	public String type;
 	public FunctionSum belongs;
-	public boolean dec;
 	public ArrayList<FunctionSum> fun;
 	public ArrayList<VarSum> arg;
 	public ArrayList<VarSum> vars;
+	public boolean dec;
 	public FunctionSum(String n)
 	{
 		name=n;
@@ -93,22 +93,28 @@ public class FunctionSum
 		while(itr.hasNext())
 		{
 			FunctionSum ret=itr.next();
-			if(ret.name.equals(name))
+			String fun=ret.name.replaceAll(" ","");
+			if(fun.equals(name.replaceAll(" ","")))
 			{
 				return ret;
 			}   
 		}
 		return null;
 	}
-	
 	public boolean exist_name(String na)
 	{
+		String na2=na.replaceAll(" ","");
 		if(name.equals(na))
 			return true;
 		for(FunctionSum fa:fun)
 		{
-			if(fa.name.equals(na))
+			System.out.println("fun1 "+fa.name+ " to compare "+na);
+			String comp=fa.name.replaceAll(" ","");
+			if(comp.equals(na2))
+			{
+				System.out.println("found");
 				return true;
+			}
 		}
 		return false;
 	}

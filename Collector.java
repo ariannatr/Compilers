@@ -653,24 +653,28 @@ public class Collector extends DepthFirstAdapter {
 	        	if(current.name.equals(name))
 	        		ftemp=current;
 	        	else
+	        	{
 	        		ftemp=current.getFunction(name);
+	        		if(ftemp==null)
+	        			ftemp=standar_library.getFunction(name);
+	        	}
+
 	            List<PExpr> copy = new ArrayList<PExpr>(node.getExpr());
+
 	            int i=0;
 	            for(PExpr e : copy)
 	            {
-	             
 	                e.apply(this);
-	                
 	                String temp=exprtype;
 	                VarSum vartemp=ftemp.arg.get(i);
 	                String currenttype=vartemp.type;
-	              
+	              	System.out.println("Function "+current.name+"type "+currenttype);
 	                currenttype=currenttype.replaceAll(" ","");
 	                temp=temp.replaceAll(" ","");
 	                if(!temp.equals(currenttype))
 	                {
 	                	int num=i+1;
-	                	error+="Different expression type in argument "+num+" in function "+current.name+"\n";
+	                	error+="Different expression type in argument "+num+" in function call "+ftemp.name+"\n";
 	                System.out.println("->>> "+currenttype+temp); 
 	                }
 	                i++;
