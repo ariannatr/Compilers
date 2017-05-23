@@ -604,6 +604,8 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        if(bcounter2!=bcounter && bcounter!=0)
 	        	error+="Wrong on Lvalue between arrays\n";
+	        left=left.replaceAll(" ","");
+	        right=right.replaceAll(" ","");
 	        if(!left.equals(right))
 	        	error+="Wrong on Lvalue "+left+"<-"+right+"\n";
 	        bcounter=0;
