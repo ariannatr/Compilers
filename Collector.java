@@ -198,12 +198,23 @@ public class Collector extends DepthFirstAdapter {
 	        if(first_time==0)
 	        {
 	        	f=new FunctionSum(name);
+	        	if(type.replaceAll(" ","")!="nothing")
+	        	{
+	        		System.out.println("Error:Main programm sould have no return value!");
+	        		error+="Error:Main programm sould have no return value!\n";
+	        	}
+	        	if(node.getFparDef() != null)
+	        	{
+	        		//System.out.println("Error:Main programm sould have no parameters!");
+	        		//error+="Error:Main programm sould have no parameters!\n";
+	        	}
 	        	f.type=type;
 	        	current=f;
 	        	first_time=1;
 	        }    
 	        else
 	        {
+	        	first_time++;
 	        	FunctionSum fa=new FunctionSum(name);
 	        	fa.type=type;
 	        	fa.belongs=current;
@@ -330,6 +341,11 @@ public class Collector extends DepthFirstAdapter {
 	    @Override
 	    public void caseAFparDef1FparDef(AFparDef1FparDef node)
 	    {
+	    	if(first_time==1)
+	    	{
+	    		System.out.println("Error:Main programm sould have no parameters!");
+	        	error+="Error:Main programm sould have no parameters!\n";
+	    	}
 	    	String varname="";
 	        inAFparDef1FparDef(node);
 	        if(node.getRef() != null)
@@ -361,6 +377,11 @@ public class Collector extends DepthFirstAdapter {
 	    @Override
 	    public void caseAFparDef2FparDef(AFparDef2FparDef node)
 	    {
+	    	if(first_time==1)
+	    	{
+	    		System.out.println("Error:Main programm sould have no parameters!");
+	        	error+="Error:Main programm sould have no parameters!\n";
+	    	}
 	    	String varname="";
 	        inAFparDef2FparDef(node);
 	        if(node.getRef() != null)
@@ -393,6 +414,11 @@ public class Collector extends DepthFirstAdapter {
 	    @Override
 	    public void caseAFparDef3FparDef(AFparDef3FparDef node)
 	    {
+	    	if(first_time==1)
+	    	{
+	    		System.out.println("Error:Main programm sould have no parameters!");
+	        	error+="Error:Main programm sould have no parameters!\n";
+	    	}
 	    	String varname="";
 	        inAFparDef3FparDef(node);
 	        if(node.getRef() != null)
@@ -428,6 +454,11 @@ public class Collector extends DepthFirstAdapter {
 	    @Override
 	    public void caseAFparDef4FparDef(AFparDef4FparDef node)
 	    {
+	    	if(first_time==1)
+	    	{
+	    		System.out.println("Error:Main programm sould have no parameters!");
+	        	error+="Error:Main programm sould have no parameters!\n";
+	    	}
 	    	String varname="";
 	        inAFparDef4FparDef(node);
 	        if(node.getRef() != null)
