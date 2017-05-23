@@ -40,6 +40,15 @@ class Main {
     			symboltable.create_standar_library();
     			tree.apply(symboltable);
     			symboltable.print_errors();
+    			System.out.println("Converting Code of file"+args[i]);
+    			LoweringCode converter= new LoweringCode(symboltable.current,symboltable.standar_library);
+    			if(symboltable.error.equals(""))
+    			{
+    				tree.apply(converter);
+    				converter.help.print_instructions();
+    			}
+    			else
+    				System.out.println("Couldn't convert code,because there were semantic errors\n");
         	} catch (Exception e) 
     		{	
     		    e.printStackTrace();
