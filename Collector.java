@@ -17,8 +17,21 @@ public class Collector extends DepthFirstAdapter {
 	public String exprtype="";
 	public String mtype="";
 	public ArrayList<VarSum> paramtemp=null;
+	public int bcounter=0;
 	public FunctionSum standar_library= new FunctionSum("standard");
 
+	public String create_type(String vartype,int counter)
+	{
+
+        if(vartype.contains("int"))
+        	vartype="int";
+        else if(vartype.contains("char"))
+        	vartype="char";
+        for(int i=0;i<counter;i++)
+        	vartype+="[]";
+        return vartype;
+	}
+	
 	public void create_standar_library()
 	{
 		FunctionSum fun1=new FunctionSum("puti");
@@ -125,17 +138,6 @@ public class Collector extends DepthFirstAdapter {
 	            node.getFuncDef().apply(this);
 	        }
 	        
-	        for(FunctionSum fa:f.fun)
-	        {
-		        for(VarSum va : fa.arg)
-		       {
-		    	   System.out.println(va.ref+" "+va.name+" "+va.type);
-		       }
-		       for(VarSum va : fa.vars)
-		       {
-		    	   System.out.println(va.ref+" "+va.name+" "+va.type);
-		       }
-	        }
 	        outAProgramm(node);
 	    }
 
@@ -200,7 +202,6 @@ public class Collector extends DepthFirstAdapter {
 	        	f=new FunctionSum(name);
 	        	if(!type.replaceAll(" ","").equals("nothing"))
 	        	{
-	        		System.out.println("Error:Main programm sould have no return value!");
 	        		error+="Error:Main programm sould have no return value!\n";
 	        	}
 	        	f.type=type;
@@ -245,10 +246,8 @@ public class Collector extends DepthFirstAdapter {
 	        	{
 					error+="Error:The name "+fa.name+" already exists for variable name!\n";
 	        	}
-	        	else if ((current.belongs!=null)) 
+	        	else if (current.belongs!=null && current.belongs.findvariable(fa.name)) 
 	        	{
-	        		System.out.println("Mother of mother is "+current.belongs.name);
-	        		if( current.belongs.findvariable(fa.name))
 	        			error+="Error:The name "+fa.name+" already exists for variable name!\n";
 	        	}
 	        	else
@@ -267,9 +266,13 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        if(ftemp!=null)
 	        {
-	        	System.out.println(ftemp.arg.size()+current.arg.size());
+	        	
 	        	if(ftemp.arg.size()!=current.arg.size())
+	        	{
+	        		System.out.println("edw");
 	        		error+="Amount of args differ between definition and declaration in " +current.name+"\n";
+	        		return;
+	        	}
 	        	Iterator<VarSum> itr=current.arg.iterator();
 	        	Iterator<VarSum> itr2=ftemp.arg.iterator();
 	    		while(itr.hasNext() && itr2.hasNext())
@@ -354,6 +357,14 @@ public class Collector extends DepthFirstAdapter {
 	        if(node.getType() != null)
 	        {
 	            vartype=node.getType().toString();
+	            int counter = 0;
+	            for( int i=0; i<vartype.length(); i++ ) {
+	                if( vartype.charAt(i) == '[' ) {
+	                    counter++;
+	                } 
+	            }
+	            if(counter>0)
+	            	vartype=create_type(vartype,counter);
 	        }
 	        VarSum v=new VarSum(varname,vartype);
 	        v.ref=ref;
@@ -364,7 +375,7 @@ public class Collector extends DepthFirstAdapter {
 	        else
 	        {
 	        	error+="Error:The parameter "+v.name+" already exists !\n";
-	        	System.out.println("Error:The parameter "+v.name+" already exists !");
+	        	
 	        }
 	        outAFparDef1FparDef(node);
 	    }
@@ -400,8 +411,6 @@ public class Collector extends DepthFirstAdapter {
 	        else
 	        {
 	        	error+="Error:The parameter "+v.name+" already exists !\n";
-
-	        	System.out.println("Error:The parameter "+v.name+" already exists !");
 	        }
 	        outAFparDef2FparDef(node);
 	    }
@@ -427,6 +436,14 @@ public class Collector extends DepthFirstAdapter {
 	        if(node.getType() != null)
 	        {
 	           vartype= node.getType().toString();
+	           int counter = 0;
+	            for( int i=0; i<vartype.length(); i++ ) {
+	                if( vartype.charAt(i) == '[' ) {
+	                    counter++;
+	                } 
+	            }
+	            if(counter>0)
+	            	vartype=create_type(vartype,counter);
 	        }
 	        if(node.getFparDef() != null)
 	        {
@@ -467,6 +484,14 @@ public class Collector extends DepthFirstAdapter {
 	        if(node.getType() != null)
 	        {
 	            vartype=node.getType().toString();
+	            int counter = 0;
+	            for( int i=0; i<vartype.length(); i++ ) {
+	                if( vartype.charAt(i) == '[' ) {
+	                    counter++;
+	                } 
+	            }
+	            if(counter>0)
+	            	vartype=create_type(vartype,counter);
 	        }
 	        VarSum v=new VarSum(varname,vartype);
 	        v.ref=ref;
@@ -477,7 +502,6 @@ public class Collector extends DepthFirstAdapter {
 	        else
 	        {
 	        	error+="Error:The parameter "+v.name+" already exists !\n";
-	        	System.out.println("Error :The parameter "+v.name+" already exists !");
 	        }
 	        if(node.getFparDef() != null)
 	        {
@@ -504,7 +528,17 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        if(node.getType() != null)
 	        {
+	        	
 	            vartype=node.getType().toString();
+	            int counter = 0;
+	            for( int i=0; i<vartype.length(); i++ ) {
+	                if( vartype.charAt(i) == '[' ) {
+	                    counter++;
+	                } 
+	            }
+	            if(counter>0)
+	            	vartype=create_type(vartype,counter);
+	            System.out.println("var "+name+vartype);
 	        }
 	        VarSum va=new VarSum(name,vartype);
 	       	if(!current.findvariable(va.name) && !current.findparameter(va.name))
@@ -554,16 +588,24 @@ public class Collector extends DepthFirstAdapter {
 	        inAExprStmt(node);
 	        String left="";
 	        String right="";
+	        bcounter=0;
+	        int bcounter2=0;
 	        if(node.getLValue() != null)
 	        {
 	        	node.getLValue().apply(this);
 	            left=mtype;
 	        }
+	        bcounter2=bcounter;
+	        bcounter=0;
 	        if(node.getExpr() != null)
 	        {
 	            node.getExpr().apply(this);
 	            right=mtype;
 	        }
+	        System.out.println(bcounter2+" "+bcounter+"<-----a");
+	        if(bcounter2!=bcounter && bcounter!=0)
+	        	error+="Wrong on Lvalue between arrays\n";
+	        System.out.println(left+right+"<-----a");
 	        if(!left.equals(right))
 	        	error+="Wrong on Lvalue "+left+"<-"+right+"\n";
 	        outAExprStmt(node);
@@ -621,12 +663,12 @@ public class Collector extends DepthFirstAdapter {
 	            String topic=exprtype;
 	           
 	            if(!topic.equals(current.type))
-	            	error+="Wrong return statement in function "+current.name+"\n";
+	            	error+="Wrong return statement ,expecting "+current.type+" but got "+topic+" in function "+current.name+"\n";
 	        }
 	        else
 	        {
-	        	if(!current.type.equals("nothing"))
-	        		error+="Wrong return statement in function "+current.name+"\n";
+	        	if(!current.type.equals("nothing "))
+	        		error+="Wrong return statement, expecting "+current.type+" in function "+current.name+"\n";
 	        }
 	        outAReturnStmt(node);
 	    }
@@ -676,6 +718,7 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        if((!current.exist_name(name)) && (!standar_library.exist_name(name)))
         	{
+	        	
         		error+="Error:The function "+name+" doesn't exist to be called!\n";
         		return;
         	}
@@ -698,16 +741,20 @@ public class Collector extends DepthFirstAdapter {
 	            {
 	                e.apply(this);
 	                String temp=exprtype;
+	               
+	                if(i>=ftemp.arg.size())
+	                {
+	                	error+="Wrong functioncall "+ftemp.name+" with more arguments than expected!\n";
+	                	return;
+	            	}
 	                VarSum vartemp=ftemp.arg.get(i);
 	                String currenttype=vartemp.type;
-	              	System.out.println("Function "+current.name+"type "+currenttype);
 	                currenttype=currenttype.replaceAll(" ","");
 	                temp=temp.replaceAll(" ","");
 	                if(!temp.equals(currenttype))
 	                {
 	                	int num=i+1;
 	                	error+="Different expression type in argument "+num+" in function call "+ftemp.name+"\n";
-	                System.out.println("->>> "+currenttype+temp); 
 	                }
 	                i++;
 	            }
@@ -728,13 +775,6 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	            node.getArrayNum().apply(this);
 	        }
-	     /*  {
-	            List<PArrayNum> copy = new ArrayList<PArrayNum>(node.getArrayNum());
-	            for(PArrayNum e : copy)
-	            {
-	                e.apply(this);
-	            }
-	        }*/
 	        outATypeType(node);
 	    }
 
@@ -828,6 +868,7 @@ public class Collector extends DepthFirstAdapter {
 	        if(node.getVariable() != null)
 	        {
 	        	String var= node.getVariable().toString();
+	        	System.out.println("aaaaa "+var);
 	            mtype=current.findparametertype(var);
 	            if(mtype.equals("NULL"))
 	            {
@@ -870,6 +911,7 @@ public class Collector extends DepthFirstAdapter {
 	        if(node.getLValueArray() != null)
 	        {
 	            node.getLValueArray().apply(this);
+	            bcounter++;
 	        }
 	        outALValueArrayLValue(node);
 	    }
@@ -882,9 +924,11 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	            node.getLValue().apply(this);
 	        }
+	        
 	        if(node.getExpr() != null)
 	        {
 	            node.getExpr().apply(this);
+	            
 	        }
 	        outALValueArrayLValueArray(node);
 	    }
