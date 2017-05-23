@@ -26,7 +26,8 @@ public class FunctionSum
 		while(itr.hasNext())
 		{
 			VarSum ret=itr.next();
-			if(ret.name.equals(var))
+			String  comp=ret.name.replaceAll(" ","");
+			if(comp.equals(var.replaceAll(" ","")))
 			{
 				return true;
 			}   
@@ -39,7 +40,8 @@ public class FunctionSum
 		while(itr.hasNext())
 		{
 			VarSum ret=itr.next();
-			if(ret.name.equals(var))
+			String comp=ret.name.replaceAll(" ","");
+			if(comp.equals(var.replaceAll(" ","")))
 			{
 				return ret.type;
 			}   
@@ -66,7 +68,8 @@ public class FunctionSum
 		while(itr.hasNext())
 		{
 			VarSum ret=itr.next();
-			if(ret.name.equals(var))
+			String comp=ret.name.replaceAll(" ","");
+			if(comp.equals(var.replaceAll(" ","")))
 			{
 				return true;
 			}   

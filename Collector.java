@@ -228,7 +228,7 @@ public class Collector extends DepthFirstAdapter {
 	        			fparam=true;
 	    	        }
 	    	        else
-	    	        	error+="Error:The function "+fa.name+" has beens already declared !\n";
+	    	        	error+="Error:The function "+fa.name+" has been already declared !\n";
 	    	              		
 	        	}
 	        	else if(current.findparameter(fa.name) )
@@ -238,6 +238,12 @@ public class Collector extends DepthFirstAdapter {
 	        	else if(current.findvariable(fa.name))
 	        	{
 					error+="Error:The name "+fa.name+" already exists for variable name!\n";
+	        	}
+	        	else if ((current.belongs!=null)) 
+	        	{
+	        		System.out.println("Mother of mother is "+current.belongs.name);
+	        		if( current.belongs.findvariable(fa.name))
+	        			error+="Error:The name "+fa.name+" already exists for variable name!\n";
 	        	}
 	        	else
 	        	{
