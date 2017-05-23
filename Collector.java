@@ -269,7 +269,7 @@ public class Collector extends DepthFirstAdapter {
 	        	
 	        	if(ftemp.arg.size()!=current.arg.size())
 	        	{
-	        		System.out.println("edw");
+	        		
 	        		error+="Amount of args differ between definition and declaration in " +current.name+"\n";
 	        		return;
 	        	}
@@ -602,12 +602,11 @@ public class Collector extends DepthFirstAdapter {
 	            node.getExpr().apply(this);
 	            right=mtype;
 	        }
-	        System.out.println(bcounter2+" "+bcounter+"<-----a");
 	        if(bcounter2!=bcounter && bcounter!=0)
 	        	error+="Wrong on Lvalue between arrays\n";
-	        System.out.println(left+right+"<-----a");
 	        if(!left.equals(right))
 	        	error+="Wrong on Lvalue "+left+"<-"+right+"\n";
+	        bcounter=0;
 	        outAExprStmt(node);
 	    }
 
@@ -712,6 +711,7 @@ public class Collector extends DepthFirstAdapter {
 	    {
 	    	String name="";
 	        inAFuncCallFuncCall(node);
+	        
 	        if(node.getVariable() != null)
 	        {
 	            name=node.getVariable().toString();
@@ -737,8 +737,10 @@ public class Collector extends DepthFirstAdapter {
 	            List<PExpr> copy = new ArrayList<PExpr>(node.getExpr());
 
 	            int i=0;
+	           
 	            for(PExpr e : copy)
 	            {
+	            	bcounter=0;
 	                e.apply(this);
 	                String temp=exprtype;
 	               
@@ -747,19 +749,25 @@ public class Collector extends DepthFirstAdapter {
 	                	error+="Wrong functioncall "+ftemp.name+" with more arguments than expected!\n";
 	                	return;
 	            	}
+	                
 	                VarSum vartemp=ftemp.arg.get(i);
 	                String currenttype=vartemp.type;
 	                currenttype=currenttype.replaceAll(" ","");
 	                temp=temp.replaceAll(" ","");
+	                if(bcounter>0)
+	                	temp=create_type(temp,bcounter);
 	                if(!temp.equals(currenttype))
 	                {
 	                	int num=i+1;
 	                	error+="Different expression type in argument "+num+" in function call "+ftemp.name+"\n";
+	                	error+=temp+currenttype+" "+bcounter+"\n";
+
 	                }
 	                i++;
 	            }
 	            mtype=ftemp.type;
 	        }
+	        bcounter=0;
 	        outAFuncCallFuncCall(node);
 	    }
 
@@ -868,7 +876,6 @@ public class Collector extends DepthFirstAdapter {
 	        if(node.getVariable() != null)
 	        {
 	        	String var= node.getVariable().toString();
-	        	System.out.println("aaaaa "+var);
 	            mtype=current.findparametertype(var);
 	            if(mtype.equals("NULL"))
 	            {
@@ -923,12 +930,14 @@ public class Collector extends DepthFirstAdapter {
 	        if(node.getLValue() != null)
 	        {
 	            node.getLValue().apply(this);
+	            
 	        }
 	        
 	        if(node.getExpr() != null)
 	        {
 	            node.getExpr().apply(this);
-	            
+	         
+	            bcounter--;
 	        }
 	        outALValueArrayLValueArray(node);
 	    }
