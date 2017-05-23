@@ -198,15 +198,10 @@ public class Collector extends DepthFirstAdapter {
 	        if(first_time==0)
 	        {
 	        	f=new FunctionSum(name);
-	        	if(type.replaceAll(" ","")!="nothing")
+	        	if(!type.replaceAll(" ","").equals("nothing"))
 	        	{
 	        		System.out.println("Error:Main programm sould have no return value!");
 	        		error+="Error:Main programm sould have no return value!\n";
-	        	}
-	        	if(node.getFparDef() != null)
-	        	{
-	        		//System.out.println("Error:Main programm sould have no parameters!");
-	        		//error+="Error:Main programm sould have no parameters!\n";
 	        	}
 	        	f.type=type;
 	        	current=f;
