@@ -602,8 +602,10 @@ public class Collector extends DepthFirstAdapter {
 	            node.getExpr().apply(this);
 	            right=mtype;
 	        }
+	        /*
+	        System.err.println(bcounter2 +" "+bcounter);
 	        if(bcounter2!=bcounter && bcounter!=0)
-	        	error+="Wrong on Lvalue between arrays\n";
+	        	error+="Wrong on Lvalue between arrays\n";*/
 	        left=left.replaceAll(" ","");
 	        right=right.replaceAll(" ","");
 	        if(!left.equals(right))
@@ -758,8 +760,6 @@ public class Collector extends DepthFirstAdapter {
 	                String currenttype=vartemp.type;
 	                currenttype=currenttype.replaceAll(" ","");
 	                temp=temp.replaceAll(" ","");
-	                if(bcounter>0)
-	                	temp=create_type(temp,bcounter);
 	                if(!temp.equals(currenttype))
 	                {
 	                	int num=i+1;
@@ -897,7 +897,6 @@ public class Collector extends DepthFirstAdapter {
 	            	}
 	            }
 	            exprtype=mtype;
-	           
 	        }
 	        outAIdLValue(node);
 	    }
@@ -922,7 +921,6 @@ public class Collector extends DepthFirstAdapter {
 	        if(node.getLValueArray() != null)
 	        {
 	            node.getLValueArray().apply(this);
-	            bcounter++;
 	        }
 	        outALValueArrayLValue(node);
 	    }
@@ -937,13 +935,26 @@ public class Collector extends DepthFirstAdapter {
 	            
 	        }
 	        String mtemp=mtype;
+	        int counter = 0;
+            for( int i=0; i<mtemp.length(); i++ ) {
+                if( mtemp.charAt(i) == '[' ) {
+                    counter++;
+                }
+            }
+             bcounter=counter; 
 	        if(node.getExpr() != null)
 	        {
 	            node.getExpr().apply(this);
-	         
+	            String exprt=exprtype.replace(" ","");
+	            if(!exprt.equals("int"))
+	            {
+	            	error+="Wrong type of value in brackets of array\n";
+	            }
 	            bcounter--;
+	            mtemp=create_type(mtemp,bcounter);
 	        }
 	        mtype=mtemp;
+	        exprtype=mtype;
 	        outALValueArrayLValueArray(node);
 	    }
 
@@ -1044,6 +1055,8 @@ public class Collector extends DepthFirstAdapter {
 	            node.getRight().apply(this);
 	        }
 	        String right=mtype;
+        	left=left.replaceAll(" ","");
+        	right=right.replaceAll(" ","");
 	        if(!left.equals(right))
 	        	error+="Wrong Plus Expression!\n";
 	        exprtype="int";
@@ -1064,6 +1077,8 @@ public class Collector extends DepthFirstAdapter {
 	            node.getRight().apply(this);
 	        }
 	        String right=mtype;
+	        left=left.replaceAll(" ","");
+        	right=right.replaceAll(" ","");
 	        if(!left.equals(right))
 	        	error+="Wrong Minus Expression!"+left+" "+right+"\n";
 	        exprtype="int";
@@ -1084,6 +1099,8 @@ public class Collector extends DepthFirstAdapter {
 	            node.getRight().apply(this);
 	        }
 	        String right=mtype;
+	        left=left.replaceAll(" ","");
+        	right=right.replaceAll(" ","");
 	        if(!left.equals(right))
 	        	error+="Wrong Mult Expression!\n";
 	        exprtype="int";
@@ -1104,6 +1121,8 @@ public class Collector extends DepthFirstAdapter {
 	            node.getRight().apply(this);
 	        }
 	        String right=mtype;
+	        left=left.replaceAll(" ","");
+        	right=right.replaceAll(" ","");
 	        if(!left.equals(right))
 	        	error+="Wrong Slash Expression!\n";
 	        exprtype="int";
@@ -1124,6 +1143,8 @@ public class Collector extends DepthFirstAdapter {
 	            node.getRight().apply(this);
 	        }
 	        String right=mtype;
+	        left=left.replaceAll(" ","");
+        	right=right.replaceAll(" ","");
 	        if(!left.equals(right))
 	        	error+="Wrong Mod Expression!\n";
 	        exprtype="int";
@@ -1144,6 +1165,8 @@ public class Collector extends DepthFirstAdapter {
 	            node.getRight().apply(this);
 	        }
 	        String right=mtype;
+	        left=left.replaceAll(" ","");
+        	right=right.replaceAll(" ","");
 	        if(!left.equals(right))
 	        	error+="Wrong Div Expression!\n";
 	        exprtype="int";
