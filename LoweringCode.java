@@ -71,7 +71,7 @@ public class LoweringCode extends DepthFirstAdapter {
 	            e.apply(this);
 	        }
 	    }
-	    String code_line=help.genquad("endu",tname,"_","_");
+	    String code_line=help.genquad("endu",tname,"-","-");
         help.instruction_list.add(code_line);
 	    outAFuncDefFuncDef(node);
 	}
@@ -83,7 +83,7 @@ public class LoweringCode extends DepthFirstAdapter {
 	    if(node.getVariable() != null)
 	    {
 	        name=node.getVariable().toString();
-	        String code_line=help.genquad("unit",name,"_","_");
+	        String code_line=help.genquad("unit",name,"-","-");
 	        help.instruction_list.add(code_line);
 	    }
 	   
@@ -567,14 +567,23 @@ public class LoweringCode extends DepthFirstAdapter {
 	public void caseALValueArrayLValueArray(ALValueArrayLValueArray node)
 	{
 	    inALValueArrayLValueArray(node);
+	    String left="";
+	    String right="";
 	    if(node.getLValue() != null)
 	    {
 	        node.getLValue().apply(this);
+	        left=mtype;
 	    }
 	    if(node.getExpr() != null)
 	    {
 	        node.getExpr().apply(this);
+	        right=mtype;
 	    }
+	    register++;
+	    mtype="$"+register;
+	    String code_line=help.genquad("array",left,right,"$"+register);
+	    mtype="[$"+register+"]";
+        help.instruction_list.add(code_line);
 	    outALValueArrayLValueArray(node);
 	}
 	
