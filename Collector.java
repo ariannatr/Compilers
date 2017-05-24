@@ -215,7 +215,7 @@ public class Collector extends DepthFirstAdapter {
 	        	fa.type=type;
 	        	fa.belongs=current;
 	        	fa.dec=flag;
-	        	System.out.println("Mother funtion of "+fa.name+" is function "+ current.name+flag);
+	        	
 	        	if(current.findfunction(fa))
 	        	{
 	    	        if(flag==false)
@@ -259,7 +259,7 @@ public class Collector extends DepthFirstAdapter {
 	        		prev=current;
 	        	current=fa;
 	        }
-	        System.out.println("EIMAI STIN "+current.name);
+	        
 	        if(node.getFparDef() != null)
 	        {
 	           node.getFparDef().apply(this);
@@ -341,7 +341,7 @@ public class Collector extends DepthFirstAdapter {
 	    {
 	    	if(first_time==1)
 	    	{
-	    		System.out.println("Error:Main programm sould have no parameters!");
+	    		
 	        	error+="Error:Main programm sould have no parameters!\n";
 	    	}
 	    	String varname="";
@@ -385,7 +385,7 @@ public class Collector extends DepthFirstAdapter {
 	    {
 	    	if(first_time==1)
 	    	{
-	    		System.out.println("Error:Main programm sould have no parameters!");
+	    		
 	        	error+="Error:Main programm sould have no parameters!\n";
 	    	}
 	    	String varname="";
@@ -420,7 +420,7 @@ public class Collector extends DepthFirstAdapter {
 	    {
 	    	if(first_time==1)
 	    	{
-	    		System.out.println("Error:Main programm sould have no parameters!");
+	    		
 	        	error+="Error:Main programm sould have no parameters!\n";
 	    	}
 	    	String varname="";
@@ -458,7 +458,7 @@ public class Collector extends DepthFirstAdapter {
 	        else
 	        {
 	           	error+="Error:The parameter "+v.name+" already exists !\n";
-	        	System.out.println("Error:The parameter "+v.name+" already exists !");
+	        	
 	        }
 	        outAFparDef3FparDef(node);
 	    }
@@ -468,7 +468,7 @@ public class Collector extends DepthFirstAdapter {
 	    {
 	    	if(first_time==1)
 	    	{
-	    		System.out.println("Error:Main programm sould have no parameters!");
+	    		
 	        	error+="Error:Main programm sould have no parameters!\n";
 	    	}
 	    	String varname="";
@@ -538,7 +538,7 @@ public class Collector extends DepthFirstAdapter {
 	            }
 	            if(counter>0)
 	            	vartype=create_type(vartype,counter);
-	            System.out.println("var "+name+vartype);
+	           
 	        }
 	        VarSum va=new VarSum(name,vartype);
 	       	if(!current.findvariable(va.name) && !current.findparameter(va.name))
@@ -662,9 +662,11 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	            node.getExpr().apply(this);
 	            String topic=exprtype;
-	           
-	            if(!topic.equals(current.type))
-	            	error+="Wrong return statement ,expecting "+current.type+" but got "+topic+" in function "+current.name+"\n";
+	           String top2=current.type;
+	           top2=top2.replaceAll(" ","");
+	           topic=topic.replace(" ","");
+	            if(!topic.equals(top2))
+	            	error+="Wrong return statement ,expecting "+top2+" but got "+topic+" in function "+current.name+"\n";
 	        }
 	        else
 	        {
@@ -934,13 +936,14 @@ public class Collector extends DepthFirstAdapter {
 	            node.getLValue().apply(this);
 	            
 	        }
-	        
+	        String mtemp=mtype;
 	        if(node.getExpr() != null)
 	        {
 	            node.getExpr().apply(this);
 	         
 	            bcounter--;
 	        }
+	        mtype=mtemp;
 	        outALValueArrayLValueArray(node);
 	    }
 

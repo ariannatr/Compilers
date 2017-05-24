@@ -4,22 +4,14 @@ import compiler.analysis.DepthFirstAdapter;
 import compiler.node.*;
 
 public class LoweringCode extends DepthFirstAdapter {
-
-	public FunctionSum f;
-	public FunctionSum current;
-	public String vartype="";
-	public String name="";
-	public String type="";
-	public String ref="";
-	public String code="";
-	public boolean flag=false;
+	
 	public FunctionSum library;
-	//public boolean reflag=false;
 	public String exprtype="";
 	public String mtype="";
+	public String code="";
+	public String name="";
+	public int register=0;
 	public HelpfullMethods help;
-	//public ArrayList<VarSum> paramtemp=null;
-	//public FunctionSum standar_library= new FunctionSum("standard");
 	public FunctionSum symboltable;
 
 	LoweringCode(FunctionSum symboltable,FunctionSum library)
@@ -29,1091 +21,834 @@ public class LoweringCode extends DepthFirstAdapter {
 		help= new HelpfullMethods();
 		System.out.println("Main class name is "+symboltable.name);
 	}
-
 	
 	public void print_code()
 	{
 		System.out.println("The code Constructed: \n"+code);
 	}
+
+	@Override
+	public void caseStart(Start node)
+	{
+	    inStart(node);
+	    node.getPProgramm().apply(this);
+	    node.getEOF().apply(this);
+	    outStart(node);
+	}
 	
-	int first_time=0;
-	    @Override
-	    public void caseStart(Start node)
+	@Override
+	public void caseAProgramm(AProgramm node)
+	{
+	    inAProgramm(node);
+	    if(node.getFuncDef() != null)
 	    {
-	        inStart(node);
-	        node.getPProgramm().apply(this);
-	        node.getEOF().apply(this);
-	        outStart(node);
+	        node.getFuncDef().apply(this);
 	    }
-
-	    @Override
-	    public void caseAProgramm(AProgramm node)
+	    outAProgramm(node);
+	}
+	
+	@Override
+	public void caseAFuncDefFuncDef(AFuncDefFuncDef node)
+	{
+	    inAFuncDefFuncDef(node);
+	    String tname="";
+	    if(node.getHeader() != null)
 	    {
-	        inAProgramm(node);
-	        if(node.getFuncDef() != null)
-	        {
-	            node.getFuncDef().apply(this);
-	        }
-	        
-	        for(FunctionSum fa:f.fun)
-	        {
-		        for(VarSum va : fa.arg)
-		       {
-		    	   System.out.println(va.ref+" "+va.name+" "+va.type);
-		       }
-		       for(VarSum va : fa.vars)
-		       {
-		    	   System.out.println(va.ref+" "+va.name+" "+va.type);
-		       }
-	        }
-	        outAProgramm(node);
+	        node.getHeader().apply(this);
+	        tname=name;
 	    }
-
-	    @Override
-	    public void caseAFuncDefFuncDef(AFuncDefFuncDef node)
 	    {
-	        inAFuncDefFuncDef(node);
-	    	FunctionSum previous=null;
-	        if(current!=null)
-	        	previous=current;
-	        if(node.getHeader() != null)
+	        List<PLocalDef> copy = new ArrayList<PLocalDef>(node.getLocalDef());
+	        for(PLocalDef e : copy)
 	        {
-	        	
-	            node.getHeader().apply(this);
+	            e.apply(this);
 	        }
-	        {
-	            List<PLocalDef> copy = new ArrayList<PLocalDef>(node.getLocalDef());
-	            for(PLocalDef e : copy)
-	            {
-	                e.apply(this);
-	            }
-	        }
-	        {
-
-	            List<PStmt> copy = new ArrayList<PStmt>(node.getStmt());
-	            for(PStmt e : copy)
-	            {
-	                e.apply(this);
-	            }
-	            String ctype=current.type;
-		 /*       if(reflag==false && !ctype.equals("nothing "))
-		        	error+="No return statement for function "+current.name+" found\n";
-		        reflag=false;*/
-	        }
-	      	/*for(FunctionSum ftemp:current.fun)
-	      	{
-	      		if(ftemp.dec==true)
-	      			error+="Function "+ftemp.name+" was declared but not defined \n";
-	      	}*/
-	        if(previous!=null)
-	        	current=previous;
-	        outAFuncDefFuncDef(node);
 	    }
-
-	    @Override
-	    public void caseAHeaderHeader(AHeaderHeader node)
 	    {
-	        inAHeaderHeader(node);
-	        boolean fparam=false;
-	        FunctionSum ftemp=null;
-	        FunctionSum prev=null;
-	        if(node.getVariable() != null)
+	        List<PStmt> copy = new ArrayList<PStmt>(node.getStmt());
+	        for(PStmt e : copy)
 	        {
-	            name=node.getVariable().toString();
+	            e.apply(this);
 	        }
-	        if(node.getRetType() != null)
-	        {
-	            type=node.getRetType().toString();
-	        }
-	        if(first_time==0)
-	        {
-	        	f=new FunctionSum(name);
-	        	/*if(!type.replaceAll(" ","").equals("nothing"))
-	        	{
-	        		System.out.println("Error:Main programm sould have no return value!");
-	        		error+="Error:Main programm sould have no return value!\n";
-	        	}*/
-	        	f.type=type;
-	        	current=f;
-	        	first_time=1;
-	        }    
-	        else
-	        {
-	        	first_time++;
-	        	FunctionSum fa=new FunctionSum(name);
-	        	fa.type=type;
-	        	fa.belongs=current;
-	        	fa.dec=flag;
-	        	System.out.println("Mother funtion of "+fa.name+" is function "+ current.name+flag);
-	        	/*if(current.findfunction(fa))
-	        	{
-	    	        if(flag==false)
-	    	        {
-	        			ftemp=current.getFunction(name);
-	        			if(ftemp.dec==false)
-	        			{
-	        				error+="Error:The function "+fa.name+" has been already defined exists !\n";
-	        				return;
-	        			}
-	        			if(!ftemp.type.equals(fa.type))
-	        			{
-	        				error+="Error:The function "+fa.name+" has been defined with different return type !\n";
-	        				return;
-	        			}
-	        			ftemp.dec=false;
-	        			fparam=true;
-	    	        }
-	    	        else
-	    	        	error+="Error:The function "+fa.name+" has been already declared !\n";
-	    	              		
-	        	}
-	        	else if(current.findparameter(fa.name) )
-	        	{
-	        		error+="Error:The name "+fa.name+" already exists for parameter name!\n";
-	        	}
-	        	else if(current.findvariable(fa.name))
-	        	{
-					error+="Error:The name "+fa.name+" already exists for variable name!\n";
-	        	}
-	        	else if ((current.belongs!=null)) 
-	        	{
-	        		System.out.println("Mother of mother is "+current.belongs.name);
-	        		if( current.belongs.findvariable(fa.name))
-	        			error+="Error:The name "+fa.name+" already exists for variable name!\n";
-	        	}
-	        	else
-	        	{
-	        		if(fparam==false)
-	        			current.fun.add(fa);
-	        	}
-	        	if(flag==true)
-	        		prev=current;
-	        	current=fa;*/
-	        }
-	        System.out.println("EIMAI STIN "+current.name);
+	    }
+	    String code_line=help.genquad("endu",tname,"_","_");
+        help.instruction_list.add(code_line);
+	    outAFuncDefFuncDef(node);
+	}
+	
+	@Override
+	public void caseAHeaderHeader(AHeaderHeader node)
+	{
+	    inAHeaderHeader(node);
+	    if(node.getVariable() != null)
+	    {
+	        name=node.getVariable().toString();
 	        String code_line=help.genquad("unit",name,"_","_");
 	        help.instruction_list.add(code_line);
-	        if(node.getFparDef() != null)
-	        {
-	           node.getFparDef().apply(this);
-	        }
-	        if(ftemp!=null)
-	        {
-	        	/*System.out.println(ftemp.arg.size()+current.arg.size());
-	        	if(ftemp.arg.size()!=current.arg.size())
-	        		error+="Amount of args differ between definition and declaration in " +current.name+"\n";
-	        	Iterator<VarSum> itr=current.arg.iterator();
-	        	Iterator<VarSum> itr2=ftemp.arg.iterator();
-	    		while(itr.hasNext() && itr2.hasNext())
-	    		{
-	    			VarSum ret=itr.next();
-	    			VarSum ret2=itr2.next();
-	    			if(!ret.name.equals(ret2.name))
-	    				error+="Different name in argument "+ret.name+"in function "+current.name+" between definiton and declaration "+ret.name+"-"+ret2.name+"\n";
-	    			if(!ret.type.equals(ret2.type))
-	    				error+="Different type in argument "+ret.name+"in function "+current.name+" between definiton and declaration "+ret.type+"-"+ret2.type+"\n";
-	    		}*/
-	        }
-	        if(flag==true)
-	        	current=prev;
-	        outAHeaderHeader(node);
 	    }
-
-	    @Override
-	    public void caseAFuncDefLocalDef(AFuncDefLocalDef node)
+	   
+	    if(node.getFparDef() != null)
 	    {
-	        inAFuncDefLocalDef(node);
-	        if(node.getFuncDef() != null)
-	        {
-	            node.getFuncDef().apply(this);
-	        }
-	        outAFuncDefLocalDef(node);
+	        node.getFparDef().apply(this);
 	    }
-
-	    @Override
-	    public void caseAFuncDeclLocalDef(AFuncDeclLocalDef node)
+	    if(node.getRetType() != null)
 	    {
-	        inAFuncDeclLocalDef(node);
-	        if(node.getFuncDecl() != null)
-	        {
-	            node.getFuncDecl().apply(this);
-	        }
-	        outAFuncDeclLocalDef(node);
+	        node.getRetType().apply(this);
 	    }
-
-	    @Override
-	    public void caseAVarDefLocalDef(AVarDefLocalDef node)
+	    outAHeaderHeader(node);
+	}
+	
+	@Override
+	public void caseAFuncDefLocalDef(AFuncDefLocalDef node)
+	{
+	    inAFuncDefLocalDef(node);
+	    if(node.getFuncDef() != null)
 	    {
-	        inAVarDefLocalDef(node);
-	        if(node.getVarDef() != null)
-	        {
-	            node.getVarDef().apply(this);
-	        }
-	        outAVarDefLocalDef(node);
+	        node.getFuncDef().apply(this);
 	    }
-
-	    @Override
-	    public void caseAFuncDeclFuncDecl(AFuncDeclFuncDecl node)
+	    outAFuncDefLocalDef(node);
+	}
+	
+	@Override
+	public void caseAFuncDeclLocalDef(AFuncDeclLocalDef node)
+	{
+	    inAFuncDeclLocalDef(node);
+	    if(node.getFuncDecl() != null)
 	    {
-	        inAFuncDeclFuncDecl(node);
-	        flag=true;
-	        if(node.getHeader() != null)
-	        {
-	            node.getHeader().apply(this);
-	        }
-	        flag=false;
-	        outAFuncDeclFuncDecl(node);
+	        node.getFuncDecl().apply(this);
 	    }
-
-	    @Override
-	    public void caseAFparDef1FparDef(AFparDef1FparDef node)
+	    outAFuncDeclLocalDef(node);
+	}
+	
+	@Override
+	public void caseAVarDefLocalDef(AVarDefLocalDef node)
+	{
+	    inAVarDefLocalDef(node);
+	    if(node.getVarDef() != null)
 	    {
-	    /*	if(first_time==1)
-	    	{
-	    		System.out.println("Error:Main programm sould have no parameters!");
-	        	error+="Error:Main programm sould have no parameters!\n";
-	    	}*/
-	    	String varname="";
-	        inAFparDef1FparDef(node);
-	        if(node.getRef() != null)
-	        {
-	           ref=node.getRef().toString();
-	        }
-	        if(node.getVariable() != null)
-	        {
-	            varname=node.getVariable().toString();
-	        }
-	        if(node.getType() != null)
-	        {
-	            vartype=node.getType().toString();
-	        }
-	        VarSum v=new VarSum(varname,vartype);
-	        v.ref=ref;
-	        /*if(!current.findparameter(v.name))
-	        {
-	        	current.arg.add(v);
-	        }
-	        else
-	        {
-	        	error+="Error:The parameter "+v.name+" already exists !\n";
-	        	System.out.println("Error:The parameter "+v.name+" already exists !");
-	        }*/
-	        outAFparDef1FparDef(node);
+	        node.getVarDef().apply(this);
 	    }
-
-	    @Override
-	    public void caseAFparDef2FparDef(AFparDef2FparDef node)
+	    outAVarDefLocalDef(node);
+	}
+	
+	@Override
+	public void caseAFuncDeclFuncDecl(AFuncDeclFuncDecl node)
+	{
+	    inAFuncDeclFuncDecl(node);
+	    if(node.getHeader() != null)
 	    {
-			/*if(first_time==1)
-	    	{
-	    		System.out.println("Error:Main programm sould have no parameters!");
-	        	error+="Error:Main programm sould have no parameters!\n";
-	    	}*/
-	    	String varname="";
-	        inAFparDef2FparDef(node);
-	        if(node.getRef() != null)
-	        {
-	           ref=node.getRef().toString();
-	        }
-	        if(node.getVariable() != null)
-	        {
-	            varname=node.getVariable().toString();
-	        }
-	        if(node.getFparDef() != null)
-	        {
-	            node.getFparDef().apply(this);
-	        }
-	       VarSum v=new VarSum(varname,vartype);
-	        v.ref=ref;
-	        /*if(!current.findparameter(v.name))
-	        {
-	        	current.arg.add(v);
-	        }
-	        else
-	        {
-	        	error+="Error:The parameter "+v.name+" already exists !\n";
-
-	        	System.out.println("Error:The parameter "+v.name+" already exists !");
-	        }*/
-	        outAFparDef2FparDef(node);
+	        node.getHeader().apply(this);
 	    }
-
-	    @Override
-	    public void caseAFparDef3FparDef(AFparDef3FparDef node)
+	    outAFuncDeclFuncDecl(node);
+	}
+	
+	@Override
+	public void caseAFparDef1FparDef(AFparDef1FparDef node)
+	{
+	    inAFparDef1FparDef(node);
+	    if(node.getRef() != null)
 	    {
-	    	/*if(first_time==1)
-	    	{
-	    		System.out.println("Error:Main programm sould have no parameters!");
-	        	error+="Error:Main programm sould have no parameters!\n";
-	    	}*/
-	    	String varname="";
-	        inAFparDef3FparDef(node);
-	        if(node.getRef() != null)
-	        {
-	        	 ref=node.getRef().toString();
-	        }
-	        if(node.getVariable() != null)
-	        {
-	            varname=node.getVariable().toString();
-	        }
-	        if(node.getType() != null)
-	        {
-	           vartype= node.getType().toString();
-	        }
-	        if(node.getFparDef() != null)
-	        {
-	            node.getFparDef().apply(this);
-	        }
-	        VarSum v=new VarSum(varname,vartype);
-	        v.ref=ref;
-	       /*	if(!current.findparameter(v.name))
-	        {
-	        	/current.arg.add(v);
-	        }
-	        else
-	        {
-	           	error+="Error:The parameter "+v.name+" already exists !\n";
-	        	System.out.println("Error:The parameter "+v.name+" already exists !");
-	        }*/
-	        outAFparDef3FparDef(node);
+	        node.getRef().apply(this);
 	    }
-
-	    @Override
-	    public void caseAFparDef4FparDef(AFparDef4FparDef node)
+	    if(node.getVariable() != null)
 	    {
-	    	/*if(first_time==1)
-	    	{
-	    		System.out.println("Error:Main programm sould have no parameters!");
-	        	error+="Error:Main programm sould have no parameters!\n";
-	    	}*/
-	    	String varname="";
-	        inAFparDef4FparDef(node);
-	        if(node.getRef() != null)
-	        {
-	        	 ref=node.getRef().toString();
-	        }
-	        if(node.getVariable() != null)
-	        {
-	            varname=node.getVariable().toString();
-	        }
-	        if(node.getType() != null)
-	        {
-	            vartype=node.getType().toString();
-	        }
-	        VarSum v=new VarSum(varname,vartype);
-	        v.ref=ref;
-	        /*if(!current.findparameter(v.name))
-	        {
-	        	current.arg.add(v);
-	        }
-	        else
-	        {
-	        	error+="Error:The parameter "+v.name+" already exists !\n";
-	        	System.out.println("Error :The parameter "+v.name+" already exists !");
-	        }*/
-	        if(node.getFparDef() != null)
-	        {
-	            node.getFparDef().apply(this);
-	        }
-	        outAFparDef4FparDef(node);
+	        node.getVariable().apply(this);
 	    }
-
-	    @Override
-	    public void caseAFparDef5FparDef(AFparDef5FparDef node)
+	    if(node.getType() != null)
 	    {
-	        inAFparDef5FparDef(node);
-	        outAFparDef5FparDef(node);
+	        node.getType().apply(this);
 	    }
-
-	    @Override
-	    public void caseAVarDefVarDef(AVarDefVarDef node)
+	    outAFparDef1FparDef(node);
+	}
+	
+	@Override
+	public void caseAFparDef2FparDef(AFparDef2FparDef node)
+	{
+	    inAFparDef2FparDef(node);
+	    if(node.getRef() != null)
 	    {
-	    	String name="";
-	        inAVarDefVarDef(node);
-	        if(node.getVariable() != null)
-	        {
-	            name=node.getVariable().toString();
-	        }
-	        if(node.getType() != null)
-	        {
-	            vartype=node.getType().toString();
-	        }
-	        VarSum va=new VarSum(name,vartype);
-	      /* 	if(!current.findvariable(va.name) && !current.findparameter(va.name))
-	       	{
-	       		current.vars.add(va);
-	       	}
-	       	else
-	       	{
-	       		error+="Error :This variable name "+va.name+" is already used !\n";
-	       	}*/
-	        {
-	            List<TVariable> copy = new ArrayList<TVariable>(node.getVariables());
-	            for(TVariable e : copy)
-	            {
-	               name=e.toString();
-	               VarSum v1=new VarSum(name,vartype);
-	           /*    if(!current.findvariable(v1.name) && !current.findparameter(v1.name))
-	        		{
-		   	           	current.vars.add(v1);
-	        		}
-	        		else
-	        		{
-	        			error+="Error :This variable name "+v1.name+" is already used !\n";
-	        		}*/
-	        	}
-	        }
-	        outAVarDefVarDef(node);
+	        node.getRef().apply(this);
 	    }
-
-	    @Override
-	    public void caseAEmptyStmt(AEmptyStmt node)
+	    if(node.getVariable() != null)
 	    {
-	        inAEmptyStmt(node);
-	        outAEmptyStmt(node);
+	        node.getVariable().apply(this);
 	    }
-
-	    @Override
-	    public void caseASemiStmt(ASemiStmt node)
+	    if(node.getFparDef() != null)
 	    {
-	        inASemiStmt(node);
-	        outASemiStmt(node);
+	        node.getFparDef().apply(this);
 	    }
-
-	    @Override
-	    public void caseAExprStmt(AExprStmt node)
+	    outAFparDef2FparDef(node);
+	}
+	
+	@Override
+	public void caseAFparDef3FparDef(AFparDef3FparDef node)
+	{
+	    inAFparDef3FparDef(node);
+	    if(node.getRef() != null)
 	    {
-	        inAExprStmt(node);
-	        String left="";
-	        String right="";
-	        if(node.getLValue() != null)
-	        {
-	        	node.getLValue().apply(this);
-	            left=mtype;
-	        }
-	        if(node.getExpr() != null)
-	        {
-	            node.getExpr().apply(this);
-	            right=mtype;
-	        }
-	   //     if(!left.equals(right))
-	     //   	error+="Wrong on Lvalue "+left+"<-"+right+"\n";
-	        System.out.println("Prepei na allaksoume tin entoli "+Integer.toString(help.nextquad()-1));
-	        help.modifiyquad(Integer.toString(help.nextquad()-1),node.getLValue().toString());
-	        System.out.println("Anathesi se "+node.getLValue().toString());
-	        outAExprStmt(node);
+	        node.getRef().apply(this);
 	    }
-
-	    @Override
-	    public void caseABlockStmt(ABlockStmt node)
+	    if(node.getVariable() != null)
 	    {
-	        inABlockStmt(node);
-	        {
-	            List<PStmt> copy = new ArrayList<PStmt>(node.getStatements());
-	            for(PStmt e : copy)
-	            {
-	                e.apply(this);
-	            }
-	        }
-	        
-	        outABlockStmt(node);
+	        node.getVariable().apply(this);
 	    }
-
-	    @Override
-	    public void caseAFuncCallStmt(AFuncCallStmt node)
+	    if(node.getType() != null)
 	    {
-	        inAFuncCallStmt(node);
-	        if(node.getFuncCall() != null)
-	        {
-	            node.getFuncCall().apply(this);
-	        }
-	        outAFuncCallStmt(node);
+	        node.getType().apply(this);
 	    }
-
-	    @Override
-	    public void caseAWhileStatementStmt(AWhileStatementStmt node)
+	    if(node.getFparDef() != null)
 	    {
-	        inAWhileStatementStmt(node);
-	        if(node.getExpr() != null)
-	        {
-	            node.getExpr().apply(this);
-	        }
-	        if(node.getStmt() != null)
-	        {
-	            node.getStmt().apply(this);
-	        }
-	        outAWhileStatementStmt(node);
+	        node.getFparDef().apply(this);
 	    }
-
-	    @Override
-	    public void caseAReturnStmt(AReturnStmt node)
+	    outAFparDef3FparDef(node);
+	}
+	
+	@Override
+	public void caseAFparDef4FparDef(AFparDef4FparDef node)
+	{
+	    inAFparDef4FparDef(node);
+	    if(node.getRef() != null)
 	    {
-	        inAReturnStmt(node);
-	        //reflag=true;
-	        if(node.getExpr() != null)
-	        {
-	            node.getExpr().apply(this);
-	            String topic=exprtype;
-	           
-	          /*  if(!topic.equals(current.type))
-	            	error+="Wrong return statement in function "+current.name+"\n";*/
-	        }
-	        else
-	        {/*
-	        	if(!current.type.equals("nothing"))
-	        		error+="Wrong return statement in function "+current.name+"\n";
-	        */}
-	        outAReturnStmt(node);
+	        node.getRef().apply(this);
 	    }
-
-	    @Override
-	    public void caseAIfStmt(AIfStmt node)
+	    if(node.getVariable() != null)
 	    {
-	        inAIfStmt(node);
-	        if(node.getCondition() != null)
-	        {
-	            node.getCondition().apply(this);
-	        }
-	        if(node.getStatement() != null)
-	        {
-	            node.getStatement().apply(this);
-	        }
-	        outAIfStmt(node);
+	        node.getVariable().apply(this);
 	    }
-
-	    @Override
-	    public void caseAIfElseStmt(AIfElseStmt node)
+	    if(node.getType() != null)
 	    {
-	        inAIfElseStmt(node);
-	        if(node.getCondition() != null)
-	        {
-	            node.getCondition().apply(this);
-	        }
-	        if(node.getThen() != null)
-	        {
-	            node.getThen().apply(this);
-	        }
-	        if(node.getElse() != null)
-	        {
-	            node.getElse().apply(this);
-	        }
-	        outAIfElseStmt(node);
+	        node.getType().apply(this);
 	    }
-
-	    @Override
-	    public void caseAFuncCallFuncCall(AFuncCallFuncCall node)
+	    if(node.getFparDef() != null)
 	    {
-	    	String name="";
-	        inAFuncCallFuncCall(node);
-	        if(node.getVariable() != null)
-	        {
-	            name=node.getVariable().toString();
-	        }
-	       /* if((!current.exist_name(name)) && (!standar_library.exist_name(name)))
-        	{
-        		error+="Error:The function "+name+" doesn't exist to be called!\n";
-        		return;
-        	}*/
-	        
-	        {
-	        	FunctionSum ftemp;
-	        	System.out.println("In func call eimai stin sunartisi "+current.name);
-	        	String comp =current.name.replaceAll(" ","");
-	        	if(comp.equals(name.replaceAll(" ","")))
-	        		ftemp=current;
-	        	else
-	        	{
-	        		System.out.println("In func call f wanted is "+name);
-	        		ftemp=current.getFunction(name);
-	        		if(ftemp==null)
-	        		{
-	        			//FunctionSum function=symboltable.standar_library;
-	        			ftemp=library.getFunction(name);
-	        		}
-	        		System.out.println("In func call ftemp is "+ftemp.name);
-	        	}
-
-	            List<PExpr> copy = new ArrayList<PExpr>(node.getExpr());
-
-	            int i=0;
-	            for(PExpr e : copy)
-	            {
-	                e.apply(this);
-	                String temp=exprtype;
-	                //VarSum vartemp=ftemp.arg.get(i);
-	                //String currenttype=vartemp.type;
-	              	//System.out.println("Function "+current.name+"type "+currenttype);
-	                //currenttype=currenttype.replaceAll(" ","");
-	                //temp=temp.replaceAll(" ","");
-	           /*     if(!temp.equals(currenttype))
-	                {
-	                	int num=i+1;
-	                	error+="Different expression type in argument "+num+" in function call "+ftemp.name+"\n";
-	                System.out.println("->>> "+currenttype+temp); 
-	                }*/
-	                i++;
-	            }
-	           // mtype=ftemp.type;
-	        }
-	        outAFuncCallFuncCall(node);
+	        node.getFparDef().apply(this);
 	    }
-
-	    @Override
-	    public void caseATypeType(ATypeType node)
+	    outAFparDef4FparDef(node);
+	}
+	
+	@Override
+	public void caseAFparDef5FparDef(AFparDef5FparDef node)
+	{
+	    inAFparDef5FparDef(node);
+	    outAFparDef5FparDef(node);
+	}
+	
+	@Override
+	public void caseAVarDefVarDef(AVarDefVarDef node)
+	{
+	    inAVarDefVarDef(node);
+	    if(node.getVariable() != null)
 	    {
-	        inATypeType(node);
-	        if(node.getDataType() != null)
-	        {
-	            node.getDataType().apply(this);
-	        }
-	        if(node.getArrayNum() != null)
-	        {
-	            node.getArrayNum().apply(this);
-	        }
-	     /*  {
-	            List<PArrayNum> copy = new ArrayList<PArrayNum>(node.getArrayNum());
-	            for(PArrayNum e : copy)
-	            {
-	                e.apply(this);
-	            }
-	        }*/
-	        outATypeType(node);
+	        node.getVariable().apply(this);
 	    }
-
-
-	    @Override
-	   	public void caseAType2Type(AType2Type node)
 	    {
-	        inAType2Type(node);
-	        if(node.getDataType() != null)
+	        List<TVariable> copy = new ArrayList<TVariable>(node.getVariables());
+	        for(TVariable e : copy)
 	        {
-	            node.getDataType().apply(this);
+	            e.apply(this);
 	        }
+	    }
+	    if(node.getType() != null)
+	    {
+	        node.getType().apply(this);
+	    }
+	    outAVarDefVarDef(node);
+	}
+	
+	@Override
+	public void caseAEmptyStmt(AEmptyStmt node)
+	{
+	    inAEmptyStmt(node);
+	    outAEmptyStmt(node);
+	}
+	
+	@Override
+	public void caseASemiStmt(ASemiStmt node)
+	{
+	    inASemiStmt(node);
+	    outASemiStmt(node);
+	}
+	
+	@Override
+	public void caseAExprStmt(AExprStmt node)
+	{
+	    inAExprStmt(node);
+	    String left="";
+	    String right="";
+	    if(node.getLValue() != null)
+	    {
+	        node.getLValue().apply(this);
+	        left=mtype;
+	    }
+	    
+	    if(node.getExpr() != null)
+	    {
+	        node.getExpr().apply(this);
+	        right=mtype;
+	    }
+	    left=left.replaceAll(" ","");
+	    right=right.replaceAll(" ","");
+	    String code_line=help.genquad(":=",left,"-",right);
+        help.instruction_list.add(code_line);
+	    outAExprStmt(node);
+	}
+	
+	@Override
+	public void caseABlockStmt(ABlockStmt node)
+	{
+	    inABlockStmt(node);
+	    {
+	        List<PStmt> copy = new ArrayList<PStmt>(node.getStatements());
+	        for(PStmt e : copy)
+	        {
+	            e.apply(this);
+	        }
+	    }
+	    outABlockStmt(node);
+	}
+	
+	@Override
+	public void caseAFuncCallStmt(AFuncCallStmt node)
+	{
+	    inAFuncCallStmt(node);
+	    if(node.getFuncCall() != null)
+	    {
+	        node.getFuncCall().apply(this);
+	    }
+	    outAFuncCallStmt(node);
+	}
+	
+	@Override
+	public void caseAWhileStatementStmt(AWhileStatementStmt node)
+	{
+	    inAWhileStatementStmt(node);
+	    if(node.getExpr() != null)
+	    {
+	        node.getExpr().apply(this);
+	    }
+	    if(node.getStmt() != null)
+	    {
+	        node.getStmt().apply(this);
+	    }
+	    outAWhileStatementStmt(node);
+	}
+	
+	@Override
+	public void caseAReturnStmt(AReturnStmt node)
+	{
+	    inAReturnStmt(node);
+	    if(node.getExpr() != null)
+	    {
+	        node.getExpr().apply(this);
+	        String k=mtype;
+	        String code_line=help.genquad(":=",k,"-","$$");
+	        help.instruction_list.add(code_line);
+	    }
+	    String code_line=help.genquad("ret","-","-","-");
+        help.instruction_list.add(code_line);
+	    outAReturnStmt(node);
+	}
+	
+	@Override
+	public void caseAIfStmt(AIfStmt node)
+	{
+	    inAIfStmt(node);
+	    if(node.getCondition() != null)
+	    {
+	        node.getCondition().apply(this);
+	    }
+	    if(node.getStatement() != null)
+	    {
+	        node.getStatement().apply(this);
+	    }
+	    outAIfStmt(node);
+	}
+	
+	@Override
+	public void caseAIfElseStmt(AIfElseStmt node)
+	{
+	    inAIfElseStmt(node);
+	    if(node.getCondition() != null)
+	    {
+	        node.getCondition().apply(this);
+	    }
+	    if(node.getThen() != null)
+	    {
+	        node.getThen().apply(this);
+	    }
+	    if(node.getElse() != null)
+	    {
+	        node.getElse().apply(this);
+	    }
+	    outAIfElseStmt(node);
+	}
+	
+	@Override
+	public void caseAFuncCallFuncCall(AFuncCallFuncCall node)
+	{
+	    inAFuncCallFuncCall(node);
+	    String left="";
+	    if(node.getVariable() != null)
+	    {
+	        left=node.getVariable().toString();
+	    }
+	    
+	    {
+	        List<PExpr> copy = new ArrayList<PExpr>(node.getExpr());
+	        for(PExpr e : copy)
+	        {
+	            e.apply(this);
+	            String temp=mtype;
+	    	    String code_line=help.genquad("par",temp,"R","-");
+	            help.instruction_list.add(code_line);
+	        }
+	        String code_line=help.genquad("call","-","-",left);
+            help.instruction_list.add(code_line);
+	    }
+	    outAFuncCallFuncCall(node);
+	}
+	
+	@Override
+	public void caseATypeType(ATypeType node)
+	{
+	    inATypeType(node);
+	    if(node.getDataType() != null)
+	    {
+	        node.getDataType().apply(this);
+	    }
+	    if(node.getArrayNum() != null)
+	    {
 	        node.getArrayNum().apply(this);
-	        {
-	            List<PArrayNumDefined> copy = new ArrayList<PArrayNumDefined>(node.getArrayNumDefined());
-	            for(PArrayNumDefined e : copy)
-	            {
-	                e.apply(this);
-	            }
-	        }
-	        outAType2Type(node);
 	    }
-
-	    @Override
-	    public void caseADataTypeRetType(ADataTypeRetType node)
+	    outATypeType(node);
+	}
+	
+	@Override
+	public void caseAType2Type(AType2Type node)
+	{
+	    inAType2Type(node);
+	    if(node.getDataType() != null)
 	    {
-	        inADataTypeRetType(node);
-	        if(node.getDataType() != null)
-	        {
-	            node.getDataType().apply(this);
-	        }
-	        outADataTypeRetType(node);
+	        node.getDataType().apply(this);
 	    }
-
-	    @Override
-	    public void caseANothingRetType(ANothingRetType node)
+	    if(node.getArrayNum() != null)
 	    {
-	        inANothingRetType(node);
-	        if(node.getNothing() != null)
-	        {
-	            node.getNothing().apply(this);
-	        }
-	        outANothingRetType(node);
+	        node.getArrayNum().apply(this);
 	    }
-
-	    @Override
-	    public void caseAArrayNumArrayNum(AArrayNumArrayNum node)
 	    {
-	        inAArrayNumArrayNum(node);
-	        if(node.getLBkt() != null)
+	        List<PArrayNumDefined> copy = new ArrayList<PArrayNumDefined>(node.getArrayNumDefined());
+	        for(PArrayNumDefined e : copy)
 	        {
-	            node.getLBkt().apply(this);
+	            e.apply(this);
 	        }
-	        if(node.getInteger() != null)
-	        {
-	            node.getInteger().apply(this);
-	        }
-	        if(node.getRBkt() != null)
-	        {
-	            node.getRBkt().apply(this);
-	        }
-	        outAArrayNumArrayNum(node);
 	    }
-
-	    @Override
-	    public void caseAIntDataType(AIntDataType node)
+	    outAType2Type(node);
+	}
+	
+	@Override
+	public void caseADataTypeRetType(ADataTypeRetType node)
+	{
+	    inADataTypeRetType(node);
+	    if(node.getDataType() != null)
 	    {
-	        inAIntDataType(node);
-	        if(node.getInt() != null)
-	        {
-	            node.getInt().apply(this);
-	        }
-	        outAIntDataType(node);
+	        node.getDataType().apply(this);
 	    }
-
-	    @Override
-	    public void caseACharDataType(ACharDataType node)
+	    outADataTypeRetType(node);
+	}
+	
+	@Override
+	public void caseANothingRetType(ANothingRetType node)
+	{
+	    inANothingRetType(node);
+	    if(node.getNothing() != null)
 	    {
-	        inACharDataType(node);
-	        if(node.getChar() != null)
-	        {
-	            node.getChar().apply(this);
-	        }
-	        outACharDataType(node);
+	        node.getNothing().apply(this);
 	    }
-
-	    @Override
-	    public void caseAIdLValue(AIdLValue node)
+	    outANothingRetType(node);
+	}
+	
+	@Override
+	public void caseAArrayNumArrayNum(AArrayNumArrayNum node)
+	{
+	    inAArrayNumArrayNum(node);
+	    if(node.getLBkt() != null)
 	    {
-	        inAIdLValue(node);
-	        if(node.getVariable() != null)
-	        {
-	        	String var= node.getVariable().toString();
-	            mtype=node.getVariable().toString();
-	       /*     if(mtype.equals("NULL"))
-	            {
-	            	mtype=current.findvariabletype(var);
-	            	if(mtype.equals("NULL"))
-	            	{
-	            		FunctionSum ftemp=current.belongs;
-	            		mtype=ftemp.findvariabletype(var);
-	            		if(mtype.equals("NULL"))
-	            		{
-	            			mtype=ftemp.findparametertype(var);
-	            			if(mtype.equals("NULL"))
-	            			error+="Variable "+var+" isnt declared!\n";
-	            		}
-	            	}
-	            }*/
-	            System.out.println("swthikame");
-	            exprtype=mtype;
-	           
-	        }
-	        outAIdLValue(node);
+	        node.getLBkt().apply(this);
 	    }
-
-	    @Override
-	    public void caseAStringLitLValue(AStringLitLValue node)
+	    if(node.getInteger() != null)
 	    {
-	        inAStringLitLValue(node);
-	        if(node.getStringLit() != null)
-	        {
-	            node.getStringLit().apply(this);
-	            mtype="char[]";
-	        }
-	        exprtype=mtype;
-	        outAStringLitLValue(node);
+	        node.getInteger().apply(this);
 	    }
-
-	    @Override
-	    public void caseALValueArrayLValue(ALValueArrayLValue node)
+	    if(node.getRBkt() != null)
 	    {
-	        inALValueArrayLValue(node);
-	        if(node.getLValueArray() != null)
-	        {
-	            node.getLValueArray().apply(this);
-	        }
-	        outALValueArrayLValue(node);
+	        node.getRBkt().apply(this);
 	    }
-
-	    @Override
-	    public void caseALValueArrayLValueArray(ALValueArrayLValueArray node)
+	    outAArrayNumArrayNum(node);
+	}
+	
+	@Override
+	public void caseAArrayNumDefinedArrayNumDefined(AArrayNumDefinedArrayNumDefined node)
+	{
+	    inAArrayNumDefinedArrayNumDefined(node);
+	    if(node.getLBkt() != null)
 	    {
-	        inALValueArrayLValueArray(node);
-	        if(node.getLValue() != null)
-	        {
-	            node.getLValue().apply(this);
-	        }
-	        if(node.getExpr() != null)
-	        {
-	            node.getExpr().apply(this);
-	        }
-	        outALValueArrayLValueArray(node);
+	        node.getLBkt().apply(this);
 	    }
-
-	    @Override
-	    public void caseACondOrExpr(ACondOrExpr node)
+	    if(node.getInteger() != null)
 	    {
-	    	
-	        inACondOrExpr(node);
-	        if(node.getLeft() != null)
-	        {
-	            node.getLeft().apply(this);
-	        }
-	        String left=exprtype;
-	        if(node.getRight() != null)
-	        {
-	            node.getRight().apply(this);
-	        }
-	        String right=exprtype;
-	      //  if(!left.equals(right))
-	        //	error+="Wrong exprtypes in Or expression\n";
-	        outACondOrExpr(node);
+	        node.getInteger().apply(this);
 	    }
-
-	    @Override
-	    public void caseACompAndExpr(ACompAndExpr node)
+	    if(node.getRBkt() != null)
 	    {
-	        inACompAndExpr(node);
-	        if(node.getLeft() != null)
-	        {
-	            node.getLeft().apply(this);
-	        }
-	        String left=exprtype;
-	        if(node.getRight() != null)
-	        {
-	            node.getRight().apply(this);
-	        }
-	        String right=exprtype;
+	        node.getRBkt().apply(this);
+	    }
+	    outAArrayNumDefinedArrayNumDefined(node);
+	}
+	
+	@Override
+	public void caseAIntDataType(AIntDataType node)
+	{
+	    inAIntDataType(node);
+	    if(node.getInt() != null)
+	    {
+	        node.getInt().apply(this);
+	    }
+	    outAIntDataType(node);
+	}
+	
+	@Override
+	public void caseACharDataType(ACharDataType node)
+	{
+	    inACharDataType(node);
+	    if(node.getChar() != null)
+	    {
+	        node.getChar().apply(this);
+	    }
+	    outACharDataType(node);
+	}
+	
+	@Override
+	public void caseAIdLValue(AIdLValue node)
+	{
+	    inAIdLValue(node);
+	    if(node.getVariable() != null)
+	    {
+	        node.getVariable().apply(this);
+	        mtype=node.getVariable().toString();
+	    }
+	    outAIdLValue(node);
+	}
+	
+	@Override
+	public void caseAStringLitLValue(AStringLitLValue node)
+	{
+	    inAStringLitLValue(node);
+	    if(node.getStringLit() != null)
+	    {
+	        node.getStringLit().apply(this);
+	        mtype=node.getStringLit().toString();
 	        
-	        //if(!left.equals(right))
-	        //	error+="Wrong exprtypes in And expression\n";
-	        outACompAndExpr(node);
 	    }
-
-	    @Override
-	    public void caseACompEqExpr(ACompEqExpr node)
+	    outAStringLitLValue(node);
+	}
+	
+	@Override
+	public void caseALValueArrayLValue(ALValueArrayLValue node)
+	{
+	    inALValueArrayLValue(node);
+	    if(node.getLValueArray() != null)
 	    {
-	        inACompEqExpr(node);
-	        if(node.getLeft() != null)
-	        {
-	            node.getLeft().apply(this);
-	        }
-	        String left=mtype;
-	        if(node.getRight() != null)
-	        {
-	            node.getRight().apply(this);
-	        }
-	        String right=mtype;
-	     //   if(!left.equals(right))
-	       // 	error+="Wrong on CompareExpression\n";
-	        exprtype="logic";
-	        outACompEqExpr(node);
+	        node.getLValueArray().apply(this);
 	    }
-
-	    @Override
-	    public void caseACompNotEqExpr(ACompNotEqExpr node)
+	    outALValueArrayLValue(node);
+	}
+	
+	@Override
+	public void caseALValueArrayLValueArray(ALValueArrayLValueArray node)
+	{
+	    inALValueArrayLValueArray(node);
+	    if(node.getLValue() != null)
 	    {
-	        inACompNotEqExpr(node);
-	        if(node.getExpr() != null)
-	        {
-	            node.getExpr().apply(this);
-	        }
-	        outACompNotEqExpr(node);
+	        node.getLValue().apply(this);
 	    }
-
-	    @Override
-	    public void caseACondBlockExpr(ACondBlockExpr node)
+	    if(node.getExpr() != null)
 	    {
-	        inACondBlockExpr(node);
-	        if(node.getExpr() != null)
-	        {
-	            node.getExpr().apply(this);
-	        }
-	        outACondBlockExpr(node);
+	        node.getExpr().apply(this);
 	    }
-
-	    @Override
-	    public void caseAPlusExpr(APlusExpr node)
+	    outALValueArrayLValueArray(node);
+	}
+	
+	@Override
+	public void caseACondOrExpr(ACondOrExpr node)
+	{
+	    inACondOrExpr(node);
+	    if(node.getLeft() != null)
 	    {
-	        inAPlusExpr(node);
-	        if(node.getLeft() != null)
-	        {
-	        	
-	            node.getLeft().apply(this);
-	        }
-	        String left=mtype;
-	        if(node.getRight() != null)
-	        {
-	            node.getRight().apply(this);
-	        }
-	        String right=mtype;
-	        //if(!left.equals(right))
-	        //	error+="Wrong Plus Expression!\n";
-	        exprtype="int";
-	        String code_line=help.genquad("+",left,right,"_");
-	        help.instruction_list.add(code_line);
-	        outAPlusExpr(node);
+	        node.getLeft().apply(this);
 	    }
-
-	    @Override
-	    public void caseAMinusExpr(AMinusExpr node)
+	    if(node.getRight() != null)
 	    {
-	        inAMinusExpr(node);
-	        if(node.getLeft() != null)
-	        {
-	            node.getLeft().apply(this);
-	        }
-	        String left=mtype;
-	        if(node.getRight() != null)
-	        {
-	            node.getRight().apply(this);
-	        }
-	        String right=mtype;
-	      //  if(!left.equals(right))
-	        //	error+="Wrong Minus Expression!"+left+" "+right+"\n";
-	        exprtype="int";
-	        String code_line=help.genquad("-",left,right,"_");
-	        help.instruction_list.add(code_line);
-	        outAMinusExpr(node);
+	        node.getRight().apply(this);
 	    }
-
-	    @Override
-	    public void caseAMultExpr(AMultExpr node)
+	    outACondOrExpr(node);
+	}
+	
+	@Override
+	public void caseACompAndExpr(ACompAndExpr node)
+	{
+	    inACompAndExpr(node);
+	    if(node.getLeft() != null)
 	    {
-	        inAMultExpr(node);
-	        if(node.getLeft() != null)
-	        {
-	            node.getLeft().apply(this);
-	        }
-	        String left=mtype;
-	        if(node.getRight() != null)
-	        {
-	            node.getRight().apply(this);
-	        }
-	        String right=mtype;
-	        //if(!left.equals(right))
-	        //	error+="Wrong Mult Expression!\n";
-	        exprtype="int";
-	        String code_line=help.genquad("*",left,right,"_");
-	        help.instruction_list.add(code_line);
-	        outAMultExpr(node);
+	        node.getLeft().apply(this);
 	    }
-
-	    @Override
-	    public void caseASlashExpr(ASlashExpr node)
+	    if(node.getRight() != null)
 	    {
-	        inASlashExpr(node);
-	        if(node.getLeft() != null)
-	        {
-	            node.getLeft().apply(this);
-	        }
-	        String left=mtype;
-	        System.out.println("Odws vrika value "+left+ " "+ mtype);
-	        if(node.getRight() != null)
-	        {
-	            node.getRight().apply(this);
-	        }
-	        String right=mtype;
-	        //if(!left.equals(right))
-	        //	error+="Wrong Slash Expression!\n";
-	        exprtype="int";
-	        String code_line=help.genquad("/",left,right,"_");
-	        help.instruction_list.add(code_line);
-	        outASlashExpr(node);
+	        node.getRight().apply(this);
 	    }
-
-	    @Override
-	    public void caseAModExpr(AModExpr node)
+	    outACompAndExpr(node);
+	}
+	
+	@Override
+	public void caseACompEqExpr(ACompEqExpr node)
+	{
+	    inACompEqExpr(node);
+	    if(node.getLeft() != null)
 	    {
-	        inAModExpr(node);
-	        if(node.getLeft() != null)
-	        {
-	            node.getLeft().apply(this);
-	        }
-	        String left=mtype;
-	        if(node.getRight() != null)
-	        {
-	            node.getRight().apply(this);
-	        }
-	        String right=mtype;
-	        //if(!left.equals(right))
-	        //	error+="Wrong Mod Expression!\n";
-	        exprtype="int";
-	        String code_line=help.genquad("mod",left,right,"_");
-	        help.instruction_list.add(code_line);
-	        outAModExpr(node);
+	        node.getLeft().apply(this);
 	    }
-
-	    @Override
-	    public void caseADivExpr(ADivExpr node)
+	    if(node.getRight() != null)
 	    {
-	        inADivExpr(node);
-	        if(node.getLeft() != null)
-	        {
-	            node.getLeft().apply(this);
-	        }
-	        String left=mtype;
-	        if(node.getRight() != null)
-	        {
-	            node.getRight().apply(this);
-	        }
-	        String right=mtype;
-	        //if(!left.equals(right))
-	        //	error+="Wrong Div Expression!\n";
-	        exprtype="int";
-	        System.out.println("Odws vrika value "+left+ " "+ mtype);
-	        String code_line=help.genquad("div",left,right,"_");
-	        help.instruction_list.add(code_line);
-	        outADivExpr(node);
+	        node.getRight().apply(this);
 	    }
-
-	    @Override
-	    public void caseATermIntExpr(ATermIntExpr node)
+	    outACompEqExpr(node);
+	}
+	
+	@Override
+	public void caseACompNotEqExpr(ACompNotEqExpr node)
+	{
+	    inACompNotEqExpr(node);
+	    if(node.getExpr() != null)
 	    {
-	        inATermIntExpr(node);
-	        if(node.getInteger() != null)
-	        {
-	            mtype=node.getInteger().toString();
-	            System.out.println("Bika edw kai vrika value "+mtype);
-	        }
-	        outATermIntExpr(node);
+	        node.getExpr().apply(this);
 	    }
-
-	    @Override
-	    public void caseATermCharExpr(ATermCharExpr node)
+	    outACompNotEqExpr(node);
+	}
+	
+	@Override
+	public void caseACondBlockExpr(ACondBlockExpr node)
+	{
+	    inACondBlockExpr(node);
+	    if(node.getExpr() != null)
 	    {
-	        inATermCharExpr(node);
-	        if(node.getConstChar() != null)
-	        {
-	            mtype=node.getConstChar().toString();
-	        }
-	        outATermCharExpr(node);
+	        node.getExpr().apply(this);
 	    }
-
-	    @Override
-	    public void caseATermValExpr(ATermValExpr node)
+	    outACondBlockExpr(node);
+	}
+	
+	@Override
+	public void caseAPlusExpr(APlusExpr node)
+	{
+	    inAPlusExpr(node);
+	    String left="";
+	    String right="";
+	    if(node.getLeft() != null)
 	    {
-	        inATermValExpr(node);
-	        if(node.getLValue() != null)
-	        {
-	            node.getLValue().apply(this);
-	        }
-	        outATermValExpr(node);
+	        node.getLeft().apply(this);
+	        left=mtype;
 	    }
-
-	    @Override
-	    public void caseAPlusMinusExpExpr(APlusMinusExpExpr node)
+	    if(node.getRight() != null)
 	    {
-	        inAPlusMinusExpExpr(node);
-	        if(node.getExpr() != null)
-	        {
-	            node.getExpr().apply(this);
-	        }
-	        outAPlusMinusExpExpr(node);
+	        node.getRight().apply(this);
+	        right=mtype;
 	    }
-
-	    @Override
-	    public void caseAFuncCallExpr(AFuncCallExpr node)
+	    register++;
+	    String code_line=help.genquad("+",left,right,"$"+register);
+	    mtype="$"+register;
+        help.instruction_list.add(code_line);
+	    outAPlusExpr(node);
+	}
+	
+	@Override
+	public void caseAMinusExpr(AMinusExpr node)
+	{
+	    inAMinusExpr(node);
+	    String left="";
+	    String right="";
+	    if(node.getLeft() != null)
 	    {
-	        inAFuncCallExpr(node);
-	        if(node.getFuncCall() != null)
-	        {
-	            node.getFuncCall().apply(this);
-	        }
-	        outAFuncCallExpr(node);
+	        node.getLeft().apply(this);
+	        left=mtype;
 	    }
-
-	    @Override
-	    public void caseATermExprExpr(ATermExprExpr node)
+	    if(node.getRight() != null)
 	    {
-	        inATermExprExpr(node);
-	        if(node.getExpr() != null)
-	        {
-	            node.getExpr().apply(this);
-	        }
-	        outATermExprExpr(node);
+	        node.getRight().apply(this);
+	        right=mtype;
 	    }
-
+	    register++;
+	    String code_line=help.genquad("-",left,right,"$"+register);
+        help.instruction_list.add(code_line);
+        mtype="$"+register;
+	    outAMinusExpr(node);
+	}
+	
+	@Override
+	public void caseAMultExpr(AMultExpr node)
+	{
+	    inAMultExpr(node);
+	    String left="";
+	    String right="";
+	    if(node.getLeft() != null)
+	    {
+	        node.getLeft().apply(this);
+	        left=mtype;
+	    }
+	    if(node.getRight() != null)
+	    {
+	        node.getRight().apply(this);
+	        right=mtype;
+	    }
+	    register++;
+	    String code_line=help.genquad("*",left,right,"$"+register);
+        help.instruction_list.add(code_line);
+        mtype="$"+register;
+	    outAMultExpr(node);
+	}
+	
+	@Override
+	public void caseASlashExpr(ASlashExpr node)
+	{
+	    inASlashExpr(node);
+	    String left="";
+	    String right="";
+	    if(node.getLeft() != null)
+	    {
+	        node.getLeft().apply(this);
+	        left=mtype;
+	    }
+	    if(node.getRight() != null)
+	    {
+	        node.getRight().apply(this);
+	        right=mtype;
+	    }
+	    register++;
+	    String code_line=help.genquad("/",left,right,"$"+register);
+        help.instruction_list.add(code_line);
+        mtype="$"+register;
+	    outASlashExpr(node);
+	}
+	
+	@Override
+	public void caseAModExpr(AModExpr node)
+	{
+	    inAModExpr(node);
+	    String left="";
+	    String right="";
+	    if(node.getLeft() != null)
+	    {
+	        node.getLeft().apply(this);
+	        left=mtype;
+	    }
+	    if(node.getRight() != null)
+	    {
+	        node.getRight().apply(this);
+	        right=mtype;
+	    }
+	    register++;
+	    String code_line=help.genquad("mod",left,right,"$"+register);
+        help.instruction_list.add(code_line);
+        mtype="$"+register;
+	    outAModExpr(node);
+	}
+	
+	@Override
+	public void caseADivExpr(ADivExpr node)
+	{
+	    inADivExpr(node);
+	    String left="";
+	    String right="";
+	    if(node.getLeft() != null)
+	    {
+	        node.getLeft().apply(this);
+	        left=mtype;
+	    }
+	    if(node.getRight() != null)
+	    {
+	        node.getRight().apply(this);
+	        right=mtype;
+	    }
+	    register++;
+	    String code_line=help.genquad("div",left,right,"$"+register);
+        help.instruction_list.add(code_line);
+        mtype="$"+register;
+	    outADivExpr(node);
+	}
+	
+	@Override
+	public void caseATermIntExpr(ATermIntExpr node)
+	{
+	    inATermIntExpr(node);
+	    if(node.getInteger() != null)
+	    {
+	        node.getInteger().apply(this);
+	        mtype=node.getInteger().toString();
+	    }
+	    outATermIntExpr(node);
+	}
+	
+	@Override
+	public void caseATermCharExpr(ATermCharExpr node)
+	{
+	    inATermCharExpr(node);
+	    if(node.getConstChar() != null)
+	    {
+	        node.getConstChar().apply(this);
+	        mtype=node.getConstChar().toString();
+	    }
+	    outATermCharExpr(node);
+	}
+	
+	@Override
+	public void caseATermValExpr(ATermValExpr node)
+	{
+	    inATermValExpr(node);
+	    if(node.getLValue() != null)
+	    {
+	        node.getLValue().apply(this);
+	    }
+	    outATermValExpr(node);
+	}
+	
+	@Override
+	public void caseAPlusMinusExpExpr(APlusMinusExpExpr node)
+	{
+	    inAPlusMinusExpExpr(node);
+	    if(node.getExpr() != null)
+	    {
+	        node.getExpr().apply(this);
+	    }
+	    outAPlusMinusExpExpr(node);
+	}
+	
+	@Override
+	public void caseAFuncCallExpr(AFuncCallExpr node)
+	{
+	    inAFuncCallExpr(node);
+	    if(node.getFuncCall() != null)
+	    {
+	        node.getFuncCall().apply(this);
+	    }
+	    outAFuncCallExpr(node);
+	}
+	
+	@Override
+	public void caseATermExprExpr(ATermExprExpr node)
+	{
+	    inATermExprExpr(node);
+	    if(node.getExpr() != null)
+	    {
+	        node.getExpr().apply(this);
+	    }
+	    outATermExprExpr(node);
+	}
 }
+	
