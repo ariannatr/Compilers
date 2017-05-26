@@ -18,6 +18,8 @@ public class Collector extends DepthFirstAdapter {
 	public String mtype="";
 	public ArrayList<VarSum> paramtemp=null;
 	public int bcounter=0;
+	public int bcounter2=0;
+	public int bcounter3=0;
 	public FunctionSum standar_library= new FunctionSum("standard");
 
 	public String create_type(String vartype,int counter)
@@ -589,23 +591,21 @@ public class Collector extends DepthFirstAdapter {
 	        String left="";
 	        String right="";
 	        bcounter=0;
-	        int bcounter2=0;
+	        bcounter2=0;
 	        if(node.getLValue() != null)
 	        {
 	        	node.getLValue().apply(this);
 	            left=mtype;
 	        }
-	        bcounter2=bcounter;
 	        bcounter=0;
+	        bcounter3=0;
 	        if(node.getExpr() != null)
 	        {
 	            node.getExpr().apply(this);
 	            right=mtype;
 	        }
-	        /*
-	        System.err.println(bcounter2 +" "+bcounter);
-	        if(bcounter2!=bcounter && bcounter!=0)
-	        	error+="Wrong on Lvalue between arrays\n";*/
+	        if(bcounter2<bcounter3)
+	        	error+="Bigger Dimension on array than Expected\n";
 	        left=left.replaceAll(" ","");
 	        right=right.replaceAll(" ","");
 	        if(!left.equals(right))
@@ -747,14 +747,19 @@ public class Collector extends DepthFirstAdapter {
 	            for(PExpr e : copy)
 	            {
 	            	bcounter=0;
+	            	bcounter2=0;
+		            bcounter3=0;
 	                e.apply(this);
 	                String temp=exprtype;
-	               
+	             
+	                
 	                if(i>=ftemp.arg.size())
 	                {
 	                	error+="Wrong functioncall "+ftemp.name+" with more arguments than expected!\n";
 	                	return;
 	            	}
+	                if(bcounter3!=0 &&bcounter2<bcounter3)
+	                	error+="Used array with bigger dimension than expected\n";
 	                
 	                VarSum vartemp=ftemp.arg.get(i);
 	                String currenttype=vartemp.type;
@@ -764,7 +769,7 @@ public class Collector extends DepthFirstAdapter {
 	                {
 	                	int num=i+1;
 	                	error+="Different expression type in argument "+num+" in function call "+ftemp.name+"\n";
-	                	error+=temp+currenttype+" "+bcounter+"\n";
+	                	
 
 	                }
 	                i++;
@@ -887,7 +892,12 @@ public class Collector extends DepthFirstAdapter {
 	            	if(mtype.equals("NULL"))
 	            	{
 	            		FunctionSum ftemp=current.belongs;
-	            		mtype=ftemp.findvariabletype(var);
+	            		if(ftemp==null)
+	            		{
+	            			error+="Variable "+var+" isnt declared!\n";
+	            			return;
+	            		}
+	            		mtype=ftemp.findvariabletype(var);            		
 	            		if(mtype.equals("NULL"))
 	            		{
 	            			mtype=ftemp.findparametertype(var);
@@ -942,6 +952,8 @@ public class Collector extends DepthFirstAdapter {
                 }
             }
              bcounter=counter; 
+             if(bcounter2==0)
+            	 bcounter2=counter;
 	        if(node.getExpr() != null)
 	        {
 	            node.getExpr().apply(this);
@@ -951,6 +963,7 @@ public class Collector extends DepthFirstAdapter {
 	            	error+="Wrong type of value in brackets of array\n";
 	            }
 	            bcounter--;
+	            bcounter3++;
 	            mtemp=create_type(mtemp,bcounter);
 	        }
 	        mtype=mtemp;
