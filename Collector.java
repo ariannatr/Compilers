@@ -82,34 +82,34 @@ public class Collector extends DepthFirstAdapter {
 		standar_library.fun.add(fun9);
 		FunctionSum fun10 = new FunctionSum("strlen");
 		fun10.type="int";
-		VarSum var10=new VarSum("s","char");
+		VarSum var10=new VarSum("s","char[]");
 		var10.ref="char";//
 		fun10.arg.add(var10);
 		standar_library.fun.add(fun10);
 		FunctionSum fun11 = new FunctionSum("strcmp");
 		fun11.type="int";
-		VarSum var11a=new VarSum("s1","char");
+		VarSum var11a=new VarSum("s1","char[]");
 		var11a.ref="char";//
 		fun11.arg.add(var11a);
-		VarSum var11b=new VarSum("s2","char");
+		VarSum var11b=new VarSum("s2","char[]");
 		var11b.ref="char";//
 		fun11.arg.add(var11b);
 		standar_library.fun.add(fun11);
 		FunctionSum fun12 = new FunctionSum("strcpy");
 		fun12.type="nothing";
-		VarSum var12a=new VarSum("s1","char");
+		VarSum var12a=new VarSum("s1","char[]");
 		var12a.ref="char";//
 		fun12.arg.add(var12a);
-		VarSum var12b=new VarSum("s2","char");
+		VarSum var12b=new VarSum("s2","char[]");
 		var12b.ref="char";//
 		fun12.arg.add(var12b);
 		standar_library.fun.add(fun12);
 		FunctionSum fun13 = new FunctionSum("strcat");
 		fun13.type="nothing";
-		VarSum var13a=new VarSum("s1","char");
+		VarSum var13a=new VarSum("s1","char[]");
 		var13a.ref="char";//
 		fun13.arg.add(var13a);
-		VarSum var13b=new VarSum("s2","char");
+		VarSum var13b=new VarSum("s2","char[]");
 		var13b.ref="char";//
 		fun13.arg.add(var13b);
 		standar_library.fun.add(fun13);
@@ -373,6 +373,8 @@ public class Collector extends DepthFirstAdapter {
 	        if(!current.findparameter(v.name))
 	        {
 	        	current.arg.add(v);
+	        	System.out.println("Prosthetw tin parametro name= "+v.name+" type= "+v.type);
+
 	        }
 	        else
 	        {
@@ -409,6 +411,7 @@ public class Collector extends DepthFirstAdapter {
 	        if(!current.findparameter(v.name))
 	        {
 	        	current.arg.add(v);
+	        	System.out.println("Prosthetw tin parametro name= "+v.name+" type= "+v.type);
 	        }
 	        else
 	        {
@@ -447,20 +450,21 @@ public class Collector extends DepthFirstAdapter {
 	            if(counter>0)
 	            	vartype=create_type(vartype,counter);
 	        }
-	        if(node.getFparDef() != null)
-	        {
-	            node.getFparDef().apply(this);
-	        }
 	        VarSum v=new VarSum(varname,vartype);
 	        v.ref=ref;
 	       	if(!current.findparameter(v.name))
 	        {
 	        	current.arg.add(v);
+	        	System.out.println("Prosthetw tin parametro name= "+v.name+" type= "+v.type);
 	        }
 	        else
 	        {
 	           	error+="Error:The parameter "+v.name+" already exists !\n";
 	        	
+	        }
+	        if(node.getFparDef() != null)
+	        {
+	            node.getFparDef().apply(this);
 	        }
 	        outAFparDef3FparDef(node);
 	    }
@@ -762,13 +766,14 @@ public class Collector extends DepthFirstAdapter {
 	                	error+="Used array with bigger dimension than expected\n";
 	                
 	                VarSum vartemp=ftemp.arg.get(i);
+	                System.out.println("Zitisa tin parametro "+i+" epistrafike (onoma= "+vartemp.name+", type = "+vartemp.type);
 	                String currenttype=vartemp.type;
 	                currenttype=currenttype.replaceAll(" ","");
 	                temp=temp.replaceAll(" ","");
 	                if(!temp.equals(currenttype))
 	                {
 	                	int num=i+1;
-	                	error+="Different expression type in argument "+num+" in function call "+ftemp.name+"\n";
+	                	error+="Different expression type in argument "+num+" in function call "+ftemp.name+" (it was declared "+currenttype+" "+vartemp.name+",but the one used is "+temp+")\n";
 	                	
 
 	                }

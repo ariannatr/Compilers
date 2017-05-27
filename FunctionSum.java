@@ -20,6 +20,57 @@ public class FunctionSum
 		fun= new ArrayList<FunctionSum>();
 	}
 
+
+	public FunctionSum get_function_from_Symboltable(String function_name)
+	{
+		System.out.println("Psaxnw sto symboltable tin sunartisi "+function_name+"kai twra eimi stin "+this.name);
+		if(this.name.replaceAll(" ","").equals(function_name.replaceAll(" ","")))
+		{
+
+			return this;
+		}
+		for(FunctionSum function:this.fun)
+		{
+			//Iterator<FunctionSum> itr=this.fun.iterator();
+			//while(itr.hasNext())
+			//{
+			//	FunctionSum ret=itr.next();
+				String  comp=function.name.replaceAll(" ","");
+				if(comp.equals(function_name.replaceAll(" ","")))
+				{
+					return function;
+				}
+				else
+					return function.get_function_from_Symboltable(function_name);   
+			//}
+		}
+		return null;
+
+	}
+
+	public boolean get_variable_ref(int var)
+	{
+		System.out.println("Psaxnw stin sunartisi "+this.name+"tin parametro "+Integer.toString(var));
+		int num=0;
+		Iterator<VarSum> itr=this.arg.iterator();
+		while(itr.hasNext())
+		{
+			VarSum ret=itr.next();
+			if(num==var)
+			{	
+				if(!ret.ref.replaceAll(" ","").equals(""))
+					return true;
+				else
+					return false;
+			}   
+			num++;
+		}
+		System.out.println("Den eprepe n bainw edw");
+		return false;
+	}
+
+
+
 	public boolean findparameter(String var)
 	{
 		Iterator<VarSum> itr=this.arg.iterator();
