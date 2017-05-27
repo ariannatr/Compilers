@@ -111,11 +111,9 @@ public class FunctionSum
 			return true;
 		for(FunctionSum fa:fun)
 		{
-			System.out.println("fun1 "+fa.name+ " to compare "+na);
 			String comp=fa.name.replaceAll(" ","");
 			if(comp.equals(na2))
 			{
-				System.out.println("found");
 				return true;
 			}
 		}

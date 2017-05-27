@@ -195,10 +195,10 @@ cond_not{->expr}=
   {comp_not_expr} cond_eq {->cond_eq.expr};
 
 cond_eq{->expr}=
-  {comp_eq} [left]:expr compare_rel_operators [right]:expr{->New expr.comp_eq(left.expr,right.expr)}|
+  {comp_eq} [left]:expr compare_rel_operators [right]:expr{->New expr.comp_eq(left.expr,compare_rel_operators,right.expr)}|
   {cond_block} l_par cond r_par{-> cond.expr};
 
-compare_rel_operators = 
+compare_rel_operators= 
   {eq}equal |
   {neq}neq|
   {hashtag} hashtag |
@@ -329,12 +329,21 @@ l_value =
 l_value_array=
   {l_value_array}l_value expr ;
 
+compare_rel_operators= 
+  {eq}equal |
+  {neq}neq|
+  {hashtag} hashtag |
+  {lt} lt |
+  {gt} gt |
+  {lteq} lteq |
+  {gteq} gteq ;
+
 /* Expressions */
 
 expr =
   {cond_or} [left]:expr [right]:expr|
   {comp_and} [left]:expr [right]:expr|
-  {comp_eq} [left]:expr [right]:expr|
+  {comp_eq} [left]:expr compare_rel_operators [right]:expr|
   {comp_not_eq} expr |
   {cond_block} expr |
   {plus}[left]:expr  [right]:expr|

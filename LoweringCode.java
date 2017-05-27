@@ -1,4 +1,5 @@
 package compiler;
+import java.io.IOException;
 import java.util.*;
 import compiler.analysis.DepthFirstAdapter;
 import compiler.node.*;
@@ -353,14 +354,24 @@ public class LoweringCode extends DepthFirstAdapter {
 	public void caseAIfStmt(AIfStmt node)
 	{
 	    inAIfStmt(node);
+	    String left="";
+	    String right="";
 	    if(node.getCondition() != null)
 	    {
 	        node.getCondition().apply(this);
+	        left=mtype;
 	    }
+	    String dest=""+help.nextquad();
+	    String code_line=help.genquad("jump","-","-","*");
+	    help.instruction_list.add(code_line);
+        String dest2=""+help.nextquad();
+        help.modifiyquad(left,dest2);
 	    if(node.getStatement() != null)
 	    {
 	        node.getStatement().apply(this);
-	    }
+	        right=""+help.nextquad();
+	    } 
+	    help.modifiyquad(dest, right);
 	    outAIfStmt(node);
 	}
 	
@@ -368,14 +379,24 @@ public class LoweringCode extends DepthFirstAdapter {
 	public void caseAIfElseStmt(AIfElseStmt node)
 	{
 	    inAIfElseStmt(node);
+	    String left="";
+	    String right="";
 	    if(node.getCondition() != null)
 	    {
 	        node.getCondition().apply(this);
+	        left=mtype;
 	    }
+	    String dest=""+help.nextquad();
+	    String code_line=help.genquad("jump","-","-","*");
+	    help.instruction_list.add(code_line);
+        String dest2=""+help.nextquad();
+        help.modifiyquad(left,dest2);
 	    if(node.getThen() != null)
 	    {
 	        node.getThen().apply(this);
+	        right=""+help.nextquad();
 	    }
+	    help.modifiyquad(dest, right);
 	    if(node.getElse() != null)
 	    {
 	        node.getElse().apply(this);
@@ -591,14 +612,25 @@ public class LoweringCode extends DepthFirstAdapter {
 	public void caseACondOrExpr(ACondOrExpr node)
 	{
 	    inACondOrExpr(node);
+	    String left="";
+	    String right="";
 	    if(node.getLeft() != null)
 	    {
 	        node.getLeft().apply(this);
+	        left=mtype;
 	    }
+	    System.out.println(left+"<-");
+	    String dest=""+help.nextquad();
+	    String code_line=help.genquad("jump","-","-","*");
+	    help.instruction_list.add(code_line);
+	    String dest2=""+help.nextquad();
 	    if(node.getRight() != null)
 	    {
 	        node.getRight().apply(this);
+	        right=""+help.nextquad();
 	    }
+	    help.modifiyquad(dest,dest2);
+	    mtype=right;
 	    outACondOrExpr(node);
 	}
 	
@@ -621,14 +653,27 @@ public class LoweringCode extends DepthFirstAdapter {
 	public void caseACompEqExpr(ACompEqExpr node)
 	{
 	    inACompEqExpr(node);
+	    String left="";
+	    String right="";
+	    String coop="";
 	    if(node.getLeft() != null)
 	    {
 	        node.getLeft().apply(this);
+	        left=mtype;
+	    }
+	    if(node.getCompareRelOperators() != null)
+	    {
+	        coop=node.getCompareRelOperators().toString();
 	    }
 	    if(node.getRight() != null)
 	    {
 	        node.getRight().apply(this);
+	        right=mtype;
 	    }
+	    mtype=""+help.nextquad();//<------------notsure
+	    String code_line=help.genquad(coop,left,right,"*");
+        help.instruction_list.add(code_line);
+        
 	    outACompEqExpr(node);
 	}
 	
@@ -859,5 +904,87 @@ public class LoweringCode extends DepthFirstAdapter {
 	    }
 	    outATermExprExpr(node);
 	}
+
+	    @Override
+	    public void caseAEqCompareRelOperators(AEqCompareRelOperators node)
+	    {
+	        inAEqCompareRelOperators(node);
+	        if(node.getEqual() != null)
+	        {
+	            node.getEqual().apply(this);
+	        }
+	        outAEqCompareRelOperators(node);
+	    }
+
+
+	    @Override
+	    public void caseANeqCompareRelOperators(ANeqCompareRelOperators node)
+	    {
+	        inANeqCompareRelOperators(node);
+	        if(node.getNeq() != null)
+	        {
+	            node.getNeq().apply(this);
+	        }
+	        outANeqCompareRelOperators(node);
+	    }
+
+	    @Override
+	    public void caseAHashtagCompareRelOperators(AHashtagCompareRelOperators node)
+	    {
+	        inAHashtagCompareRelOperators(node);
+	        if(node.getHashtag() != null)
+	        {
+	            node.getHashtag().apply(this);
+	        }
+	        outAHashtagCompareRelOperators(node);
+	    }
+
+	    @Override
+	    public void caseALtCompareRelOperators(ALtCompareRelOperators node)
+	    {
+	        inALtCompareRelOperators(node);
+	        if(node.getLt() != null)
+	        {
+	            node.getLt().apply(this);
+	        }
+	        outALtCompareRelOperators(node);
+	    }
+
+	    @Override
+	    public void caseAGtCompareRelOperators(AGtCompareRelOperators node)
+	    {
+	        inAGtCompareRelOperators(node);
+	        if(node.getGt() != null)
+	        {
+	            node.getGt().apply(this);
+	        }
+	        outAGtCompareRelOperators(node);
+	    }
+
+
+	    @Override
+	    public void caseALteqCompareRelOperators(ALteqCompareRelOperators node)
+	    {
+	        inALteqCompareRelOperators(node);
+	        if(node.getLteq() != null)
+	        {
+	            node.getLteq().apply(this);
+	        }
+	        outALteqCompareRelOperators(node);
+	    }
+
+
+	    @Override
+	    public void caseAGteqCompareRelOperators(AGteqCompareRelOperators node)
+	    {
+	        inAGteqCompareRelOperators(node);
+	        if(node.getGteq() != null)
+	        {
+	            node.getGteq().apply(this);
+	        }
+	        outAGteqCompareRelOperators(node);
+	    }
 }
 	
+
+

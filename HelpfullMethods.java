@@ -19,7 +19,7 @@ public class HelpfullMethods
 	}
 
 	public String genquad(String op,String x,String y,String z)
-	{
+	{	
 		String value=Integer.toString(instruction_num)+": "+op+","+x+","+y+","+z+"\n";
 		instruction_num++;
 		return value;
@@ -46,8 +46,7 @@ public class HelpfullMethods
 			String ret=itr.next();
 			if(ret.substring(0,1).equals(num))
 			{
-				ret=ret.replaceAll("_",value);
-				System.out.println("Vrika auto p thelw na antikatastisw");
+				ret=ret.replaceAll("\\*",value);
 				this.instruction_list.set(Integer.parseInt(num)-1,ret);
 				return;
 			}
