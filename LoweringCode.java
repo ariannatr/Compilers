@@ -1,5 +1,4 @@
 package compiler;
-import java.io.IOException;
 import java.util.*;
 import compiler.analysis.DepthFirstAdapter;
 import compiler.node.*;
@@ -14,8 +13,8 @@ public class LoweringCode extends DepthFirstAdapter {
 	public int register=0;
 	public HelpfullMethods help;
 	public FunctionSum symboltable;
-	ArrayList<String> conditions;//=new ArrayList<String>();
-	ArrayList<String> jumps;//=new ArrayList<String>();	
+	ArrayList<String> conditions=new ArrayList<String>();
+	ArrayList<String> jumps=new ArrayList<String>();	
 	ArrayList<String> operator;
 
 	LoweringCode(FunctionSum symboltable,FunctionSum library)
@@ -373,11 +372,8 @@ public class LoweringCode extends DepthFirstAdapter {
 	    conditions2=conditions;
 	    jumps2=jumps;
 	    operator2=operator;
-	   // String dest=""+help.nextquad();
-	   // String code_line=help.genquad("jump","-","-","*");
-	   // help.instruction_list.add(code_line);
-       // String dest2=""+help.nextquad();
-       // help.modifiyquad(left,dest2);
+	    for(String s :operator2)
+	    	System.out.println(s+"<000000");
 	    if(node.getStatement() != null)
 	    {
 	        node.getStatement().apply(this);
@@ -388,12 +384,75 @@ public class LoweringCode extends DepthFirstAdapter {
 	    {
 	    	if(i<operator2.size())
 	    	{
-	    		System.out.println("Condition "+conditions2.get(i)+" Jumps "+jumps2.get(i));
+	    		System.out.println("Condition "+conditions2.get(i)+" Jumps "+jumps2.get(i)+" op "+operator2.get(i));
 	    		if(operator2.get(i).equals("or"))
 	    		{
+	    			System.out.println("BIKA OR");
 	    			help.modifiyquad(conditions2.get(i),left);
 	    			String where=conditions2.get(i+1);
 	    			help.modifiyquad(jumps2.get(i),where);//
+	    		}
+	    		else if(operator2.get(i).equals("and"))
+	    		{
+	    			System.out.println("BIKA AND");
+	    			String where=conditions2.get(i+1);
+	    			System.out.println("After and Where is "+where+" and we will place it at "+conditions2.get(i));
+	    			help.modifiyquad(conditions2.get(i),where);
+	    			help.modifiyquad(jumps2.get(i),right);
+	    		}
+
+	    	}
+	    	else
+	    	{
+				System.out.println("Condition "+conditions2.get(i)+" Jumps "+jumps2.get(i)+" "+left);
+//	    		String where=Integer.toString(Integer.parseInt(conditions2.get(i))+1);
+				int k=Integer.parseInt(jumps2.get(i))+1;
+	    		help.modifiyquad(conditions2.get(i)," "+k);
+	    		help.modifiyquad(jumps2.get(i),right);
+	    	}
+	    }
+	    mtype=right;
+	    //help.modifiyquad(dest, right);
+	    outAIfStmt(node);
+	}
+	
+	@Override
+	public void caseAIfElseStmt(AIfElseStmt node)
+	{
+	    inAIfElseStmt(node);
+	    String left="";
+	    String right="";
+	    conditions=new ArrayList<String>();
+  		jumps=new ArrayList<String>();	
+  		operator=new ArrayList<String>();
+  		ArrayList<String> conditions2;//=new ArrayList<String>();
+  		ArrayList<String> jumps2;//=new ArrayList<String>();	
+  		ArrayList<String> operator2;//=new ArrayList<String>();   
+	    if(node.getCondition() != null)
+	    {
+	        node.getCondition().apply(this);
+	        left=mtype;
+	    }
+	    
+	    conditions2=conditions;
+	    jumps2=jumps;
+	    operator2=operator;
+	    if(node.getThen() != null)
+	    {
+	        node.getThen().apply(this);
+	        right=""+(help.nextquad()+1);
+	    }
+	    for(int i=0;i<conditions2.size();i++)
+	    {
+	    	if(i<operator2.size())
+	    	{
+	    		System.out.println("Condition "+conditions2.get(i)+" Jumps "+jumps2.get(i)+" op "+operator2.get(i));
+	    		if(operator2.get(i).equals("or"))
+	    		{
+	  
+	    			help.modifiyquad(conditions2.get(i),left);
+	    			String where=conditions2.get(i+1);
+	    			help.modifiyquad(jumps2.get(i),where);
 	    		}
 	    		else if(operator2.get(i).equals("and"))
 	    		{
@@ -406,44 +465,21 @@ public class LoweringCode extends DepthFirstAdapter {
 	    	}
 	    	else
 	    	{
-				System.out.println("Condition "+conditions2.get(i)+" Jumps "+jumps2.get(i));
-//	    		String where=Integer.toString(Integer.parseInt(conditions2.get(i))+1);
-	    		help.modifiyquad(conditions2.get(i),left);
+				System.out.println("Condition "+conditions2.get(i)+" Jumps "+jumps2.get(i)+" "+left);
+				int k=Integer.parseInt(jumps2.get(i))+1;
+	    		help.modifiyquad(conditions2.get(i)," "+k);
 	    		help.modifiyquad(jumps2.get(i),right);
 	    	}
 	    }
-	    //help.modifiyquad(dest, right);
-	    outAIfStmt(node);
-	}
-	
-	@Override
-	public void caseAIfElseStmt(AIfElseStmt node)
-	{
-	    inAIfElseStmt(node);
-	    conditions=new ArrayList<String>();
-		jumps=new ArrayList<String>();	 
-	    String left="";
-	    String right="";
-	    if(node.getCondition() != null)
-	    {
-	        node.getCondition().apply(this);
-	        left=mtype;
-	    }
-	    String dest=""+help.nextquad();
+	    int place=help.nextquad();
 	    String code_line=help.genquad("jump","-","-","*");
 	    help.instruction_list.add(code_line);
-        String dest2=""+help.nextquad();
-        help.modifiyquad(left,dest2);
-	    if(node.getThen() != null)
-	    {
-	        node.getThen().apply(this);
-	        right=""+help.nextquad();
-	    }
-	    help.modifiyquad(dest, right);
 	    if(node.getElse() != null)
 	    {
 	        node.getElse().apply(this);
 	    }
+	    String where=""+help.nextquad();
+	    help.modifiyquad(""+place, where);
 	    outAIfElseStmt(node);
 	}
 	
@@ -478,12 +514,16 @@ public class LoweringCode extends DepthFirstAdapter {
 	            e.apply(this);
 	            String temp=mtype;
 	            String code_line;
-	            if(fun.get_variable_ref(num_of_param))
-	    	    	code_line=help.genquad("par",temp,"R","-");
-	            else
-					code_line=help.genquad("par",temp,"V","-");	            	
-	            help.instruction_list.add(code_line);
+	            if(fun!=null)
+	            {
+		            if(fun.get_variable_ref(num_of_param))
+		    	    	code_line=help.genquad("par",temp,"R","-");
+		            else
+						code_line=help.genquad("par",temp,"V","-");	            	
+		            help.instruction_list.add(code_line);
+	            }
 	            num_of_param++;
+	            
 	        }
 	        String code_line=help.genquad("call","-","-",left);
             help.instruction_list.add(code_line);
@@ -682,11 +722,6 @@ public class LoweringCode extends DepthFirstAdapter {
 	        node.getLeft().apply(this);
 	      //  left=mtype;
 	    }
-	  //  System.out.println(left+"<-");
-	    // String dest=""+help.nextquad();
-	    // String code_line=help.genquad("jump","-","-","*");
-	   // help.instruction_list.add(code_line);
-	 //   String dest2=""+help.nextquad();
 	    if(node.getRight() != null)
 	    {
 	        node.getRight().apply(this);
