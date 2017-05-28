@@ -327,14 +327,38 @@ public class LoweringCode extends DepthFirstAdapter {
 	public void caseAWhileStatementStmt(AWhileStatementStmt node)
 	{
 	    inAWhileStatementStmt(node);
+	    String right="";
+	    String left="";
+	    String start="";
+	    start=""+help.nextquad();
+	    conditions=new ArrayList<String>();
+  		jumps=new ArrayList<String>();	
+  		operator=new ArrayList<String>();
+  		ArrayList<String> conditions2;//=new ArrayList<String>();
+  		ArrayList<String> jumps2;//=new ArrayList<String>();
 	    if(node.getExpr() != null)
 	    {
 	        node.getExpr().apply(this);
+	        left=""+help.nextquad();
 	    }
+	    conditions2=conditions;
+	    jumps2=jumps;
 	    if(node.getStmt() != null)
 	    {
 	        node.getStmt().apply(this);
+	        right=""+help.nextquad();
 	    }
+	    for(String s:conditions2)
+	    {
+	    	help.modifiyquad(s, left);
+	    }
+	    for(String s:jumps2)
+	    {
+	    	String where=Integer.toString(Integer.parseInt(right)+1);
+	    	help.modifiyquad(s, where);
+	    }
+	    String code_line=help.genquad("jump","-","-",start);
+	    help.instruction_list.add(code_line);
 	    outAWhileStatementStmt(node);
 	}
 	

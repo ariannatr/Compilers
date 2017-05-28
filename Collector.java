@@ -348,9 +348,10 @@ public class Collector extends DepthFirstAdapter {
 	    	}
 	    	String varname="";
 	        inAFparDef1FparDef(node);
+	        String ref2="";
 	        if(node.getRef() != null)
 	        {
-	           ref=node.getRef().toString();
+	           ref2=node.getRef().toString();
 	        }
 	        if(node.getVariable() != null)
 	        {
@@ -369,7 +370,7 @@ public class Collector extends DepthFirstAdapter {
 	            	vartype=create_type(vartype,counter);
 	        }
 	        VarSum v=new VarSum(varname,vartype);
-	        v.ref=ref;
+	        v.ref=ref2;
 	        if(!current.findparameter(v.name))
 	        {
 	        	current.arg.add(v);
@@ -394,9 +395,10 @@ public class Collector extends DepthFirstAdapter {
 	    	}
 	    	String varname="";
 	        inAFparDef2FparDef(node);
+	         String ref2="";
 	        if(node.getRef() != null)
 	        {
-	           ref=node.getRef().toString();
+	           ref2=node.getRef().toString();
 	        }
 	        if(node.getVariable() != null)
 	        {
@@ -407,7 +409,7 @@ public class Collector extends DepthFirstAdapter {
 	            node.getFparDef().apply(this);
 	        }
 	        VarSum v=new VarSum(varname,vartype);
-	        v.ref=ref;
+	        v.ref=ref2;
 	        if(!current.findparameter(v.name))
 	        {
 	        	current.arg.add(v);
@@ -429,10 +431,11 @@ public class Collector extends DepthFirstAdapter {
 	        	error+="Error:Main programm sould have no parameters!\n";
 	    	}
 	    	String varname="";
+	    	String ref2="";
 	        inAFparDef3FparDef(node);
 	        if(node.getRef() != null)
 	        {
-	        	 ref=node.getRef().toString();
+	        	ref2=node.getRef().toString();
 	        }
 	        if(node.getVariable() != null)
 	        {
@@ -451,7 +454,7 @@ public class Collector extends DepthFirstAdapter {
 	            	vartype=create_type(vartype,counter);
 	        }
 	        VarSum v=new VarSum(varname,vartype);
-	        v.ref=ref;
+	        v.ref=ref2;
 	       	if(!current.findparameter(v.name))
 	        {
 	        	current.arg.add(v);
@@ -478,10 +481,11 @@ public class Collector extends DepthFirstAdapter {
 	        	error+="Error:Main programm sould have no parameters!\n";
 	    	}
 	    	String varname="";
+	    	 String ref2="";
 	        inAFparDef4FparDef(node);
 	        if(node.getRef() != null)
 	        {
-	        	 ref=node.getRef().toString();
+	        	ref2=node.getRef().toString();
 	        }
 	        if(node.getVariable() != null)
 	        {
@@ -500,7 +504,7 @@ public class Collector extends DepthFirstAdapter {
 	            	vartype=create_type(vartype,counter);
 	        }
 	        VarSum v=new VarSum(varname,vartype);
-	        v.ref=ref;
+	        v.ref=ref2;
 	        if(!current.findparameter(v.name))
 	        {
 	        	current.arg.add(v);

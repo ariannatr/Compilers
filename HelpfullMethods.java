@@ -46,7 +46,7 @@ public class HelpfullMethods
 		{
 			String ret=itr.next();
 			
-			if(ret.substring(0,1).equals(num) || ret.substring(0,2).equals(num))
+			if(ret.startsWith(num))
 			{
 				ret=ret.replaceAll("\\*",value);
 
