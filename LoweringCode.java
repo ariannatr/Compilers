@@ -13,6 +13,7 @@ public class LoweringCode extends DepthFirstAdapter {
 	public int register=0;
 	public HelpfullMethods help;
 	public FunctionSum symboltable;
+	public int myflag=0;
 	ArrayList<String> conditions=new ArrayList<String>();
 	ArrayList<String> orcond=new ArrayList<String>();
 	ArrayList<String> andjumps=new ArrayList<String>();
@@ -704,8 +705,14 @@ public class LoweringCode extends DepthFirstAdapter {
 	        node.getRight().apply(this);
 	        right=""+help.nextquad();
 	    }
-	    help.modifiyquad(jumps.get(jumps.size()-2),left);
-	    jumps.remove(jumps.size()-2);
+	    if(myflag>0 && jumps.size()>=3)
+	    {
+	    	help.modifiyquad(jumps.get(jumps.size()-3),left);
+	    	jumps.remove(jumps.size()-3);
+	    	myflag--;
+	    }
+	    	help.modifiyquad(jumps.get(jumps.size()-2),left);
+	    	jumps.remove(jumps.size()-2);
 	    mtype=right;
 	    	    System.out.println("Mtype in Or is " +mtype+" "+jumps.size());
 	   
@@ -730,9 +737,15 @@ public class LoweringCode extends DepthFirstAdapter {
 	        node.getRight().apply(this);
 	        right=""+help.nextquad();
 	    }
-	    System.out.println(conditions.size());
-	    	help.modifiyquad(conditions.get(conditions.size()-2),left);
-		    conditions.remove(conditions.size()-2);
+	    System.out.println(conditions.get(conditions.size()-2)+ " "+left+""+myflag);
+	    if(myflag>0 && conditions.size()>=3)
+	    {
+	    	help.modifiyquad(conditions.get(conditions.size()-3),left);
+	    	conditions.remove(conditions.size()-3);
+	    	myflag--;
+	    }
+    	help.modifiyquad(conditions.get(conditions.size()-2),left);
+	    conditions.remove(conditions.size()-2);
 	    mtype=right;
 	    System.out.println("Mtype And is "+mtype);
 	    outACompAndExpr(node);
@@ -785,8 +798,11 @@ public class LoweringCode extends DepthFirstAdapter {
 	public void caseACondBlockExpr(ACondBlockExpr node)
 	{
 	    inACondBlockExpr(node);
+	    System.err.println("bika");
 	    if(node.getExpr() != null)
 	    {
+	    	System.err.println("bika");
+	    	myflag++;
 	        node.getExpr().apply(this);
 	    }
 	    outACondBlockExpr(node);

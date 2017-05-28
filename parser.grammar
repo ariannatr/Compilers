@@ -196,7 +196,7 @@ cond_not{->expr}=
 
 cond_eq{->expr}=
   {comp_eq} [left]:expr compare_rel_operators [right]:expr{->New expr.comp_eq(left.expr,compare_rel_operators,right.expr)}|
-  {cond_block} l_par cond r_par{-> cond.expr};
+  {cond_block} l_par cond r_par{->New expr.cond_block(cond.expr)};
 
 compare_rel_operators= 
   {eq}equal |
