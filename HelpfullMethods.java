@@ -41,16 +41,20 @@ public class HelpfullMethods
 	public void modifiyquad(String num,String value)
 	{
 		Iterator<String> itr=this.instruction_list.iterator();
+
 		while(itr.hasNext())
 		{
 			String ret=itr.next();
-			if(ret.substring(0,1).equals(num))
+			
+			if(ret.substring(0,1).equals(num) || ret.substring(0,2).equals(num))
 			{
 				ret=ret.replaceAll("\\*",value);
+
 				this.instruction_list.set(Integer.parseInt(num)-1,ret);
 				return;
 			}
 		}
+
 		return;
 	}
 

@@ -14,6 +14,8 @@ public class LoweringCode extends DepthFirstAdapter {
 	public HelpfullMethods help;
 	public FunctionSum symboltable;
 	ArrayList<String> conditions=new ArrayList<String>();
+	ArrayList<String> orcond=new ArrayList<String>();
+	ArrayList<String> andjumps=new ArrayList<String>();
 	ArrayList<String> jumps=new ArrayList<String>();	
 	ArrayList<String> operator;
 
@@ -363,56 +365,28 @@ public class LoweringCode extends DepthFirstAdapter {
 		operator=new ArrayList<String>();
 		ArrayList<String> conditions2;//=new ArrayList<String>();
 		ArrayList<String> jumps2;//=new ArrayList<String>();	
-		ArrayList<String> operator2;//=new ArrayList<String>();      
 	    if(node.getCondition() != null)
 	    {
 	        node.getCondition().apply(this);
-	        left=mtype;
+	        left=""+help.nextquad();
 	    }
 	    conditions2=conditions;
 	    jumps2=jumps;
-	    operator2=operator;
-	    for(String s :operator2)
-	    	System.out.println(s+"<000000");
 	    if(node.getStatement() != null)
 	    {
 	        node.getStatement().apply(this);
 	        right=""+help.nextquad();
 	    }
-	    System.out.println("Condition size "+conditions2.size()+" operator size "+operator2.size()+" Jumps size "+jumps2.size());
-	    for(int i=0;i<conditions2.size();i++)
+	    for(String s:conditions2)
 	    {
-	    	if(i<operator2.size())
-	    	{
-	    		System.out.println("Condition "+conditions2.get(i)+" Jumps "+jumps2.get(i)+" op "+operator2.get(i));
-	    		if(operator2.get(i).equals("or"))
-	    		{
-	    			System.out.println("BIKA OR");
-	    			help.modifiyquad(conditions2.get(i),left);
-	    			String where=conditions2.get(i+1);
-	    			help.modifiyquad(jumps2.get(i),where);//
-	    		}
-	    		else if(operator2.get(i).equals("and"))
-	    		{
-	    			System.out.println("BIKA AND");
-	    			String where=conditions2.get(i+1);
-	    			System.out.println("After and Where is "+where+" and we will place it at "+conditions2.get(i));
-	    			help.modifiyquad(conditions2.get(i),where);
-	    			help.modifiyquad(jumps2.get(i),right);
-	    		}
-
-	    	}
-	    	else
-	    	{
-				System.out.println("Condition "+conditions2.get(i)+" Jumps "+jumps2.get(i)+" "+left);
-//	    		String where=Integer.toString(Integer.parseInt(conditions2.get(i))+1);
-				int k=Integer.parseInt(jumps2.get(i))+1;
-	    		help.modifiyquad(conditions2.get(i)," "+k);
-	    		help.modifiyquad(jumps2.get(i),right);
-	    	}
+	    	help.modifiyquad(s, left);
+	    }
+	  
+	    for(String s:jumps2)
+	    {
+	    	help.modifiyquad(s, right);
 	    }
 	    mtype=right;
-	    //help.modifiyquad(dest, right);
 	    outAIfStmt(node);
 	}
 	
@@ -426,50 +400,27 @@ public class LoweringCode extends DepthFirstAdapter {
   		jumps=new ArrayList<String>();	
   		operator=new ArrayList<String>();
   		ArrayList<String> conditions2;//=new ArrayList<String>();
-  		ArrayList<String> jumps2;//=new ArrayList<String>();	
-  		ArrayList<String> operator2;//=new ArrayList<String>();   
+  		ArrayList<String> jumps2;//=new ArrayList<String>();	  
 	    if(node.getCondition() != null)
 	    {
 	        node.getCondition().apply(this);
-	        left=mtype;
+	        left=""+help.nextquad();
 	    }
-	    
 	    conditions2=conditions;
 	    jumps2=jumps;
-	    operator2=operator;
 	    if(node.getThen() != null)
 	    {
 	        node.getThen().apply(this);
 	        right=""+(help.nextquad()+1);
 	    }
-	    for(int i=0;i<conditions2.size();i++)
+	    for(String s:conditions2)
 	    {
-	    	if(i<operator2.size())
-	    	{
-	    		System.out.println("Condition "+conditions2.get(i)+" Jumps "+jumps2.get(i)+" op "+operator2.get(i));
-	    		if(operator2.get(i).equals("or"))
-	    		{
+	    	help.modifiyquad(s, left);
+	    }
 	  
-	    			help.modifiyquad(conditions2.get(i),left);
-	    			String where=conditions2.get(i+1);
-	    			help.modifiyquad(jumps2.get(i),where);
-	    		}
-	    		else if(operator2.get(i).equals("and"))
-	    		{
-	    			String where=conditions2.get(i+1);
-	    			System.out.println("After and Where is "+where+" and we will place it at "+conditions2.get(i));
-	    			help.modifiyquad(conditions2.get(i),where);
-	    			help.modifiyquad(jumps2.get(i),right);
-	    		}
-
-	    	}
-	    	else
-	    	{
-				System.out.println("Condition "+conditions2.get(i)+" Jumps "+jumps2.get(i)+" "+left);
-				int k=Integer.parseInt(jumps2.get(i))+1;
-	    		help.modifiyquad(conditions2.get(i)," "+k);
-	    		help.modifiyquad(jumps2.get(i),right);
-	    	}
+	    for(String s:jumps2)
+	    {
+	    	help.modifiyquad(s, right);
 	    }
 	    int place=help.nextquad();
 	    String code_line=help.genquad("jump","-","-","*");
@@ -528,6 +479,7 @@ public class LoweringCode extends DepthFirstAdapter {
 	        String code_line=help.genquad("call","-","-",left);
             help.instruction_list.add(code_line);
 	    }
+	    mtype="$$";
 	    outAFuncCallFuncCall(node);
 	}
 	
@@ -714,23 +666,25 @@ public class LoweringCode extends DepthFirstAdapter {
 	public void caseACondOrExpr(ACondOrExpr node)
 	{
 	    inACondOrExpr(node);
-	    String left="";
 	    String right="";
+	    String left="";
 	    operator.add("or");
+	    System.out.println("OR");
 	    if(node.getLeft() != null)
 	    {
 	        node.getLeft().apply(this);
-	      //  left=mtype;
+	        left=""+help.nextquad();
 	    }
 	    if(node.getRight() != null)
 	    {
 	        node.getRight().apply(this);
 	        right=""+help.nextquad();
 	    }
-	   // help.modifiyquad(dest,dest2);
+	    help.modifiyquad(jumps.get(jumps.size()-2),left);
+	    jumps.remove(jumps.size()-2);
 	    mtype=right;
-	    	    System.out.println("Mtype in Or is " +mtype);
-
+	    	    System.out.println("Mtype in Or is " +mtype+" "+jumps.size());
+	   
 	    outACondOrExpr(node);
 	}
 	
@@ -739,18 +693,22 @@ public class LoweringCode extends DepthFirstAdapter {
 	{
 	    inACompAndExpr(node);
 	    operator.add("and");
+	    System.out.println("AND");
 	    String right="";
+	    String left="";
 	    if(node.getLeft() != null)
 	    {
 	        node.getLeft().apply(this);
-
+	        left=""+help.nextquad();
 	    }
 	    if(node.getRight() != null)
 	    {
 	        node.getRight().apply(this);
-	        	        right=""+help.nextquad();
-
+	        right=""+help.nextquad();
 	    }
+	    System.out.println(conditions.size());
+	    	help.modifiyquad(conditions.get(conditions.size()-2),left);
+		    conditions.remove(conditions.size()-2);
 	    mtype=right;
 	    System.out.println("Mtype And is "+mtype);
 	    outACompAndExpr(node);
