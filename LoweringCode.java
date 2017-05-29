@@ -14,6 +14,7 @@ public class LoweringCode extends DepthFirstAdapter {
 	public HelpfullMethods help;
 	public FunctionSum symboltable;
 	public int myflag=0;
+	public int flag_not=0;
 	ArrayList<String> conditions=new ArrayList<String>();
 	ArrayList<String> orcond=new ArrayList<String>();
 	ArrayList<String> andjumps=new ArrayList<String>();
@@ -402,15 +403,29 @@ public class LoweringCode extends DepthFirstAdapter {
 	        node.getStatement().apply(this);
 	        right=""+help.nextquad();
 	    }
+	    int i=0;
 	    for(String s:conditions2)
 	    {
-	    	help.modifiyquad(s, left);
+	    	if(flag_not<=0)
+	    	{
+	    		help.modifiyquad(s, left);
+	    		if(i<jumps2.size())
+	    			help.modifiyquad(jumps2.get(i),right);
+	    	}
+	    	else
+	    	{
+	    		help.modifiyquad(s, right);
+	    		if(i<jumps2.size())
+	    			help.modifiyquad(jumps2.get(i),left);	
+	    	}
+	    	flag_not--;
+	    	i++;
 	    }
 	  
-	    for(String s:jumps2)
+	   /* for(String s:jumps2)
 	    {
 	    	help.modifiyquad(s, right);
-	    }
+	    }*/
 	    mtype=right;
 	    outAIfStmt(node);
 	}
@@ -707,13 +722,23 @@ public class LoweringCode extends DepthFirstAdapter {
 	    }
 	    if(myflag>0 && jumps.size()>=3)
 	    {
-	    	help.modifiyquad(jumps.get(jumps.size()-3),left);
+	    	if(flag_not<=0)
+	    		help.modifiyquad(jumps.get(jumps.size()-3),left);
+	    	else
+				help.modifiyquad(jumps.get(jumps.size()-3),right);	    		
 	    	jumps.remove(jumps.size()-3);
 	    	myflag--;
 	    }
+	    if(flag_not<=0)
 	    	help.modifiyquad(jumps.get(jumps.size()-2),left);
-	    	jumps.remove(jumps.size()-2);
-	    mtype=right;
+	    else
+	    	help.modifiyquad(jumps.get(jumps.size()-2),right);
+	    jumps.remove(jumps.size()-2);
+	    if(flag_not<=0)
+	    	mtype=right;
+	    else
+	    	mtype=left;
+	    flag_not--;
 	    	    System.out.println("Mtype in Or is " +mtype+" "+jumps.size());
 	   
 	    outACondOrExpr(node);
@@ -740,13 +765,24 @@ public class LoweringCode extends DepthFirstAdapter {
 	    System.out.println(conditions.get(conditions.size()-2)+ " "+left+""+myflag);
 	    if(myflag>0 && conditions.size()>=3)
 	    {
-	    	help.modifiyquad(conditions.get(conditions.size()-3),left);
+	    	if(flag_not<=0)
+	    		help.modifiyquad(conditions.get(conditions.size()-3),left);
+	    	else
+	    		help.modifiyquad(conditions.get(conditions.size()-3),right);	    		
 	    	conditions.remove(conditions.size()-3);
 	    	myflag--;
 	    }
-    	help.modifiyquad(conditions.get(conditions.size()-2),left);
+	    if(flag_not<=0)
+    		help.modifiyquad(conditions.get(conditions.size()-2),left);
+	    else
+    		help.modifiyquad(conditions.get(conditions.size()-2),left);
+
 	    conditions.remove(conditions.size()-2);
-	    mtype=right;
+	    if(flag_not<=0)
+	    	mtype=right;
+	    else
+	    	mtype=left;
+	    flag_not--;
 	    System.out.println("Mtype And is "+mtype);
 	    outACompAndExpr(node);
 	}
@@ -789,6 +825,7 @@ public class LoweringCode extends DepthFirstAdapter {
 	    inACompNotEqExpr(node);
 	    if(node.getExpr() != null)
 	    {
+	    	flag_not++;
 	        node.getExpr().apply(this);
 	    }
 	    outACompNotEqExpr(node);
