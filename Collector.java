@@ -612,6 +612,7 @@ public class Collector extends DepthFirstAdapter {
 	            node.getExpr().apply(this);
 	            right=mtype;
 	        }
+	        System.out.println(bcounter2+""+bcounter3);
 	        if(bcounter2<bcounter3)
 	        	error+="Bigger Dimension on array than Expected\n";
 	        left=left.replaceAll(" ","");
@@ -770,7 +771,6 @@ public class Collector extends DepthFirstAdapter {
 	                	error+="Used array with bigger dimension than expected\n";
 	                
 	                VarSum vartemp=ftemp.arg.get(i);
-	                System.out.println("Zitisa tin parametro "+i+" epistrafike (onoma= "+vartemp.name+", type = "+vartemp.type);
 	                String currenttype=vartemp.type;
 	                currenttype=currenttype.replaceAll(" ","");
 	                temp=temp.replaceAll(" ","");
@@ -951,13 +951,16 @@ public class Collector extends DepthFirstAdapter {
 	        if(node.getLValue() != null)
 	        {
 	            node.getLValue().apply(this);
-	            
 	        }
 	        String mtemp=mtype;
+	        
+	      //  System.out.println("bika"+mtemp);
 	        int counter = 0;
             for( int i=0; i<mtemp.length(); i++ ) {
                 if( mtemp.charAt(i) == '[' ) {
-                    counter++;
+                		counter++;
+                		if(bcounter>0)
+                		bcounter3--;
                 }
             }
              bcounter=counter; 
@@ -966,6 +969,7 @@ public class Collector extends DepthFirstAdapter {
 	        if(node.getExpr() != null)
 	        {
 	            node.getExpr().apply(this);
+	            System.out.println("bika2 "+node.getExpr().toString());
 	            String exprt=exprtype.replace(" ","");
 	            if(!exprt.equals("int"))
 	            {
@@ -975,6 +979,7 @@ public class Collector extends DepthFirstAdapter {
 	            bcounter3++;
 	            mtemp=create_type(mtemp,bcounter);
 	        }
+	        
 	        mtype=mtemp;
 	        exprtype=mtype;
 	        outALValueArrayLValueArray(node);
