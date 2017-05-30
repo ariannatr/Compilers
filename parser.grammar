@@ -232,7 +232,7 @@ term {->expr} =
   {term_int} integer {-> New expr.term_int(integer)} | 
   {term_char} const_char {-> New expr.term_char(const_char)} | 
   {term_val} l_value {-> New expr.term_val(l_value)} |
-  {plus_minus_exp} plus_minus term {-> New expr.plus_minus_exp(term.expr)}|
+  {plus_minus_exp} plus_minus term {-> New expr.plus_minus_exp(plus_minus,term.expr)}|
   {func_call} func_call {-> New expr.func_call(func_call)}|
   {term_expr} l_par expr r_par {-> expr.expr};
 
@@ -337,6 +337,10 @@ compare_rel_operators=
   {gt} gt |
   {lteq} lteq |
   {gteq} gteq ;
+  
+  plus_minus = 
+  {plus} plus|
+  {minus} minus;
 
 /* Expressions */
 
@@ -355,6 +359,6 @@ expr =
   {term_int} integer | 
   {term_char} const_char | 
   {term_val} l_value |
-  {plus_minus_exp} expr|
+  {plus_minus_exp} plus_minus expr|
   {func_call} func_call|
   {term_expr} expr;

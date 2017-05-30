@@ -13,7 +13,6 @@ public class LoweringCode extends DepthFirstAdapter {
 	public int register=0;
 	public HelpfullMethods help;
 	public FunctionSum symboltable;
-	public int myflag=0;
 	ArrayList<String> conditions=new ArrayList<String>();
 	ArrayList<String> orcond=new ArrayList<String>();
 	ArrayList<String> andjumps=new ArrayList<String>();
@@ -694,27 +693,30 @@ public class LoweringCode extends DepthFirstAdapter {
 	    String right="";
 	    String left="";
 	    operator.add("or");
-	    System.out.println("OR");
+	    int prin=jumps.size();
 	    if(node.getLeft() != null)
 	    {
 	        node.getLeft().apply(this);
 	        left=""+help.nextquad();
 	    }
+	    int meta=jumps.size();
+
+	    	for(int i=0;i<meta-prin;i++)
+	    	{
+	    		Integer t=jumps.size()-i-1;
+		    	help.modifiyquad(jumps.get(t),left);
+		    	jumps.remove(t.toString());
+	    	}
+	    String mytemp=jumps.get(jumps.size()-1);
 	    if(node.getRight() != null)
 	    {
 	        node.getRight().apply(this);
 	        right=""+help.nextquad();
 	    }
-	    if(myflag>0 && jumps.size()>=3)
-	    {
-	    	help.modifiyquad(jumps.get(jumps.size()-3),left);
-	    	jumps.remove(jumps.size()-3);
-	    	myflag--;
-	    }
-	    	help.modifiyquad(jumps.get(jumps.size()-2),left);
-	    	jumps.remove(jumps.size()-2);
-	    mtype=right;
-	    	    System.out.println("Mtype in Or is " +mtype+" "+jumps.size());
+	    
+	    	help.modifiyquad(mytemp,left);
+	    	jumps.remove(mytemp);
+	    	mtype=right;
 	   
 	    outACondOrExpr(node);
 	}
@@ -727,27 +729,31 @@ public class LoweringCode extends DepthFirstAdapter {
 	    System.out.println("AND");
 	    String right="";
 	    String left="";
+	    int prin=conditions.size();
 	    if(node.getLeft() != null)
 	    {
 	        node.getLeft().apply(this);
 	        left=""+help.nextquad();
 	    }
+	    int meta=conditions.size();
+    	for(int i=0;i<meta-prin;i++)
+    	{
+    		
+    		Integer t=conditions.size()-i-1;
+	    	help.modifiyquad(conditions.get(t),left);
+	    	conditions.remove(t.toString());
+    	}
+
+	    String mytemp=conditions.get(conditions.size()-1);
 	    if(node.getRight() != null)
 	    {
 	        node.getRight().apply(this);
 	        right=""+help.nextquad();
 	    }
-	    System.out.println(conditions.get(conditions.size()-2)+ " "+left+""+myflag);
-	    if(myflag>0 && conditions.size()>=3)
-	    {
-	    	help.modifiyquad(conditions.get(conditions.size()-3),left);
-	    	conditions.remove(conditions.size()-3);
-	    	myflag--;
-	    }
-    	help.modifiyquad(conditions.get(conditions.size()-2),left);
-	    conditions.remove(conditions.size()-2);
+	    
+    	help.modifiyquad(mytemp,left);
+	    conditions.remove(mytemp);
 	    mtype=right;
-	    System.out.println("Mtype And is "+mtype);
 	    outACompAndExpr(node);
 	}
 	
@@ -772,7 +778,7 @@ public class LoweringCode extends DepthFirstAdapter {
 	        node.getRight().apply(this);
 	        right=mtype;
 	    }
-	    mtype=""+help.nextquad();//<------------notsure
+	    mtype=""+help.nextquad();
 	    String code_line=help.genquad(coop,left,right,"*");
 	   	String mtype2=""+help.nextquad();
 	    conditions.add(mtype);
@@ -787,10 +793,57 @@ public class LoweringCode extends DepthFirstAdapter {
 	public void caseACompNotEqExpr(ACompNotEqExpr node)
 	{
 	    inACompNotEqExpr(node);
+	    String current=""+help.nextquad();
+	    Integer arxi=Integer.parseInt(current);
 	    if(node.getExpr() != null)
 	    {
 	        node.getExpr().apply(this);
 	    }
+	    String end=""+help.nextquad();
+	    Integer telos=Integer.parseInt(end);
+	    for(int i=arxi;i<telos;i+=2)
+	    {
+	    	
+	    	String inst=help.instruction_list.get(i-1);
+	    	String inst2=help.instruction_list.get(i);
+	    	String[] tel1=inst.split(",");
+	    	String[] tel2=inst2.split(",");
+	    	/*if(tel1[3].equals("*\n"))
+	    		conditions.remove(index);
+	    	else if(tel2[3].equals("*\n"))
+	    		jumps.remove(index);
+	    	*/
+	    	String newc=tel1[0]+","+tel1[1]+","+tel1[2]+","+tel2[3];
+	    	String newc2=tel2[0]+","+tel2[1]+","+tel2[2]+","+tel1[3];
+	    	System.out.println(inst+""+newc);
+	    	System.out.println(inst2+""+newc2);
+	    	if(tel2[3].equals("*\n"))
+	    	{
+	    		
+	    		if(tel1[0].equals("jump"))
+	    		{
+	    			jumps.add(0,newc);
+	    		}
+	    		else
+	    		{
+	    			conditions.add(0,newc);
+	    		}
+	    	}
+	    	if(tel1[3].equals("*\n"))
+	    	{
+	    		System.err.println("bika2");
+	    		if(tel2[0].equals("jump"))
+	    			jumps.add(0,newc2);
+	    		else
+	    			conditions.add(0,newc2);
+	    	}
+	    
+	    	help.instruction_list.remove(i-1);
+	    	help.instruction_list.remove(i-1);
+	    	help.instruction_list.add(i-1,newc);
+	    	help.instruction_list.add(i,newc2);
+	    }
+	    System.err.println(current+" "+end);
 	    outACompNotEqExpr(node);
 	}
 	
@@ -798,11 +851,8 @@ public class LoweringCode extends DepthFirstAdapter {
 	public void caseACondBlockExpr(ACondBlockExpr node)
 	{
 	    inACondBlockExpr(node);
-	    System.err.println("bika");
 	    if(node.getExpr() != null)
 	    {
-	    	System.err.println("bika");
-	    	myflag++;
 	        node.getExpr().apply(this);
 	    }
 	    outACondBlockExpr(node);
@@ -982,15 +1032,31 @@ public class LoweringCode extends DepthFirstAdapter {
 	}
 	
 	@Override
-	public void caseAPlusMinusExpExpr(APlusMinusExpExpr node)
-	{
-	    inAPlusMinusExpExpr(node);
-	    if(node.getExpr() != null)
-	    {
-	        node.getExpr().apply(this);
-	    }
-	    outAPlusMinusExpExpr(node);
-	}
+    public void caseAPlusMinusExpExpr(APlusMinusExpExpr node)
+    {
+        inAPlusMinusExpExpr(node);
+        String  mid="";
+        String  prosimo="";
+        if(node.getPlusMinus() != null)
+        {
+            node.getPlusMinus().apply(this);
+            prosimo=node.getPlusMinus().toString();
+        }
+        if(node.getExpr() != null)
+        {
+            node.getExpr().apply(this);
+            mid=mtype;
+        }
+        prosimo=prosimo.replaceAll(" ","");
+        if(prosimo.equals("-"))
+        {
+        	register++;
+        	String code_line=help.genquad("-","0",mid,"$"+register);
+            help.instruction_list.add(code_line);
+            mtype="$"+register;
+        }
+        outAPlusMinusExpExpr(node);
+    }
 	
 	@Override
 	public void caseAFuncCallExpr(AFuncCallExpr node)
