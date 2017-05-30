@@ -374,7 +374,7 @@ public class Collector extends DepthFirstAdapter {
 	        if(!current.findparameter(v.name))
 	        {
 	        	current.arg.add(v);
-	        	System.out.println("Prosthetw tin parametro name= "+v.name+" type= "+v.type);
+	        	
 
 	        }
 	        else
@@ -413,7 +413,7 @@ public class Collector extends DepthFirstAdapter {
 	        if(!current.findparameter(v.name))
 	        {
 	        	current.arg.add(v);
-	        	System.out.println("Prosthetw tin parametro name= "+v.name+" type= "+v.type);
+	        	
 	        }
 	        else
 	        {
@@ -458,7 +458,7 @@ public class Collector extends DepthFirstAdapter {
 	       	if(!current.findparameter(v.name))
 	        {
 	        	current.arg.add(v);
-	        	System.out.println("Prosthetw tin parametro name= "+v.name+" type= "+v.type);
+	        	
 	        }
 	        else
 	        {
@@ -612,7 +612,7 @@ public class Collector extends DepthFirstAdapter {
 	            node.getExpr().apply(this);
 	            right=mtype;
 	        }
-	        System.out.println(bcounter2+""+bcounter3);
+	       
 	        if(bcounter2<bcounter3)
 	        	error+="Bigger Dimension on array than Expected\n";
 	        left=left.replaceAll(" ","");
@@ -954,7 +954,7 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        String mtemp=mtype;
 	        
-	      //  System.out.println("bika"+mtemp);
+	     
 	        int counter = 0;
             for( int i=0; i<mtemp.length(); i++ ) {
                 if( mtemp.charAt(i) == '[' ) {
@@ -969,7 +969,7 @@ public class Collector extends DepthFirstAdapter {
 	        if(node.getExpr() != null)
 	        {
 	            node.getExpr().apply(this);
-	            System.out.println("bika2 "+node.getExpr().toString());
+	            
 	            String exprt=exprtype.replace(" ","");
 	            if(!exprt.equals("int"))
 	            {

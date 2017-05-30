@@ -35,6 +35,7 @@ public class FunctionSum
 			//while(itr.hasNext())
 			//{
 			//	FunctionSum ret=itr.next();
+			System.out.println(function_name+" "+function.name+"<-");
 				String  comp=function.name.replaceAll(" ","");
 				if(comp.equals(function_name.replaceAll(" ","")))
 				{

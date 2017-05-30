@@ -49,15 +49,13 @@ public class HelpfullMethods
 			if(ret.startsWith(num))
 			{
 				ret=ret.replaceAll("\\*",value);
-
 				this.instruction_list.set(Integer.parseInt(num)-1,ret);
 				return;
 			}
 		}
-
 		return;
 	}
-
+	
 	public ArrayList<String> makelist(String x)
 	{
 		ArrayList<String> list=new ArrayList<String>();

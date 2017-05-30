@@ -467,7 +467,7 @@ public class LoweringCode extends DepthFirstAdapter {
 	    {
 	        left=node.getVariable().toString();
 	    }
-	    System.out.println("Psaxnw tin sunartisi "+left);
+	
 	    FunctionSum fun=null;
 	    fun=symboltable.get_function_from_Symboltable(left);
 	    if(fun!=null)
@@ -726,7 +726,6 @@ public class LoweringCode extends DepthFirstAdapter {
 	{
 	    inACompAndExpr(node);
 	    operator.add("and");
-	    System.out.println("AND");
 	    String right="";
 	    String left="";
 	    int prin=conditions.size();
@@ -795,12 +794,24 @@ public class LoweringCode extends DepthFirstAdapter {
 	    inACompNotEqExpr(node);
 	    String current=""+help.nextquad();
 	    Integer arxi=Integer.parseInt(current);
+	    Integer jtemp=jumps.size();
+	    Integer ctemp=conditions.size();
 	    if(node.getExpr() != null)
 	    {
 	        node.getExpr().apply(this);
 	    }
 	    String end=""+help.nextquad();
 	    Integer telos=Integer.parseInt(end);
+	    int js=jumps.size()-jtemp;
+	    int cs=conditions.size()-ctemp;
+	    for(int i=0;i<js;i++)
+	    {
+	    	jumps.remove(jumps.size()-1);
+	    }
+	    for(int i=0;i<cs;i++)
+	    {
+	    	conditions.remove(conditions.size()-1);
+	    }
 	    for(int i=arxi;i<telos;i+=2)
 	    {
 	    	
@@ -808,42 +819,36 @@ public class LoweringCode extends DepthFirstAdapter {
 	    	String inst2=help.instruction_list.get(i);
 	    	String[] tel1=inst.split(",");
 	    	String[] tel2=inst2.split(",");
-	    	/*if(tel1[3].equals("*\n"))
-	    		conditions.remove(index);
-	    	else if(tel2[3].equals("*\n"))
-	    		jumps.remove(index);
-	    	*/
 	    	String newc=tel1[0]+","+tel1[1]+","+tel1[2]+","+tel2[3];
 	    	String newc2=tel2[0]+","+tel2[1]+","+tel2[2]+","+tel1[3];
-	    	System.out.println(inst+""+newc);
-	    	System.out.println(inst2+""+newc2);
-	    	if(tel2[3].equals("*\n"))
+	    	if(tel2[3].contains("*"))
 	    	{
-	    		
-	    		if(tel1[0].equals("jump"))
-	    		{
-	    			jumps.add(0,newc);
-	    		}
+	    		if(tel1[0].contains("jump"))
+	    			jumps.add(tel1[0].substring(0,1));
 	    		else
-	    		{
-	    			conditions.add(0,newc);
-	    		}
+	    			conditions.add(tel1[0].substring(0,1));
 	    	}
-	    	if(tel1[3].equals("*\n"))
+	    	if(tel1[3].contains("*"))
 	    	{
-	    		System.err.println("bika2");
-	    		if(tel2[0].equals("jump"))
-	    			jumps.add(0,newc2);
+	    		if(tel2[0].contains("jump"))
+	    			jumps.add(tel2[0].substring(0,1));
 	    		else
-	    			conditions.add(0,newc2);
+	    			conditions.add(tel2[0].substring(0,1));
 	    	}
-	    
 	    	help.instruction_list.remove(i-1);
 	    	help.instruction_list.remove(i-1);
 	    	help.instruction_list.add(i-1,newc);
 	    	help.instruction_list.add(i,newc2);
 	    }
-	    System.err.println(current+" "+end);
+	    /*
+	    System.out.println(jtemp+" "+jumps.size()+" "+ctemp+" "+conditions.size()+"<--2");
+	    for(int i=0;i<conditions.size();i++)
+	    	System.out.println(conditions.get(i));
+	    for(int i=0;i<jumps.size();i++)
+	    	System.out.println(jumps.get(i));
+	    for(int i=0;i<help.instruction_list.size();i++)
+	    	System.out.println(help.instruction_list.get(i));	
+	    System.out.println("------------------");*/
 	    outACompNotEqExpr(node);
 	}
 	
