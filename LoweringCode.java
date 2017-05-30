@@ -24,7 +24,6 @@ public class LoweringCode extends DepthFirstAdapter {
 		this.symboltable=symboltable;
 		this.library=library;
 		help= new HelpfullMethods();
-		System.out.println("Main class name is "+symboltable.name);
 	}
 	
 	public void print_code()
@@ -470,16 +469,9 @@ public class LoweringCode extends DepthFirstAdapter {
 	
 	    FunctionSum fun=null;
 	    fun=symboltable.get_function_from_Symboltable(left);
-	    if(fun!=null)
-	    	System.out.println("Tin Vrika ");
-	    else
+	    if(fun==null)
 	    {
-	    	System.out.println("Mallon einai tis vivliothikis ");
-	    	fun=library.getFunction(left);;
-	    	if(fun!=null)
-	    		System.out.println("Odws itan ");
-	    	else
-	    		System.out.println("Paizetai malakia ");
+	    	fun=library.getFunction(left);
 	    }
 	    {
 	        List<PExpr> copy = new ArrayList<PExpr>(node.getExpr());
@@ -840,15 +832,6 @@ public class LoweringCode extends DepthFirstAdapter {
 	    	help.instruction_list.add(i-1,newc);
 	    	help.instruction_list.add(i,newc2);
 	    }
-	    /*
-	    System.out.println(jtemp+" "+jumps.size()+" "+ctemp+" "+conditions.size()+"<--2");
-	    for(int i=0;i<conditions.size();i++)
-	    	System.out.println(conditions.get(i));
-	    for(int i=0;i<jumps.size();i++)
-	    	System.out.println(jumps.get(i));
-	    for(int i=0;i<help.instruction_list.size();i++)
-	    	System.out.println(help.instruction_list.get(i));	
-	    System.out.println("------------------");*/
 	    outACompNotEqExpr(node);
 	}
 	

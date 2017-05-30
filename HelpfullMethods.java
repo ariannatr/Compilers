@@ -33,7 +33,6 @@ public class HelpfullMethods
 		{
 			String ret=itr.next();
 			modified.add(ret.replaceAll("_",z));
-			//String fun=ret.name.replaceAll(" ","");
 		}
 		return modified;
 	}

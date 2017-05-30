@@ -35,20 +35,21 @@ class Main {
 			Parser p = new Parser(new Lexer(new PushbackReader(new InputStreamReader(myfile), 1024)));
         	try {
 	  			System.setOut(out);
+	  			System.out.println("Semantic Check of file "+args[i]+" !");
     			Start tree = p.parse();
     			Collector symboltable= new Collector();
     			symboltable.create_standar_library();
     			tree.apply(symboltable);
     			symboltable.print_errors();
-    			System.out.println("Converting Code of file"+args[i]);
-    			LoweringCode converter= new LoweringCode(symboltable.current,symboltable.standar_library);
     			if(symboltable.error.equals(""))
     			{
+    				System.out.println("Converting Code of file "+args[i]+" !");
+    				LoweringCode converter= new LoweringCode(symboltable.current,symboltable.standar_library);
     				tree.apply(converter);
     				converter.help.print_instructions();
     			}
     			else
-    				System.out.println("Couldn't convert code,because there were semantic errors\n");
+    				System.out.println("Couldn't convert code,because there were semantic errors !\n");
         	} catch (Exception e) 
     		{	
     		    e.printStackTrace();

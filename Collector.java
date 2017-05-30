@@ -118,7 +118,10 @@ public class Collector extends DepthFirstAdapter {
 	
 	public void print_errors()
 	{
-		System.out.println("The errors found: \n"+error);
+		if(!error.replaceAll(" ","").equals(""))
+			System.out.println("The errors found: \n"+error);
+		else
+			System.out.println("No Semantic Errors found \n");		
 	}
 	
 	int first_time=0;
@@ -171,13 +174,13 @@ public class Collector extends DepthFirstAdapter {
 	            }
 	            String ctype=current.type;
 		        if(reflag==false && !ctype.equals("nothing "))
-		        	error+="No return statement for function "+current.name+" found\n";
+		        	error+="No return statement for function "+current.name+" found !\n";
 		        reflag=false;
 	        }
 	      	for(FunctionSum ftemp:current.fun)
 	      	{
 	      		if(ftemp.dec==true)
-	      			error+="Function "+ftemp.name+" was declared but not defined \n";
+	      			error+="Function "+ftemp.name+" was declared but not defined !\n";
 	      	}
 	        if(previous!=null)
 	        	current=previous;
@@ -204,7 +207,7 @@ public class Collector extends DepthFirstAdapter {
 	        	f=new FunctionSum(name);
 	        	if(!type.replaceAll(" ","").equals("nothing"))
 	        	{
-	        		error+="Error:Main programm sould have no return value!\n";
+	        		error+="Error: Main programm sould have no return value !\n";
 	        	}
 	        	f.type=type;
 	        	current=f;
@@ -225,7 +228,7 @@ public class Collector extends DepthFirstAdapter {
 	        			ftemp=current.getFunction(name);
 	        			if(ftemp.dec==false)
 	        			{
-	        				error+="Error:The function "+fa.name+" has been already defined exists !\n";
+	        				error+="Error:The function "+fa.name+" has been already defined !\n";
 	        				return;
 	        			}
 	        			if(!ftemp.type.equals(fa.type))
@@ -242,15 +245,15 @@ public class Collector extends DepthFirstAdapter {
 	        	}
 	        	else if(current.findparameter(fa.name) )
 	        	{
-	        		error+="Error:The name "+fa.name+" already exists for parameter name!\n";
+	        		error+="Error:The name "+fa.name+" already exists for parameter name !\n";
 	        	}
 	        	else if(current.findvariable(fa.name))
 	        	{
-					error+="Error:The name "+fa.name+" already exists for variable name!\n";
+					error+="Error:The name "+fa.name+" already exists for variable name !\n";
 	        	}
 	        	else if (current.belongs!=null && current.belongs.findvariable(fa.name)) 
 	        	{
-	        			error+="Error:The name "+fa.name+" already exists for variable name!\n";
+	        			error+="Error:The name "+fa.name+" already exists for variable name !\n";
 	        	}
 	        	else
 	        	{
@@ -272,7 +275,7 @@ public class Collector extends DepthFirstAdapter {
 	        	if(ftemp.arg.size()!=current.arg.size())
 	        	{
 	        		
-	        		error+="Amount of args differ between definition and declaration in " +current.name+"\n";
+	        		error+="Error :Amount of args differ between definition and declaration in function " +current.name+" !\n";
 	        		return;
 	        	}
 	        	Iterator<VarSum> itr=current.arg.iterator();
@@ -282,9 +285,9 @@ public class Collector extends DepthFirstAdapter {
 	    			VarSum ret=itr.next();
 	    			VarSum ret2=itr2.next();
 	    			if(!ret.name.equals(ret2.name))
-	    				error+="Different name in argument "+ret.name+"in function "+current.name+" between definiton and declaration "+ret.name+"-"+ret2.name+"\n";
+	    				error+="Error :Different name in argument "+ret.name+" in function "+current.name+" between definiton and declaration :"+ret.name+"-"+ret2.name+" !\n";
 	    			if(!ret.type.equals(ret2.type))
-	    				error+="Different type in argument "+ret.name+"in function "+current.name+" between definiton and declaration "+ret.type+"-"+ret2.type+"\n";
+	    				error+="Error :Different type in argument "+ret.name+" in function "+current.name+" between definiton and declaration :"+ret.type+"-"+ret2.type+" !\n";
 	    		}
 	        }
 	        if(flag==true)
@@ -344,7 +347,7 @@ public class Collector extends DepthFirstAdapter {
 	    	if(first_time==1)
 	    	{
 	    		
-	        	error+="Error:Main programm sould have no parameters!\n";
+	        	error+="Error :Main programm sould have no parameters !\n";
 	    	}
 	    	String varname="";
 	        inAFparDef1FparDef(node);
@@ -379,7 +382,7 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        else
 	        {
-	        	error+="Error:The parameter "+v.name+" already exists !\n";
+	        	error+="Error :The parameter "+v.name+" already exists !\n";
 	        	
 	        }
 	        outAFparDef1FparDef(node);
@@ -391,7 +394,7 @@ public class Collector extends DepthFirstAdapter {
 	    	if(first_time==1)
 	    	{
 	    		
-	        	error+="Error:Main programm sould have no parameters!\n";
+	        	error+="Error :Main programm sould have no parameters !\n";
 	    	}
 	    	String varname="";
 	        inAFparDef2FparDef(node);
@@ -417,7 +420,7 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        else
 	        {
-	        	error+="Error:The parameter "+v.name+" already exists !\n";
+	        	error+="Error :The parameter "+v.name+" already exists !\n";
 	        }
 	        outAFparDef2FparDef(node);
 	    }
@@ -428,7 +431,7 @@ public class Collector extends DepthFirstAdapter {
 	    	if(first_time==1)
 	    	{
 	    		
-	        	error+="Error:Main programm sould have no parameters!\n";
+	        	error+="Error :Main programm sould have no parameters !\n";
 	    	}
 	    	String varname="";
 	    	String ref2="";
@@ -462,7 +465,7 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        else
 	        {
-	           	error+="Error:The parameter "+v.name+" already exists !\n";
+	           	error+="Error :The parameter "+v.name+" already exists !\n";
 	        	
 	        }
 	        if(node.getFparDef() != null)
@@ -478,7 +481,7 @@ public class Collector extends DepthFirstAdapter {
 	    	if(first_time==1)
 	    	{
 	    		
-	        	error+="Error:Main programm sould have no parameters!\n";
+	        	error+="Error :Main programm sould have no parameters !\n";
 	    	}
 	    	String varname="";
 	    	 String ref2="";
@@ -511,7 +514,7 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        else
 	        {
-	        	error+="Error:The parameter "+v.name+" already exists !\n";
+	        	error+="Error :The parameter "+v.name+" already exists !\n";
 	        }
 	        if(node.getFparDef() != null)
 	        {
@@ -614,11 +617,11 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	       
 	        if(bcounter2<bcounter3)
-	        	error+="Bigger Dimension on array than Expected\n";
+	        	error+="Error :Bigger Dimension on array than Expected !\n";
 	        left=left.replaceAll(" ","");
 	        right=right.replaceAll(" ","");
 	        if(!left.equals(right))
-	        	error+="Wrong on Lvalue "+left+"<-"+right+"\n";
+	        	error+="Error :Wrong on Lvalue "+left+"<-"+right+" !\n";
 	        bcounter=0;
 	        outAExprStmt(node);
 	    }
@@ -677,12 +680,12 @@ public class Collector extends DepthFirstAdapter {
 	           top2=top2.replaceAll(" ","");
 	           topic=topic.replace(" ","");
 	            if(!topic.equals(top2))
-	            	error+="Wrong return statement ,expecting "+top2+" but got "+topic+" in function "+current.name+"\n";
+	            	error+="Error :Wrong return statement ,expecting "+top2+" but got "+topic+" in function "+current.name+" !\n";
 	        }
 	        else
 	        {
 	        	if(!current.type.equals("nothing "))
-	        		error+="Wrong return statement, expecting "+current.type+" in function "+current.name+"\n";
+	        		error+="Error :Wrong return statement, expecting "+current.type+" in function "+current.name+" !\n";
 	        }
 	        outAReturnStmt(node);
 	    }
@@ -734,7 +737,7 @@ public class Collector extends DepthFirstAdapter {
 	        if((!current.exist_name(name)) && (!standar_library.exist_name(name)))
         	{
 	        	
-        		error+="Error:The function "+name+" doesn't exist to be called!\n";
+        		error+="Error :The function "+name+" doesn't exist to be called !\n";
         		return;
         	}
 	        
@@ -764,11 +767,11 @@ public class Collector extends DepthFirstAdapter {
 	                
 	                if(i>=ftemp.arg.size())
 	                {
-	                	error+="Wrong functioncall "+ftemp.name+" with more arguments than expected!\n";
+	                	error+="Error :Wrong functioncall "+ftemp.name+" with more arguments than expected !\n";
 	                	return;
 	            	}
 	                if(bcounter3!=0 &&bcounter2<bcounter3)
-	                	error+="Used array with bigger dimension than expected\n";
+	                	error+="Error :Used array with bigger dimension than expected !\n";
 	                
 	                VarSum vartemp=ftemp.arg.get(i);
 	                String currenttype=vartemp.type;
@@ -777,7 +780,7 @@ public class Collector extends DepthFirstAdapter {
 	                if(!temp.equals(currenttype))
 	                {
 	                	int num=i+1;
-	                	error+="Different expression type in argument "+num+" in function call "+ftemp.name+" (it was declared "+currenttype+" "+vartemp.name+",but the one used is "+temp+")\n";
+	                	error+="Error :Different expression type in argument "+num+" in function call "+ftemp.name+" (it was declared "+currenttype+" "+vartemp.name+",but the one used is "+temp+") !\n";
 	                	
 
 	                }
@@ -903,7 +906,7 @@ public class Collector extends DepthFirstAdapter {
 	            		FunctionSum ftemp=current.belongs;
 	            		if(ftemp==null)
 	            		{
-	            			error+="Variable "+var+" isnt declared!\n";
+	            			error+="Error :Variable "+var+" isn't declared !\n";
 	            			return;
 	            		}
 	            		mtype=ftemp.findvariabletype(var);            		
@@ -911,7 +914,7 @@ public class Collector extends DepthFirstAdapter {
 	            		{
 	            			mtype=ftemp.findparametertype(var);
 	            			if(mtype.equals("NULL"))
-	            			error+="Variable "+var+" isnt declared!\n";
+	            			error+="Error :Variable "+var+" isn't declared !\n";
 	            		}
 	            	}
 	            }
@@ -973,7 +976,7 @@ public class Collector extends DepthFirstAdapter {
 	            String exprt=exprtype.replace(" ","");
 	            if(!exprt.equals("int"))
 	            {
-	            	error+="Wrong type of value in brackets of array\n";
+	            	error+="Error :Wrong type of value in brackets of array !\n";
 	            }
 	            bcounter--;
 	            bcounter3++;
@@ -1001,7 +1004,7 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        String right=exprtype;
 	        if(!left.equals(right))
-	        	error+="Wrong exprtypes in Or expression\n";
+	        	error+="Error :Wrong exprtypes in Or expression ("+left+" or "+right+" ) !\n";
 	        outACondOrExpr(node);
 	    }
 
@@ -1021,7 +1024,7 @@ public class Collector extends DepthFirstAdapter {
 	        String right=exprtype;
 	        
 	        if(!left.equals(right))
-	        	error+="Wrong exprtypes in And expression\n";
+	        	error+="Error :Wrong exprtypes in And expression ( "+left+" and "+right+" ) !\n";
 	        outACompAndExpr(node);
 	    }
 
@@ -1040,7 +1043,7 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        String right=mtype;
 	        if(!left.equals(right))
-	        	error+="Wrong on CompareExpression\n";
+	        	error+="Error :Wrong on CompareExpression ( "+left+" op "+right+" ) !\n";
 	        exprtype="logic";
 	        outACompEqExpr(node);
 	    }
@@ -1085,7 +1088,7 @@ public class Collector extends DepthFirstAdapter {
         	left=left.replaceAll(" ","");
         	right=right.replaceAll(" ","");
 	        if(!left.equals(right))
-	        	error+="Wrong Plus Expression!\n";
+	        	error+="Error :Wrong Plus Expression ( "+left+" + "+right+" ) !\n";
 	        exprtype="int";
 	        outAPlusExpr(node);
 	    }
@@ -1107,7 +1110,7 @@ public class Collector extends DepthFirstAdapter {
 	        left=left.replaceAll(" ","");
         	right=right.replaceAll(" ","");
 	        if(!left.equals(right))
-	        	error+="Wrong Minus Expression!"+left+" "+right+"\n";
+	        	error+="Error :Wrong Minus Expression ( "+left+"  -  "+right+" ) !\n";
 	        exprtype="int";
 	        outAMinusExpr(node);
 	    }
@@ -1129,7 +1132,7 @@ public class Collector extends DepthFirstAdapter {
 	        left=left.replaceAll(" ","");
         	right=right.replaceAll(" ","");
 	        if(!left.equals(right))
-	        	error+="Wrong Mult Expression!\n";
+	        	error+="Error :Wrong Mult Expression ( "+left+ " * "+right+" ) !\n";
 	        exprtype="int";
 	        outAMultExpr(node);
 	    }
@@ -1151,7 +1154,7 @@ public class Collector extends DepthFirstAdapter {
 	        left=left.replaceAll(" ","");
         	right=right.replaceAll(" ","");
 	        if(!left.equals(right))
-	        	error+="Wrong Slash Expression!\n";
+	        	error+="Error :Wrong Slash Expression ( "+left+" / "+ right+" ) !\n";
 	        exprtype="int";
 	        outASlashExpr(node);
 	    }
@@ -1173,7 +1176,7 @@ public class Collector extends DepthFirstAdapter {
 	        left=left.replaceAll(" ","");
         	right=right.replaceAll(" ","");
 	        if(!left.equals(right))
-	        	error+="Wrong Mod Expression!\n";
+	        	error+="Error :Wrong Mod Expression ( "+left+" mod "+right+" ) !\n";
 	        exprtype="int";
 	        outAModExpr(node);
 	    }
@@ -1195,7 +1198,7 @@ public class Collector extends DepthFirstAdapter {
 	        left=left.replaceAll(" ","");
         	right=right.replaceAll(" ","");
 	        if(!left.equals(right))
-	        	error+="Wrong Div Expression!\n";
+	        	error+="Error :Wrong Div Expression ( "+left+" div "+right+" ) !\n";
 	        exprtype="int";
 	        outADivExpr(node);
 	    }
