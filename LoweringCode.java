@@ -692,24 +692,18 @@ public class LoweringCode extends DepthFirstAdapter {
 	        left=""+help.nextquad();
 	    }
 	    int meta=jumps.size();
-
-	    	for(int i=0;i<meta-prin;i++)
-	    	{
-	    		Integer t=jumps.size()-i-1;
-		    	help.modifiyquad(jumps.get(t),left);
-		    	jumps.remove(t.toString());
-	    	}
-	    String mytemp=jumps.get(jumps.size()-1);
+    	for(int i=0;i<meta-prin;i++)
+    	{
+    		Integer t=jumps.size()-i-1;
+	    	help.modifiyquad(jumps.get(t),left);
+	    	jumps.remove(t.toString());
+    	}
 	    if(node.getRight() != null)
 	    {
 	        node.getRight().apply(this);
 	        right=""+help.nextquad();
 	    }
-	    
-	    	help.modifiyquad(mytemp,left);
-	    	jumps.remove(mytemp);
 	    	mtype=right;
-	   
 	    outACondOrExpr(node);
 	}
 	
@@ -735,15 +729,12 @@ public class LoweringCode extends DepthFirstAdapter {
 	    	conditions.remove(t.toString());
     	}
 
-	    String mytemp=conditions.get(conditions.size()-1);
 	    if(node.getRight() != null)
 	    {
 	        node.getRight().apply(this);
 	        right=""+help.nextquad();
 	    }
 	    
-    	help.modifiyquad(mytemp,left);
-	    conditions.remove(mytemp);
 	    mtype=right;
 	    outACompAndExpr(node);
 	}
