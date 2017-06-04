@@ -12,6 +12,7 @@ public class Collector extends DepthFirstAdapter {
 	public String type="";
 	public String ref="";
 	public String error="";
+	public String gsize="";
 	public boolean flag=false;
 	public boolean reflag=false;
 	public String exprtype="";
@@ -344,6 +345,7 @@ public class Collector extends DepthFirstAdapter {
 	    @Override
 	    public void caseAFparDef1FparDef(AFparDef1FparDef node)
 	    {
+	    
 	    	if(first_time==1)
 	    	{
 	    		
@@ -363,6 +365,7 @@ public class Collector extends DepthFirstAdapter {
 	        if(node.getType() != null)
 	        {
 	            vartype=node.getType().toString();
+	            gsize=vartype;
 	            int counter = 0;
 	            for( int i=0; i<vartype.length(); i++ ) {
 	                if( vartype.charAt(i) == '[' ) {
@@ -373,6 +376,7 @@ public class Collector extends DepthFirstAdapter {
 	            	vartype=create_type(vartype,counter);
 	        }
 	        VarSum v=new VarSum(varname,vartype);
+	        v.sizes=gsize;
 	        v.ref=ref2;
 	        if(!current.findparameter(v.name))
 	        {
@@ -412,6 +416,7 @@ public class Collector extends DepthFirstAdapter {
 	            node.getFparDef().apply(this);
 	        }
 	        VarSum v=new VarSum(varname,vartype);
+	        v.sizes=gsize;
 	        v.ref=ref2;
 	        if(!current.findparameter(v.name))
 	        {
@@ -447,6 +452,7 @@ public class Collector extends DepthFirstAdapter {
 	        if(node.getType() != null)
 	        {
 	           vartype= node.getType().toString();
+	           gsize=vartype;
 	           int counter = 0;
 	            for( int i=0; i<vartype.length(); i++ ) {
 	                if( vartype.charAt(i) == '[' ) {
@@ -457,6 +463,7 @@ public class Collector extends DepthFirstAdapter {
 	            	vartype=create_type(vartype,counter);
 	        }
 	        VarSum v=new VarSum(varname,vartype);
+	        v.sizes=gsize;
 	        v.ref=ref2;
 	       	if(!current.findparameter(v.name))
 	        {
@@ -497,6 +504,7 @@ public class Collector extends DepthFirstAdapter {
 	        if(node.getType() != null)
 	        {
 	            vartype=node.getType().toString();
+	            gsize=vartype;
 	            int counter = 0;
 	            for( int i=0; i<vartype.length(); i++ ) {
 	                if( vartype.charAt(i) == '[' ) {
@@ -507,6 +515,7 @@ public class Collector extends DepthFirstAdapter {
 	            	vartype=create_type(vartype,counter);
 	        }
 	        VarSum v=new VarSum(varname,vartype);
+	        v.sizes=gsize;
 	        v.ref=ref2;
 	        if(!current.findparameter(v.name))
 	        {
@@ -534,6 +543,7 @@ public class Collector extends DepthFirstAdapter {
 	    public void caseAVarDefVarDef(AVarDefVarDef node)
 	    {
 	    	String name="";
+	    	String sizes="";
 	        inAVarDefVarDef(node);
 	        if(node.getVariable() != null)
 	        {
@@ -543,6 +553,7 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	        	
 	            vartype=node.getType().toString();
+	            sizes=vartype;
 	            int counter = 0;
 	            for( int i=0; i<vartype.length(); i++ ) {
 	                if( vartype.charAt(i) == '[' ) {
@@ -554,6 +565,7 @@ public class Collector extends DepthFirstAdapter {
 	           
 	        }
 	        VarSum va=new VarSum(name,vartype);
+	        va.sizes=sizes;
 	       	if(!current.findvariable(va.name) && !current.findparameter(va.name))
 	       	{
 	       		current.vars.add(va);
@@ -568,6 +580,7 @@ public class Collector extends DepthFirstAdapter {
 	            {
 	               name=e.toString();
 	               VarSum v1=new VarSum(name,vartype);
+	               v1.sizes=sizes;
 	               if(!current.findvariable(v1.name) && !current.findparameter(v1.name))
 	        		{
 		   	           	current.vars.add(v1);
