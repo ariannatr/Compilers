@@ -307,12 +307,18 @@ public class LoweringCode extends DepthFirstAdapter {
 	    		for(int i=1;i<s.length-1;i++)
 	    		{
 	    			
-	    			register++;
+	    			String code_line="";
 	    			if(s2[i].equals(" "))
 	    				break;
-	    		    String code_line=help.genquad("*",s[i],s2[i],"$"+register);
-	    	        help.instruction_list.add(code_line);
-	    	       
+	    			for(int j=i;j<s2.length-1;j++)
+	    			{
+	    				register++;
+	    				if(j==i)
+	    					code_line=help.genquad("*",s[i],s2[j],"$"+register);
+	    				else
+	    					code_line=help.genquad("*","$"+(register-1),s2[j],"$"+register);
+	    				help.instruction_list.add(code_line);
+	    			}
 	    	        if(addflag==false)
 	    				addflag=true;
 	    	        else
@@ -349,8 +355,7 @@ public class LoweringCode extends DepthFirstAdapter {
    	         	help.instruction_list.add(code_line);
 		         mtype="[$"+register+"]";
 		         kra=mtype;
-	    	}
-	        else
+	    	}	       
 	        	left=mtype;
 	    }
 	    
@@ -561,10 +566,18 @@ public class LoweringCode extends DepthFirstAdapter {
 	            num_of_param++;
 	            
 	        }
-	        String code_line=help.genquad("call","-","-",left);
+	       
+	        String code_line="";
+	        if(!fun.type.replaceAll(" ","").equals("nothing"))
+	        {
+	        	 register++;
+	        	code_line=help.genquad("par","RET","$"+register,"-");
+            	help.instruction_list.add(code_line);
+	        }
+            code_line=help.genquad("call","-","-",left);
             help.instruction_list.add(code_line);
 	    }
-	    mtype="$$";
+	    mtype="$"+register;
 	    outAFuncCallFuncCall(node);
 	}
 	
@@ -1094,11 +1107,19 @@ public class LoweringCode extends DepthFirstAdapter {
 	    		for(int i=1;i<s.length-1;i++)
 	    		{
 	    			
-	    			register++;
+	    			String code_line="";
 	    			if(s2[i].equals(" "))
 	    				break;
-	    		    String code_line=help.genquad("*",s[i],s2[i],"$"+register);
-	    	        help.instruction_list.add(code_line);
+	    			for(int j=i;j<s2.length-1;j++)
+	    			{
+	    				register++;
+	    				if(j==i)
+	    					code_line=help.genquad("*",s[i],s2[j],"$"+register);
+	    				else
+	    					code_line=help.genquad("*","$"+(register-1),s2[j],"$"+register);
+	    				help.instruction_list.add(code_line);
+	    			}
+
 	    	       
 	    	        if(addflag==false)
 	    				addflag=true;
