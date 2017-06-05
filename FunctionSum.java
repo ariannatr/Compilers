@@ -108,6 +108,17 @@ public class FunctionSum
 	{
 		Iterator<VarSum> itr=this.vars.iterator();
 		String t2=var.replace(" ","");
+		
+		while(itr.hasNext())
+		{
+			VarSum ret=itr.next();
+			String t1=ret.name.replace(" ","");
+			if(t1.equals(t2))
+			{
+				return ret.sizes;
+			}   
+		}
+		itr=this.arg.iterator();
 		while(itr.hasNext())
 		{
 			VarSum ret=itr.next();

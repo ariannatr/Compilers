@@ -292,7 +292,10 @@ public class LoweringCode extends DepthFirstAdapter {
 	    		String []s=cs.split(" ");
 	    		FunctionSum f=symboltable.get_function_from_Symboltable(currentf);
 	    		String ttype=f.findvarsize(s[0]);
-	    		
+	    		if(ttype.equals("NULL"))
+	    		{
+	    			ttype=f.belongs.findvarsize(s[0]);
+	    		}
 	    		String []s2=ttype.split("]");
 	    		s2[0]=s2[0].replaceAll("int ","");
 	    		for(int i=0;i<s2.length-1;i++)
@@ -340,7 +343,7 @@ public class LoweringCode extends DepthFirstAdapter {
 	    			if(!kra.equals(""))
 	    				code_line=help.genquad("+",kra,s[s.length-1],"$"+register);
 	    			else
-	    				code_line=help.genquad("+","0",s[s.length-1],"$"+register);
+	    				code_line=help.genquad("+","0",mtype,"$"+register);
 	    		}
 	        	else
 	        	{
@@ -1092,7 +1095,10 @@ public class LoweringCode extends DepthFirstAdapter {
 	    		String []s=cs.split(" ");
 	    		FunctionSum f=symboltable.get_function_from_Symboltable(currentf);
 	    		String ttype=f.findvarsize(s[0]);
-	    		
+	    		if(ttype.equals("NULL"))
+	    		{
+	    			ttype=f.belongs.findvarsize(s[0]);
+	    		}
 	    		String []s2=ttype.split("]");
 	    		s2[0]=s2[0].replaceAll("int ","");
 	    		for(int i=0;i<s2.length-1;i++)
@@ -1104,6 +1110,7 @@ public class LoweringCode extends DepthFirstAdapter {
 	    		
 	    		boolean addflag=false;
 	    		String prereg="";
+	    		
 	    		for(int i=1;i<s.length-1;i++)
 	    		{
 	    			
@@ -1136,13 +1143,14 @@ public class LoweringCode extends DepthFirstAdapter {
 	    		
 	    		register++;
 	    		String code_line="";
+	    		
 	    		if(prereg.equals(""))
 	    		{
 	    			
 	    			if(!kra.equals(""))
 	    				code_line=help.genquad("+",kra,s[s.length-1],"$"+register);
 	    			else
-	    				code_line=help.genquad("+","0",s[s.length-1],"$"+register);
+	    				code_line=help.genquad("+","0",mtype,"$"+register);
 	    		}
 	        	else
 	        	{
