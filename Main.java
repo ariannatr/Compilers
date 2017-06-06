@@ -34,7 +34,7 @@ class Main {
 			myfile=new FileInputStream(args[i]);
 			Parser p = new Parser(new Lexer(new PushbackReader(new InputStreamReader(myfile), 1024)));
         	try {
-	  			System.setOut(out);
+	  			//System.setOut(out);
 	  			System.out.println("Semantic Check of file "+args[i]+" !");
     			Start tree = p.parse();
     			Collector symboltable= new Collector();
@@ -47,6 +47,8 @@ class Main {
     				LoweringCode converter= new LoweringCode(symboltable.current,symboltable.standar_library);
     				tree.apply(converter);
     				converter.help.print_instructions();
+    				AssemblyCreator ascreator= new AssemblyCreator(converter.help.instruction_list);
+    				ascreator.produce();
     			}
     			else
     				System.out.println("Couldn't convert code,because there were semantic errors !\n");
