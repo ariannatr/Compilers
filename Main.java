@@ -49,6 +49,7 @@ class Main {
     				converter.help.print_instructions();
     				AssemblyCreator ascreator= new AssemblyCreator(converter.help.instruction_list);
     				ascreator.produce();
+    				ascreator.print_final();
     			}
     			else
     				System.out.println("Couldn't convert code,because there were semantic errors !\n");
