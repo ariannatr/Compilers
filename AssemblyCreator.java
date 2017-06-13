@@ -1,16 +1,19 @@
 package compiler;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 
 public class AssemblyCreator{
 	
 	ArrayList<String> lowering_code;
 	ArrayList<String> final_code;
+	HashMap<String, Integer> rmap ;
 	public AssemblyCreator(ArrayList<String> lc)
 	{
 		lowering_code=lc;
 		final_code=new ArrayList<String>();
+		rmap = new HashMap<String, Integer>();	
 	}
 	
 	public void produce()
@@ -37,8 +40,16 @@ public class AssemblyCreator{
 			else if ("*".equals(token[0])) {
 			}
 			else if ("+".equals(token[0])) {
+				String reg="";
+				
+				String code_line="add eax,"+reg+"\n";
+				final_code.add(code_line);
 			}
 			else if ("-".equals(token[0])) {
+				String reg="";
+				
+				String code_line="sub eax,"+reg+"\n";
+				final_code.add(code_line);
 			}
 			else if ("/".equals(token[0])) {
 			}
@@ -52,7 +63,11 @@ public class AssemblyCreator{
 			
 		}
 	}
-	
+	public void add(String []token)
+	{
+		add(token);
+		return;
+	}
 	public void print_final()
 	{
 		Iterator<String> itr=final_code.iterator();
