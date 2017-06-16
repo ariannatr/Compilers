@@ -35,7 +35,11 @@ public class FunctionSum
 					return function;
 				}
 				else
-					return function.get_function_from_Symboltable(function_name);   
+				{
+					FunctionSum te=function.get_function_from_Symboltable(function_name); 
+					if(te!=null)
+						return te;
+				}
 		}
 		return null;
 

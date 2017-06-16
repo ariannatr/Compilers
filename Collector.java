@@ -8,6 +8,7 @@ public class Collector extends DepthFirstAdapter {
 	public FunctionSum f;
 	public FunctionSum current;
 	public String vartype="";
+	public String vartype2="";
 	public String name="";
 	public String type="";
 	public String ref="";
@@ -73,12 +74,12 @@ public class Collector extends DepthFirstAdapter {
 		standar_library.fun.add(fun7);
 		FunctionSum fun8 = new FunctionSum("ord");
 		fun8.type="int";
-		VarSum var8=new VarSum("n","int");
+		VarSum var8=new VarSum("n","char");
 		fun8.arg.add(var8);
 		standar_library.fun.add(fun8);
 		FunctionSum fun9 = new FunctionSum("chr");
 		fun9.type="char";
-		VarSum var9=new VarSum("c","char");
+		VarSum var9=new VarSum("c","int");
 		fun9.arg.add(var9);
 		standar_library.fun.add(fun9);
 		FunctionSum fun10 = new FunctionSum("strlen");
@@ -364,6 +365,7 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        if(node.getType() != null)
 	        {
+	        	vartype2=vartype;
 	            vartype=node.getType().toString();
 	            gsize=vartype;
 	            int counter = 0;
@@ -411,16 +413,24 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	            varname=node.getVariable().toString();
 	        }
+	        Integer pl=current.arg.size();
+	        String vtemp="";
+	        if(!vartype.equals(""))
+	        	vtemp=vartype;
 	        if(node.getFparDef() != null)
 	        {
 	            node.getFparDef().apply(this);
 	        }
-	        VarSum v=new VarSum(varname,vartype);
+	        VarSum v;
+	        if(vartype2.equals(vtemp))
+	        	 v=new VarSum(varname,vartype);
+	        else
+	        	v=new VarSum(varname,vartype2);
 	        v.sizes=gsize;
 	        v.ref=ref2;
 	        if(!current.findparameter(v.name))
 	        {
-	        	current.arg.add(v);
+	        	current.arg.add(pl,v);
 	        	
 	        }
 	        else
@@ -451,6 +461,7 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        if(node.getType() != null)
 	        {
+	           vartype2=vartype;
 	           vartype= node.getType().toString();
 	           gsize=vartype;
 	           int counter = 0;
@@ -503,6 +514,7 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        if(node.getType() != null)
 	        {
+	        	vartype2=vartype;
 	            vartype=node.getType().toString();
 	            gsize=vartype;
 	            int counter = 0;
@@ -775,8 +787,9 @@ public class Collector extends DepthFirstAdapter {
 	            	bcounter2=0;
 		            bcounter3=0;
 	                e.apply(this);
+
 	                String temp=exprtype;
-	             
+
 	                
 	                if(i>=ftemp.arg.size())
 	                {
@@ -785,20 +798,29 @@ public class Collector extends DepthFirstAdapter {
 	            	}
 	                if(bcounter3!=0 &&bcounter2<bcounter3)
 	                	error+="Error :Used array with bigger dimension than expected !\n";
-	                
+	               
 	                VarSum vartemp=ftemp.arg.get(i);
+	               
 	                String currenttype=vartemp.type;
 	                currenttype=currenttype.replaceAll(" ","");
 	                temp=temp.replaceAll(" ","");
+	                
 	                if(!temp.equals(currenttype))
 	                {
-	                	int num=i+1;
+	                	int num=i;
+	                	System.out.println(ftemp.name+"<--");
 	                	error+="Error :Different expression type in argument "+num+" in function call "+ftemp.name+" (it was declared "+currenttype+" "+vartemp.name+",but the one used is "+temp+") !\n";
 	                	
 
 	                }
 	                i++;
 	            }
+	            
+	            if(i!=ftemp.arg.size())
+                {
+                	error+="Error :Wrong functioncall "+ftemp.name+" with less arguments than expected !\n";
+                	return;
+            	}
 	            mtype=ftemp.type;
 	        }
 	        bcounter=0;
@@ -1057,6 +1079,8 @@ public class Collector extends DepthFirstAdapter {
 	        String right=mtype;
 	        if(!left.equals(right))
 	        	error+="Error :Wrong on CompareExpression ( "+left+" op "+right+" ) !\n";
+	        else if(!left.equals("int") && !left.equals("int "))
+	        	error+="Error :Wrong on CompareExpression, was expecting integer ( "+left+" op "+right+" ) !\n";
 	        exprtype="logic";
 	        outACompEqExpr(node);
 	    }
@@ -1102,6 +1126,8 @@ public class Collector extends DepthFirstAdapter {
         	right=right.replaceAll(" ","");
 	        if(!left.equals(right))
 	        	error+="Error :Wrong Plus Expression ( "+left+" + "+right+" ) !\n";
+	        else if(!left.equals("int") && !left.equals("int "))
+	        	error+="Error :Wrong Plus Expression,integer expected ( "+left+" + "+right+" ) !\n";
 	        exprtype="int";
 	        outAPlusExpr(node);
 	    }
@@ -1124,6 +1150,8 @@ public class Collector extends DepthFirstAdapter {
         	right=right.replaceAll(" ","");
 	        if(!left.equals(right))
 	        	error+="Error :Wrong Minus Expression ( "+left+"  -  "+right+" ) !\n";
+	        else if(!left.equals("int") && !left.equals("int "))
+	        	error+="Error :Wrong Minus Expression,integer expected ( "+left+" + "+right+" ) !\n";
 	        exprtype="int";
 	        outAMinusExpr(node);
 	    }
@@ -1146,6 +1174,8 @@ public class Collector extends DepthFirstAdapter {
         	right=right.replaceAll(" ","");
 	        if(!left.equals(right))
 	        	error+="Error :Wrong Mult Expression ( "+left+ " * "+right+" ) !\n";
+	        else if(!left.equals("int") && !left.equals("int "))
+	        	error+="Error :Wrong Mult Expression,integer expected ( "+left+ " * "+right+" ) !\n";
 	        exprtype="int";
 	        outAMultExpr(node);
 	    }
@@ -1168,6 +1198,8 @@ public class Collector extends DepthFirstAdapter {
         	right=right.replaceAll(" ","");
 	        if(!left.equals(right))
 	        	error+="Error :Wrong Slash Expression ( "+left+" / "+ right+" ) !\n";
+	        else if(!left.equals("int") && !left.equals("int "))
+	        	error+="Error :Wrong Slash Expression,integer expected ( "+left+" + "+right+" ) !\n";
 	        exprtype="int";
 	        outASlashExpr(node);
 	    }
@@ -1190,6 +1222,8 @@ public class Collector extends DepthFirstAdapter {
         	right=right.replaceAll(" ","");
 	        if(!left.equals(right))
 	        	error+="Error :Wrong Mod Expression ( "+left+" mod "+right+" ) !\n";
+	        else if(!left.equals("int") && !left.equals("int "))
+	        	error+="Error :Wrong Mod Expression,integer expected ( "+left+" + "+right+" ) !\n";
 	        exprtype="int";
 	        outAModExpr(node);
 	    }
@@ -1212,6 +1246,8 @@ public class Collector extends DepthFirstAdapter {
         	right=right.replaceAll(" ","");
 	        if(!left.equals(right))
 	        	error+="Error :Wrong Div Expression ( "+left+" div "+right+" ) !\n";
+	        else if(!left.equals("int") && !left.equals("int "))
+	        	error+="Error :Wrong Div Expression,integer expected ( "+left+" + "+right+" ) !\n";
 	        exprtype="int";
 	        outADivExpr(node);
 	    }
