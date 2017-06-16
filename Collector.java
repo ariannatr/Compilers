@@ -16,6 +16,7 @@ public class Collector extends DepthFirstAdapter {
 	public String gsize="";
 	public boolean flag=false;
 	public boolean reflag=false;
+	public boolean reff=false;
 	public String exprtype="";
 	public String mtype="";
 	public ArrayList<VarSum> paramtemp=null;
@@ -379,6 +380,7 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        VarSum v=new VarSum(varname,vartype);
 	        v.sizes=gsize;
+	        System.out.println(ref2+varname);
 	        v.ref=ref2;
 	        if(!current.findparameter(v.name))
 	        {
@@ -427,6 +429,7 @@ public class Collector extends DepthFirstAdapter {
 	        else
 	        	v=new VarSum(varname,vartype2);
 	        v.sizes=gsize;
+	        System.out.println(ref2+"<"+varname);
 	        v.ref=ref2;
 	        if(!current.findparameter(v.name))
 	        {
@@ -475,6 +478,7 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        VarSum v=new VarSum(varname,vartype);
 	        v.sizes=gsize;
+	        System.out.println(ref2+"<b "+varname);
 	        v.ref=ref2;
 	       	if(!current.findparameter(v.name))
 	        {
@@ -528,6 +532,7 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        VarSum v=new VarSum(varname,vartype);
 	        v.sizes=gsize;
+	        System.out.println(ref2+"<c "+varname);
 	        v.ref=ref2;
 	        if(!current.findparameter(v.name))
 	        {
@@ -786,6 +791,7 @@ public class Collector extends DepthFirstAdapter {
 	            	bcounter=0;
 	            	bcounter2=0;
 		            bcounter3=0;
+		            reff=false;
 	                e.apply(this);
 
 	                String temp=exprtype;
@@ -802,16 +808,18 @@ public class Collector extends DepthFirstAdapter {
 	                VarSum vartemp=ftemp.arg.get(i);
 	               
 	                String currenttype=vartemp.type;
+	                
 	                currenttype=currenttype.replaceAll(" ","");
 	                temp=temp.replaceAll(" ","");
 	                
 	                if(!temp.equals(currenttype))
 	                {
-	                	int num=i;
-	                	System.out.println(ftemp.name+"<--");
-	                	error+="Error :Different expression type in argument "+num+" in function call "+ftemp.name+" (it was declared "+currenttype+" "+vartemp.name+",but the one used is "+temp+") !\n";
 	                	
-
+	                	error+="Error :Different expression type in argument "+i+" in function call "+ftemp.name+" (it was declared "+currenttype+" "+vartemp.name+",but the one used is "+temp+") !\n";      	
+	                }
+	                if(!vartemp.ref.equals("")&&reff==false)
+	                {
+	                	error+="Error :Expecting ref expression type in argument "+i+" in function call "+ftemp.name+" (it was declared "+currenttype+" "+vartemp.name+",but the one used is "+temp+") !\n";      	
 	                }
 	                i++;
 	            }
@@ -1286,6 +1294,7 @@ public class Collector extends DepthFirstAdapter {
 	        if(node.getLValue() != null)
 	        {
 	            node.getLValue().apply(this);
+	            reff=true;
 	        }
 	        outATermValExpr(node);
 	    }
