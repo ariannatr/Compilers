@@ -583,7 +583,7 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        VarSum va=new VarSum(name,vartype);
 	        va.sizes=sizes;
-	       	if(!current.findvariable(va.name) && !current.findparameter(va.name))
+	       	if(!current.findvariable(va.name) && !current.findparameter(va.name) && !current.exist_name(va.name))
 	       	{
 	       		current.vars.add(va);
 	       	}
@@ -766,9 +766,11 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        if((!current.exist_name(name)) && (!standar_library.exist_name(name)))
         	{
-	        	
-        		error+="Error :The function "+name+" doesn't exist to be called !\n";
-        		return;
+	        	if((current.belongs!=null) && !current.belongs.exist_name(name) )
+	        	{
+        			error+="Error :The function "+name+" doesn't exist to be called !\n";
+        			return;
+        		}
         	}
 	        
 	        {
@@ -779,7 +781,13 @@ public class Collector extends DepthFirstAdapter {
 	        	{
 	        		ftemp=current.getFunction(name);
 	        		if(ftemp==null)
+	        		{
 	        			ftemp=standar_library.getFunction(name);
+	        			if(ftemp==null)
+	        			{
+	        				ftemp=current.belongs.getFunction(name);
+	        			}
+	        		}
 	        	}
 
 	            List<PExpr> copy = new ArrayList<PExpr>(node.getExpr());
@@ -830,8 +838,10 @@ public class Collector extends DepthFirstAdapter {
                 	return;
             	}
 	            mtype=ftemp.type;
+	            exprtype=ftemp.type;//now added
 	        }
 	        bcounter=0;
+	     
 	        outAFuncCallFuncCall(node);
 	    }
 
@@ -957,7 +967,24 @@ public class Collector extends DepthFirstAdapter {
 	            		{
 	            			mtype=ftemp.findparametertype(var);
 	            			if(mtype.equals("NULL"))
-	            			error+="Error :Variable "+var+" isn't declared !\n";
+	            			{//error+="Error :Variable "+var+" isn't declared !\n";
+		            			FunctionSum ftemp2=ftemp.belongs;
+		            			if(ftemp2==null)
+		            			{
+		            				error+="Error :Variable "+var+" isn't declared !\n";
+		            				return;
+		            			}
+		            			mtype=ftemp2.findvariabletype(var);
+		            			if(mtype==null)
+		            			{
+		            				mtype=ftemp2.findparametertype(var);
+		            				if(mtype.equals("NULL"))
+	            					{
+	            						error+="Error :Variable "+var+" isn't declared !\n";
+		            					return;
+	            					}
+		            			}
+	            			}          			
 	            		}
 	            	}
 	            }

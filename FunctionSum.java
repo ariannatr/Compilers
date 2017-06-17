@@ -101,7 +101,7 @@ public class FunctionSum
 		while(itr.hasNext())
 		{
 			VarSum ret=itr.next();
-			if(ret.name.equals(var))
+			if(ret.name.replaceAll(" ","").equals(var.replaceAll(" ","")))//
 			{
 				return ret.type;
 			}   
