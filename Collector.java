@@ -842,7 +842,66 @@ public class Collector extends DepthFirstAdapter {
 	                	error+="Error :Used array with bigger dimension than expected !\n";
 	               
 	                VarSum vartemp=ftemp.arg.get(i);
+	                String element=current.findvarsize(e.toString());
+	                String target=e.toString();
+	                String []clear=target.split(" ");
+	                target=clear[0];
+	                FunctionSum ftemp2;
+	                while(element.equals("NULL") && current.belongs!=null)
+	                {
+	                	ftemp2=current.belongs.getFunction(name);
+	                	 element=current.findvarsize(target);
+	                }
+	                
 	               
+	                if(!element.equals("NULL"))
+	                {
+	                
+		               if(vartemp.sizes.contains("["))
+		               {
+		            	   String element2=vartemp.sizes;
+		            	   if(!target.contains("["))
+		            	   {
+		            		
+		            		   element=element.replaceAll(" ","");
+		            		   element2=element2.replaceAll(" ","");
+		            		   String[] token=element.split("]");
+		            		   String[] token2=element2.split("]");
+		            		   for(int j=0;j<token.length;j++)
+		            		   {
+		            			   if(token[j].contains("int["))
+		            				   token[j]=token[j].replace("int[","");
+		            				else if(token[j].contains("char["))
+		            				   token[j]=token[j].replace("char[","");
+		            				else
+		            					token[j]=token[j].replace("[","");
+		            		   }
+	            			   for(int j=0;j<token2.length;j++)
+	            			   {
+	            				   if(token2[j].contains("int["))
+		            				   token2[j]=token2[j].replace("int[","");
+		            			   else if(token2[j].contains("char["))
+		            				   token2[j]=token2[j].replace("char[","");
+		            			   else
+		            				   token2[j]=token2[j].replace("[","");
+	            			   }
+		            		   for(int j=0;j<token2.length;j++)
+		            		   {
+		            			   if(j<token.length)
+		            			   {
+		            				   if(token2[j].equals(""))
+		            					   continue;
+		            				   Integer c1=Integer.parseInt(token[j]);
+		            				   Integer c2=Integer.parseInt(token2[j]);
+		            				  if(c2<c1)
+		            					  error+="Bigger array than expected in argument size "+c1+" against "+c2+"\n";
+		            			   }
+		            			   else
+		            				   break;
+		            		   }
+		            	   }
+		               }
+	                }
 	                String currenttype=vartemp.type;
 	                
 	                currenttype=currenttype.replaceAll(" ","");
