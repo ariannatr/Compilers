@@ -47,7 +47,7 @@ public class Collector extends DepthFirstAdapter {
 		FunctionSum fun2 = new FunctionSum("puts");
 		fun2.type="nothing";
 		VarSum var2=new VarSum("s","char[]");
-		var2.ref="char";//
+		var2.ref="char";
 		fun2.arg.add(var2);
 		standar_library.fun.add(fun2);
 		FunctionSum fun3 = new FunctionSum("putc");
@@ -359,6 +359,7 @@ public class Collector extends DepthFirstAdapter {
 	        if(node.getRef() != null)
 	        {
 	           ref2=node.getRef().toString();
+	           reff=true;
 	        }
 	        if(node.getVariable() != null)
 	        {
@@ -380,8 +381,10 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        VarSum v=new VarSum(varname,vartype);
 	        v.sizes=gsize;
-	        System.out.println(ref2+varname);
+	        if(vartype.contains("[]") && reff==false)
+	        	error+="Variable "+varname+" should be declared with ref !\n"; 	
 	        v.ref=ref2;
+	        reff=false;
 	        if(!current.findparameter(v.name))
 	        {
 	        	current.arg.add(v);
@@ -407,9 +410,14 @@ public class Collector extends DepthFirstAdapter {
 	    	String varname="";
 	        inAFparDef2FparDef(node);
 	         String ref2="";
+	         boolean tef=false;
+	         if(reff==true)
+	        	 tef=true;
 	        if(node.getRef() != null)
 	        {
 	           ref2=node.getRef().toString();
+	           reff=true;
+	           tef=true;
 	        }
 	        if(node.getVariable() != null)
 	        {
@@ -425,11 +433,20 @@ public class Collector extends DepthFirstAdapter {
 	        }
 	        VarSum v;
 	        if(vartype2.equals(vtemp))
-	        	 v=new VarSum(varname,vartype);
+	        {
+	        	if(vartype.contains("[]") && tef==false)
+		        	error+="Variable2 "+varname+" should be declared with ref !\n"; 
+	        	v=new VarSum(varname,vartype);
+	        }	 
 	        else
+	        {
+	        	if(vartype2.contains("[]") && reff==false)
+		        	error+="Variable "+varname+" should be declared with ref !\n";
 	        	v=new VarSum(varname,vartype2);
+	        }
 	        v.sizes=gsize;
-	        System.out.println(ref2+"<"+varname);
+	        
+	        reff=false;
 	        v.ref=ref2;
 	        if(!current.findparameter(v.name))
 	        {
@@ -457,6 +474,7 @@ public class Collector extends DepthFirstAdapter {
 	        if(node.getRef() != null)
 	        {
 	        	ref2=node.getRef().toString();
+	        	reff=true;
 	        }
 	        if(node.getVariable() != null)
 	        {
@@ -476,9 +494,10 @@ public class Collector extends DepthFirstAdapter {
 	            if(counter>0)
 	            	vartype=create_type(vartype,counter);
 	        }
+	        if(vartype.contains("[]") && reff==false)
+	        	error+="Variable "+varname+" should be declared with ref !\n";
 	        VarSum v=new VarSum(varname,vartype);
 	        v.sizes=gsize;
-	        System.out.println(ref2+"<b "+varname);
 	        v.ref=ref2;
 	       	if(!current.findparameter(v.name))
 	        {
@@ -490,6 +509,7 @@ public class Collector extends DepthFirstAdapter {
 	           	error+="Error :The parameter "+v.name+" already exists !\n";
 	        	
 	        }
+	       	reff=false;
 	        if(node.getFparDef() != null)
 	        {
 	            node.getFparDef().apply(this);
@@ -511,6 +531,7 @@ public class Collector extends DepthFirstAdapter {
 	        if(node.getRef() != null)
 	        {
 	        	ref2=node.getRef().toString();
+	        	reff=true;
 	        }
 	        if(node.getVariable() != null)
 	        {
@@ -530,9 +551,11 @@ public class Collector extends DepthFirstAdapter {
 	            if(counter>0)
 	            	vartype=create_type(vartype,counter);
 	        }
+	        if(vartype.contains("[]") && reff==false)
+	        	error+="Variable"+varname+" should be declared with ref !\n";
 	        VarSum v=new VarSum(varname,vartype);
 	        v.sizes=gsize;
-	        System.out.println(ref2+"<c "+varname);
+	        reff=false;
 	        v.ref=ref2;
 	        if(!current.findparameter(v.name))
 	        {
@@ -1336,8 +1359,10 @@ public class Collector extends DepthFirstAdapter {
 	    {
 	        inAPlusMinusExpExpr(node);
 	        if(node.getExpr() != null)
-	        {
+	        {	
 	            node.getExpr().apply(this);
+	            if(!mtype.equals("int ") && !mtype.equals("int"))
+	            	error+="Cant negate something different than integer!\n";
 	        }
 	        outAPlusMinusExpExpr(node);
 	    }
