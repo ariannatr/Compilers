@@ -771,6 +771,11 @@ public class Collector extends DepthFirstAdapter {
         			error+="Error :The function "+name+" doesn't exist to be called !\n";
         			return;
         		}
+        		else if(current.belongs==null)
+        		{
+        			error+="Error :The function "+name+" doesn't exist to be called !\n";
+        			return;
+        		}
         	}
 	        
 	        {
