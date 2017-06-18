@@ -846,11 +846,11 @@ public class Collector extends DepthFirstAdapter {
 	                String target=e.toString();
 	                String []clear=target.split(" ");
 	                target=clear[0];
-	                FunctionSum ftemp2;
+	                FunctionSum ftemp2=current;
 	                while(element.equals("NULL") && current.belongs!=null)
 	                {
 	                	ftemp2=current.belongs.getFunction(name);
-	                	 element=current.findvarsize(target);
+	                	 element=ftemp2.findvarsize(target);
 	                }
 	                
 	               
