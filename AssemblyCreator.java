@@ -17,11 +17,13 @@ public class AssemblyCreator{
 	Integer bcounter;
 	Boolean parameter_flag=true; //new function params
 	ArrayList<String> parameters; // store oarameters to push them reversed
+	ArrayList<String> parameters_kind;
 	public AssemblyCreator(ArrayList<String> lc,FunctionSum symboltable)
 	{
 		lowering_code=lc;
 		final_code=new ArrayList<String>();
 		rmap = new HashMap<String, Integer>();
+		data=new ArrayList<String>();
 		bcounter=0;
 		this.symboltable=symboltable;
 	}
@@ -238,12 +240,27 @@ public class AssemblyCreator{
 			{
 				for (int i=parameters.size();i>0;i--)
 				{
-					code_line="push "+parameters.get(i-1)+"\n";
-					final_code.add(code_line);
+					if(parameters_kind.get(i-1).equals("V"))
+					{
+						code_line="push "+parameters.get(i-1)+"\n";
+						final_code.add(code_line);
+					}
+					else {
+						code_line="mov eax, OFFSET FLAT:"+parameters.get(i-1)+"\n";
+						final_code.add(code_line);
+						code_line="push eax\n";
+						final_code.add(code_line);
+						code_line=parameters.get(i-1)+":"+"\t.asciz\t"+parameters.get(i-1)+"\n";
+						data.add(code_line);
+					}
 				}
 				code_line="call "+token[3]+"\n";
 				final_code.add(code_line);
+				code_line="add esp, "+parameters.size()*4+"\n";
+				final_code.add(code_line);
 				parameter_flag=true;
+				parameters=new ArrayList<String>();
+				parameters_kind=new ArrayList<String>();
 			}
 			else if("par".equals(token[0]))
 			{
@@ -251,8 +268,10 @@ public class AssemblyCreator{
 				{
 					parameter_flag=false;
 					parameters=new ArrayList<String>();
+					parameters_kind=new ArrayList<String>();
 				}
 				parameters.add(token[1]);
+				parameters_kind.add(token[2]);
 			}
 			else {
 				System.err.println("dn to vrika akoma ");
@@ -271,6 +290,13 @@ public class AssemblyCreator{
 		while(itr.hasNext())
 		{
 			String ret=itr.next();
+			System.out.print(ret);
+		}
+		System.out.println(".data");
+		Iterator<String> itr2=data.iterator();
+		while(itr2.hasNext())
+		{
+			String ret=itr2.next();
 			System.out.print(ret);
 		}
 		return;
