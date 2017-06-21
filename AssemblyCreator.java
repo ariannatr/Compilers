@@ -227,14 +227,144 @@ public class AssemblyCreator{
 				final_code.add(code_line);		
 			}
 			else if ("<".equals(token[0])) {
+				if(rmap.containsKey(token[1]))
+				{
+					reg=rmap.get(token[1]);
+					code_line="mov eax, DWORD PTR [ebp -"+reg+"]\n";;
+					final_code.add(code_line);
+				}
+				else
+				{
+					code_line="mov eax,"+token[1]+"\n";
+					final_code.add(code_line);
+				}
+				if(rmap.containsKey(token[2]))
+				{
+					reg2=rmap.get(token[2]);
+					code_line="mov ebx, DWORD PTR [ebp -"+reg2+"]\n";;
+					final_code.add(code_line);
+				}
+				else
+				{
+					code_line="mov ebx,"+token[2]+"\n";
+					final_code.add(code_line);	
+				}
+				code_line="cmp eax, ebx\n";
+				final_code.add(code_line);
+				code_line="jl L"+label+++"\n";
+				final_code.add(code_line);	
 			}
 			else if (">=".equals(token[0])) {
+				if(rmap.containsKey(token[1]))
+				{
+					reg=rmap.get(token[1]);
+					code_line="mov eax, DWORD PTR [ebp -"+reg+"]\n";;
+					final_code.add(code_line);
+				}
+				else
+				{
+					code_line="mov eax,"+token[1]+"\n";
+					final_code.add(code_line);
+				}
+				if(rmap.containsKey(token[2]))
+				{
+					reg2=rmap.get(token[2]);
+					code_line="mov ebx, DWORD PTR [ebp -"+reg2+"]\n";;
+					final_code.add(code_line);
+				}
+				else
+				{
+					code_line="mov ebx,"+token[2]+"\n";
+					final_code.add(code_line);	
+				}
+				code_line="cmp eax, ebx\n";
+				final_code.add(code_line);
+				code_line="jge L"+label+++"\n";
+				final_code.add(code_line);	
 			}
 			else if ("<=".equals(token[0])) {
+				if(rmap.containsKey(token[1]))
+				{
+					reg=rmap.get(token[1]);
+					code_line="mov eax, DWORD PTR [ebp -"+reg+"]\n";;
+					final_code.add(code_line);
+				}
+				else
+				{
+					code_line="mov eax,"+token[1]+"\n";
+					final_code.add(code_line);
+				}
+				if(rmap.containsKey(token[2]))
+				{
+					reg2=rmap.get(token[2]);
+					code_line="mov ebx, DWORD PTR [ebp -"+reg2+"]\n";;
+					final_code.add(code_line);
+				}
+				else
+				{
+					code_line="mov ebx,"+token[2]+"\n";
+					final_code.add(code_line);	
+				}
+				code_line="cmp eax, ebx\n";
+				final_code.add(code_line);
+				code_line="jle L"+label+++"\n";
+				final_code.add(code_line);	
 			}
 			else if ("=".equals(token[0])) {
+				if(rmap.containsKey(token[1]))
+				{
+					reg=rmap.get(token[1]);
+					code_line="mov eax, DWORD PTR [ebp -"+reg+"]\n";;
+					final_code.add(code_line);
+				}
+				else
+				{
+					code_line="mov eax,"+token[1]+"\n";
+					final_code.add(code_line);
+				}
+				if(rmap.containsKey(token[2]))
+				{
+					reg2=rmap.get(token[2]);
+					code_line="mov ebx, DWORD PTR [ebp -"+reg2+"]\n";;
+					final_code.add(code_line);
+				}
+				else
+				{
+					code_line="mov ebx,"+token[2]+"\n";
+					final_code.add(code_line);	
+				}
+				code_line="cmp eax, ebx\n";
+				final_code.add(code_line);
+				code_line="jz L"+label+++"\n";
+				final_code.add(code_line);	
 			}
 			else if ("#".equals(token[0])) {
+				if(rmap.containsKey(token[1]))
+				{
+					reg=rmap.get(token[1]);
+					code_line="mov eax, DWORD PTR [ebp -"+reg+"]\n";;
+					final_code.add(code_line);
+				}
+				else
+				{
+					code_line="mov eax,"+token[1]+"\n";
+					final_code.add(code_line);
+				}
+				if(rmap.containsKey(token[2]))
+				{
+					reg2=rmap.get(token[2]);
+					code_line="mov ebx, DWORD PTR [ebp -"+reg2+"]\n";;
+					final_code.add(code_line);
+				}
+				else
+				{
+					code_line="mov ebx,"+token[2]+"\n";
+					final_code.add(code_line);	
+				}
+				code_line="cmp eax, ebx\n";
+				final_code.add(code_line);
+				code_line="jnz L"+label+++"\n";
+				final_code.add(code_line);	
 			}
 			else if("call".equals(token[0]))
 			{
