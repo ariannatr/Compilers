@@ -240,12 +240,13 @@ public class AssemblyCreator{
 			{
 				for (int i=parameters.size();i>0;i--)
 				{
-					if(parameters_kind.get(i-1).equals("V"))
+					if(parameters_kind.get(i-1).equals("V") || parameters.get(i-1).startsWith("\""))
 					{
 						code_line="push "+parameters.get(i-1)+"\n";
 						final_code.add(code_line);
 					}
-					else {
+					else if(!parameters.get(i-1).startsWith("\""))
+					{
 						code_line="mov eax, OFFSET FLAT:"+parameters.get(i-1)+"\n";
 						final_code.add(code_line);
 						code_line="push eax\n";
