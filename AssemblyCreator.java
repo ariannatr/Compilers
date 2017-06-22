@@ -114,14 +114,14 @@ public class AssemblyCreator{
 					}
 					bcounter+=4;
 					rmap.put(token[1],bcounter);
-					code_line="move DWORD PTR [ebp -"+bcounter+"],eax\n";
+					code_line="mov DWORD PTR [ebp -"+bcounter+"],eax\n";
 					final_code.add(code_line);
 				}
 			}
 			else if ("array".equals(token[0])) {
 			}
 			else if ("*".equals(token[0])){
-				mycalc("multi");
+				mycalc("imul");
 			}
 			else if ("+".equals(token[0])) {		
 				mycalc("add");
