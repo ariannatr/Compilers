@@ -361,10 +361,12 @@ public class Collector extends DepthFirstAdapter {
 	           ref2=node.getRef().toString();
 	           reff=true;
 	        }
+	       
 	        if(node.getVariable() != null)
 	        {
 	            varname=node.getVariable().toString();
 	        }
+	        
 	        if(node.getType() != null)
 	        {
 	        	vartype2=vartype;
@@ -388,15 +390,12 @@ public class Collector extends DepthFirstAdapter {
 	        if(!current.findparameter(v.name))
 	        {
 	        	current.arg.add(v);
-	        	
-
 	        }
 	        else
 	        {
-	        	error+="Error :The parameter "+v.name+" already exists !\n";
-	        	
+	        	error+="Error :The parameter "+v.name+" already exists !\n";	        	
 	        }
-	        //ref2="";
+	        ref2="";
 	        outAFparDef1FparDef(node);
 	    }
 
@@ -419,6 +418,7 @@ public class Collector extends DepthFirstAdapter {
 	           reff=true;
 	           tef=true;
 	        }
+	       String tref=ref2;
 	        if(node.getVariable() != null)
 	        {
 	            varname=node.getVariable().toString();
@@ -447,8 +447,7 @@ public class Collector extends DepthFirstAdapter {
 	        v.sizes=gsize;
 	        
 	        reff=false;
-	        System.err.println(v.name+ref2+"<---a");
-	        v.ref=ref2;
+	        v.ref=tref;
 	        if(!current.findparameter(v.name))
 	        {
 	        	current.arg.add(pl,v);
@@ -457,7 +456,7 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	        	error+="Error :The parameter "+v.name+" already exists !\n";
 	        }
-	      //  ref2="";
+	       
 	        outAFparDef2FparDef(node);
 	    }
 	      
@@ -502,8 +501,7 @@ public class Collector extends DepthFirstAdapter {
 	        v.ref=ref2;
 	       	if(!current.findparameter(v.name))
 	        {
-	        	current.arg.add(v);
-	        	
+	        	current.arg.add(v);	        	
 	        }
 	        else
 	        {
@@ -515,7 +513,7 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	            node.getFparDef().apply(this);
 	        }
-	        //ref2="";
+	        ref2="";
 	        outAFparDef3FparDef(node);
 	    }
 
@@ -570,7 +568,7 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	            node.getFparDef().apply(this);
 	        }
-	        //ref2="";
+	        ref2="";
 	        outAFparDef4FparDef(node);
 	    }
 

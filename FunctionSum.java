@@ -46,12 +46,22 @@ public class FunctionSum
 	}
 
 	public boolean get_variable_ref(int var)
-	{
+  	{
+		Iterator<VarSum> itr=this.arg.iterator();
 		int num=0;
-		VarSum ret=arg.get(var);
-		if(ret.ref.replaceAll(" ","").equals(""))
-			return false;
-		return true;
+		while(itr.hasNext())
+		{
+			VarSum ret=itr.next();
+			if(num==var)
+			{	
+ 				if(!ret.ref.replaceAll(" ","").equals(""))
+ 					return true;
+ 				else
+ 					return false;
+ 			}   
+ 			num++;
+ 		}
+		return false;
 	}
 
 	public VarSum get_parameter(int num)
