@@ -18,11 +18,13 @@ public class LoweringCode extends DepthFirstAdapter {
 	ArrayList<String> andjumps=new ArrayList<String>();
 	ArrayList<String> jumps=new ArrayList<String>();	
 	ArrayList<String> operator;
+	ArrayList<String> library_calls;
 
 	LoweringCode(FunctionSum symboltable,FunctionSum library)
 	{
 		this.symboltable=symboltable;
 		this.library=library;
+		this.library_calls=new ArrayList<String>();
 		help= new HelpfullMethods();
 	}
 	
@@ -472,6 +474,11 @@ public class LoweringCode extends DepthFirstAdapter {
 	    if(fun==null)
 	    {
 	    	fun=library.getFunction(left);
+	    	if(!library_calls.contains("grace_"+left.trim()))
+	    	{
+	    		library_calls.add("grace_"+left.trim());
+	    	}
+	    	left="grace_"+left;
 	    }
 	    {
 	        List<PExpr> copy = new ArrayList<PExpr>(node.getExpr());
