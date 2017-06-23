@@ -23,19 +23,19 @@ class Main {
       			System.err.println("Not enough arguments");
       			System.exit(1);
       	}
-      	System.out.println("Have to compile "+args.length+" files ");
-		System.out.println("Compiler started");
+     // 	System.out.println("Have to compile "+args.length+" files ");
+	//	System.out.println("Compiler started");
 		PrintStream out = new PrintStream(new FileOutputStream("output.txt"));
 		int i;
 		for(i=0;i<args.length;i++)		
 		{		
-			System.out.println("Compiling file "+args[i]);
+			//System.out.println("Compiling file "+args[i]);
 			FileInputStream myfile = null;
 			myfile=new FileInputStream(args[i]);
 			Parser p = new Parser(new Lexer(new PushbackReader(new InputStreamReader(myfile), 1024)));
         	try {
 	  			//System.setOut(out);
-	  			System.out.println("Semantic Check of file "+args[i]+" !");
+	  		//	System.out.println("Semantic Check of file "+args[i]+" !");
     			Start tree = p.parse();
     			Collector symboltable= new Collector();
     			symboltable.create_standar_library();
@@ -43,11 +43,11 @@ class Main {
     			symboltable.print_errors();
     			if(symboltable.error.equals(""))
     			{
-    				System.out.println("Converting Code of file "+args[i]+" !");
+    		//		System.out.println("Converting Code of file "+args[i]+" !");
     				LoweringCode converter= new LoweringCode(symboltable.current,symboltable.standar_library);
     				tree.apply(converter);
-    				converter.help.print_instructions();
-    				AssemblyCreator ascreator= new AssemblyCreator(converter.help.instruction_list,symboltable.current,symboltable.standar_library);
+    			//	converter.help.print_instructions();
+    				AssemblyCreator ascreator= new AssemblyCreator(converter.help.instruction_list,symboltable.current,symboltable.standar_library,converter.library_calls);
     				ascreator.produce();
     				ascreator.print_final();
     			}
@@ -57,7 +57,7 @@ class Main {
     		{	
     		    e.printStackTrace();
     		}
-    		System.out.println("------------------------------------------------------------------------------------------");
+    		//System.out.println("------------------------------------------------------------------------------------------");
     		System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out)));
 		}
 		System.out.println("Finished all the files ");
