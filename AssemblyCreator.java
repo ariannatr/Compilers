@@ -25,6 +25,7 @@ public class AssemblyCreator{
 	Boolean parameter_flag=true; //new function params
 	ArrayList<String> parameters; // store oarameters to push them reversed
 	ArrayList<String> parameters_kind;
+	Integer count_temp;
 	public AssemblyCreator(ArrayList<String> lc,FunctionSum symboltable,FunctionSum library)
 	{
 		lowering_code=lc;
@@ -36,6 +37,7 @@ public class AssemblyCreator{
 		bcounter=0;
 		line=1;
 		funid=-1;
+		count_temp=0;
 		this.symboltable=symboltable;
 		this.library=library;
 	}
@@ -207,7 +209,8 @@ public class AssemblyCreator{
 									break;
 								}
 							}
-							temp_par=temp_fun.get_parameter(parameters.size()-i).name;
+							//temp_par=temp_fun.get_parameter(parameters.size()-i).name;
+							temp_par="temp"+count_temp++;
 							code_line="mov eax, OFFSET FLAT:"+temp_par+"\n";
 							final_code.add(code_line);
 							code_line="push eax\n";
