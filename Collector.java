@@ -124,8 +124,8 @@ public class Collector extends DepthFirstAdapter {
 	{
 		if(!error.replaceAll(" ","").equals(""))
 			System.out.println("The errors found: \n"+error);
-		else
-			System.out.println("No Semantic Errors found \n");		
+		//else
+		//	System.out.println("No Semantic Errors found \n");		
 	}
 	
 	int first_time=0;
