@@ -24,6 +24,7 @@ public class Collector extends DepthFirstAdapter {
 	public int bcounter2=0;
 	public int bcounter3=0;
 	public FunctionSum standar_library= new FunctionSum("standard");
+	public String ref2="";
 
 	public String create_type(String vartype,int counter)
 	{
@@ -355,7 +356,6 @@ public class Collector extends DepthFirstAdapter {
 	    	}
 	    	String varname="";
 	        inAFparDef1FparDef(node);
-	        String ref2="";
 	        if(node.getRef() != null)
 	        {
 	           ref2=node.getRef().toString();
@@ -396,6 +396,7 @@ public class Collector extends DepthFirstAdapter {
 	        	error+="Error :The parameter "+v.name+" already exists !\n";
 	        	
 	        }
+	        //ref2="";
 	        outAFparDef1FparDef(node);
 	    }
 
@@ -409,9 +410,8 @@ public class Collector extends DepthFirstAdapter {
 	    	}
 	    	String varname="";
 	        inAFparDef2FparDef(node);
-	         String ref2="";
-	         boolean tef=false;
-	         if(reff==true)
+	        boolean tef=false;
+	        if(reff==true)
 	        	 tef=true;
 	        if(node.getRef() != null)
 	        {
@@ -447,18 +447,20 @@ public class Collector extends DepthFirstAdapter {
 	        v.sizes=gsize;
 	        
 	        reff=false;
+	        System.err.println(v.name+ref2+"<---a");
 	        v.ref=ref2;
 	        if(!current.findparameter(v.name))
 	        {
 	        	current.arg.add(pl,v);
-	        	
 	        }
 	        else
 	        {
 	        	error+="Error :The parameter "+v.name+" already exists !\n";
 	        }
+	      //  ref2="";
 	        outAFparDef2FparDef(node);
 	    }
+	      
 
 	    @Override
 	    public void caseAFparDef3FparDef(AFparDef3FparDef node)
@@ -469,7 +471,6 @@ public class Collector extends DepthFirstAdapter {
 	        	error+="Error :Main programm sould have no parameters !\n";
 	    	}
 	    	String varname="";
-	    	String ref2="";
 	        inAFparDef3FparDef(node);
 	        if(node.getRef() != null)
 	        {
@@ -514,6 +515,7 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	            node.getFparDef().apply(this);
 	        }
+	        //ref2="";
 	        outAFparDef3FparDef(node);
 	    }
 
@@ -526,7 +528,6 @@ public class Collector extends DepthFirstAdapter {
 	        	error+="Error :Main programm sould have no parameters !\n";
 	    	}
 	    	String varname="";
-	    	 String ref2="";
 	        inAFparDef4FparDef(node);
 	        if(node.getRef() != null)
 	        {
@@ -569,6 +570,7 @@ public class Collector extends DepthFirstAdapter {
 	        {
 	            node.getFparDef().apply(this);
 	        }
+	        //ref2="";
 	        outAFparDef4FparDef(node);
 	    }
 

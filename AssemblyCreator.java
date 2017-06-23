@@ -13,6 +13,7 @@ public class AssemblyCreator{
 	HashMap<String, Integer> labels ;
 	HashMap<Integer, String> funlabel ;
 	FunctionSum symboltable;
+	FunctionSum library;
 	Integer reg=0;
 	Integer reg2=0;
 	Integer label=0;
@@ -24,7 +25,7 @@ public class AssemblyCreator{
 	Boolean parameter_flag=true; //new function params
 	ArrayList<String> parameters; // store oarameters to push them reversed
 	ArrayList<String> parameters_kind;
-	public AssemblyCreator(ArrayList<String> lc,FunctionSum symboltable)
+	public AssemblyCreator(ArrayList<String> lc,FunctionSum symboltable,FunctionSum library)
 	{
 		lowering_code=lc;
 		final_code=new ArrayList<String>();
@@ -36,6 +37,7 @@ public class AssemblyCreator{
 		line=1;
 		funid=-1;
 		this.symboltable=symboltable;
+		this.library=library;
 	}
 	
 	public void produce()
@@ -69,12 +71,13 @@ public class AssemblyCreator{
 				final_code.add(code_line);
 				final_code.add(code_line2);
 				current=symboltable.get_function_from_Symboltable(token[1]);
-				int size=current.vars.size()*4;//not sure
+				int size=(current.vars.size()+current.arg.size())*4;//not sure
 				System.out.println("eimai stn sunartisi "+current.name+" me megethos "+size+"\n");
 				funlabel.put(funid,token[1]);
 				funid--;
 				code_line="sub esp, "+size+"\n";
-				 final_code.add(code_line);
+				final_code.add(code_line);
+
 			}
 			else if (":=".equals(token[0]))
 			{
@@ -178,21 +181,49 @@ public class AssemblyCreator{
 			}
 			else if("call".equals(token[0]))
 			{
+				String temp_par="";
+				FunctionSum temp_fun;
 				for (int i=parameters.size();i>0;i--)
 				{
-					if(parameters_kind.get(i-1).equals("V") || parameters.get(i-1).startsWith("\""))
+					if(parameters_kind.get(i-1).equals("V") )
 					{
+						//code_line="mov eax "+parameters.get(i-1)+"\n";
+						//final_code.add(code_line);
 						code_line="push "+parameters.get(i-1)+"\n";
 						final_code.add(code_line);
 					}
-					else if(!parameters.get(i-1).startsWith("\""))
+					else
 					{
-						code_line="mov eax, OFFSET FLAT:"+parameters.get(i-1)+"\n";
-						final_code.add(code_line);
-						code_line="push eax\n";
-						final_code.add(code_line);
-						code_line=parameters.get(i-1)+":"+"\t.asciz\t"+parameters.get(i-1)+"\n";
-						data.add(code_line);
+						if(parameters.get(i-1).startsWith("\""))
+						{
+							temp_fun=symboltable.get_function_from_Symboltable(token[3]);
+							if(temp_fun==null)
+							{
+								System.out.println("Something went wrong ,may be library's"+token[3]);
+								temp_fun=library.getFunction(token[3]);
+								if(temp_fun==null)
+								{
+									System.out.println("tha m fas ti zwi");
+									break;
+								}
+							}
+							temp_par=temp_fun.get_parameter(parameters.size()-i).name;
+							code_line="mov eax, OFFSET FLAT:"+temp_par+"\n";
+							final_code.add(code_line);
+							code_line="push eax\n";
+							final_code.add(code_line);
+							code_line=temp_par+":"+"\t.asciz\t"+parameters.get(i-1)+"\n";
+							data.add(code_line);
+						}
+						else
+						{
+							code_line="mov eax, OFFSET FLAT:"+parameters.get(i-1)+"\n";
+							final_code.add(code_line);
+							code_line="push eax\n";
+							final_code.add(code_line);
+							code_line=parameters.get(i-1)+":"+"\t.asciz\t"+parameters.get(i-1)+"\n";
+							data.add(code_line);
+						}
 					}
 				}
 				code_line="call "+token[3]+"\n";

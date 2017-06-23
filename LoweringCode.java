@@ -490,7 +490,6 @@ public class LoweringCode extends DepthFirstAdapter {
 		            help.instruction_list.add(code_line);
 	            }
 	            num_of_param++;
-	            
 	        }
 	        String code_line=help.genquad("call","-","-",left);
             help.instruction_list.add(code_line);
