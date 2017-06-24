@@ -134,6 +134,8 @@ public class AssemblyCreator{
 					}
 					code_line="\tmov DWORD PTR [ebp -"+reg+"],eax\n";
 					final_code.get(thesi).add(code_line);
+					code_line="\tpush ebp\n";
+					final_code.get(thesi).add(code_line);
 				}
 				else
 				{
@@ -243,7 +245,7 @@ public class AssemblyCreator{
 				else
 					System.out.print("unitialized current");
 				if(temp_fun==null)
-					temp_fun=library.getFunction(token[3]);
+					temp_fun=library.getFunction(token[3].replaceAll("grace_",""));
 				
 				if(temp_fun!=null)
 				{
@@ -262,7 +264,7 @@ public class AssemblyCreator{
 					{
 						if(rmap.containsKey(parameters.get(i-1)))//sinartisi exei tovar i to exei i mama
 						{
-							code_line="\tmov eax ,DWORD PTR[ebp -"+rmap.get(parameters.get(i-1))+"]\n";
+							code_line="\tmov eax ,DWORD PTR[esi -"+rmap.get(parameters.get(i-1))+"]\n";
 							final_code.get(thesi).add(code_line);
 						}
 						else
@@ -313,7 +315,7 @@ public class AssemblyCreator{
 				else
 					code_line="\tcall "+token[3]+"\n";
 				final_code.get(thesi).add(code_line);
-				code_line="\tadd esp, "+parameters.size()*4+"\n";
+				code_line="\tadd esp, "+(parameters.size()+1)*4+"\n";
 				final_code.get(thesi).add(code_line);
 				parameter_flag=true;
 				parameters=new ArrayList<String>();
