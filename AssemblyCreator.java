@@ -13,6 +13,7 @@ public class AssemblyCreator{
 	HashMap<String, Integer> rmap ;
 	HashMap<String, Integer> labels ;
 	HashMap<Integer, String> funlabel ;
+	HashMap<Integer, Integer> whilelabel ;
 	FunctionSum symboltable;
 	FunctionSum library;
 	Integer reg=0;
@@ -35,6 +36,7 @@ public class AssemblyCreator{
 	{
 		lowering_code=lc;
 		thesi=0;
+		whilelabel=new HashMap<Integer, Integer>();
 		final_code=new ArrayList<ArrayList<String>>();
 		rmap = new HashMap<String, Integer>();
 		labels = new HashMap<String, Integer>();
@@ -187,7 +189,7 @@ public class AssemblyCreator{
 			}
 			else if ("jump".equals(token[0])) {
 			
-				System.err.println(labels);
+				
 				if(labels.containsKey(token[3]))
 				{
 					code_line="\tjmp L"+labels.get(token[3])+"\n";
@@ -197,8 +199,20 @@ public class AssemblyCreator{
 				{
 					code_line="\tjmp L"+label+"\n";
 					labels.put(token[3],label);
-					label++;
 					final_code.get(thesi).add(code_line);
+					Integer k=Integer.parseInt(token[3]);
+					if(k<final_code.get(thesi).size())
+					{
+						for(int j=0;j<whilelabel.size();j++)
+						{
+							if(whilelabel.containsKey(k))
+							{
+								final_code.get(thesi).add(whilelabel.get(k),"L"+label+":\n");
+								whilelabel.remove(k);
+							}
+						}
+					}
+					label++;
 				}
 			}
 			else if (">".equals(token[0])) {
@@ -375,6 +389,9 @@ public class AssemblyCreator{
 	}
 	public void mycompare(String symbol)
 	{
+	
+		final_code.get(thesi).add("");
+		whilelabel.put(line,final_code.get(thesi).size());
 		if(rmap.containsKey(token[1]))
 		{
 			reg=rmap.get(token[1]);
