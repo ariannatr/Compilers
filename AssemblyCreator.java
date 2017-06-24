@@ -10,8 +10,9 @@ public class AssemblyCreator{
 	ArrayList<ArrayList<String>> final_code;
 	Integer thesi;
 	ArrayList<String> data;
-	HashMap<String, Integer> rmap ;
+	HashMap<String,HashMap<String, Integer>> rmap ;
 	HashMap<String, Integer> labels ;
+	HashMap<String, Integer> rmapcounter ;
 	HashMap<Integer, String> funlabel ;
 	HashMap<Integer, Integer> whilelabel ;
 	FunctionSum symboltable;
@@ -19,7 +20,6 @@ public class AssemblyCreator{
 	Integer reg=0;
 	Integer reg2=0;
 	Integer label=0;
-	Integer bcounter;
 	Integer line;
 	Integer funid;
 	Boolean esi_used;
@@ -38,11 +38,11 @@ public class AssemblyCreator{
 		thesi=0;
 		whilelabel=new HashMap<Integer, Integer>();
 		final_code=new ArrayList<ArrayList<String>>();
-		rmap = new HashMap<String, Integer>();
+		rmap = new HashMap<String,HashMap<String, Integer>>();
+		rmapcounter = new HashMap<String, Integer>();
 		labels = new HashMap<String, Integer>();
 		funlabel = new HashMap<Integer, String>();
 		data=new ArrayList<String>();
-		bcounter=4;
 		line=1;
 		funid=-1;
 		current=null;
@@ -52,10 +52,7 @@ public class AssemblyCreator{
 		this.library=library;
 		this.library_calls=library_calls;
 		main=symboltable.name.trim();
-		for(String e:library_calls)
-		{
-			//System.out.println("Lib calling	"+e);
-		}
+		parameters=new ArrayList<String>();
 	}
 	
 	public void produce()
@@ -87,7 +84,10 @@ public class AssemblyCreator{
 			if("unit".equals(token[0])) {
 				thesi++;
 				arr=new ArrayList<String>();
+				HashMap tmap=new  HashMap<String,Integer>();
+				rmapcounter.put(token[1],4);
 				final_code.add(arr);
+				rmap.put(token[1],tmap);
 				if(token[1].equals(main))
 					code_line="main:\n";
 				else
@@ -98,12 +98,14 @@ public class AssemblyCreator{
 				final_code.get(thesi).add(code_line);
 				final_code.get(thesi).add(code_line2);
 				current=symboltable.get_function_from_Symboltable(token[1]);
+				current.name=current.name.trim();
 				int size=0;//not sure
 				for(int i=0;i<current.vars.size();i++)
 				{
 					
 					if(current.vars.get(i).sizes.contains("["))
 					{
+						
 						String s=current.vars.get(i).sizes;
 						s=s.replaceAll(" ", "");
 						s=s.replaceAll("\\[", "");
@@ -117,17 +119,19 @@ public class AssemblyCreator{
 							y=Integer.parseInt(sa[z]);
 							x*=y;
 						}
-						rmap.put(current.vars.get(i).name.trim(),bcounter);
-						bcounter+=x;
+						rmap.get(current.name).put(current.vars.get(i).name.trim(),rmapcounter.get(current.name));
+						rmapcounter.put(current.name,rmapcounter.get(current.name)+x);
 						size+=x;
 					}
 					else
 					{
-						rmap.put(current.vars.get(i).name.trim(), bcounter);
-						bcounter+=4;
+						
+						rmap.get(current.name).put(current.vars.get(i).name.trim(), rmapcounter.get(current.name));
+						rmapcounter.put(current.name,rmapcounter.get(current.name)+4);
 						size+=4;
 					}
 				}
+				/*
 				for(int i=0;i<current.arg.size();i++)
 				{
 					if(current.arg.get(i).sizes.contains("["))
@@ -145,16 +149,16 @@ public class AssemblyCreator{
 							y=Integer.parseInt(sa[z]);
 							x*=y;
 						}
-						rmap.put(current.arg.get(i).name.trim(),bcounter);
-						bcounter+=x;
+						rmap.get(current.name).put(current.arg.get(i).name.trim(),rmapcounter.get(current.name));
+						rmapcounter.put(current.name,rmapcounter.get(current.name)+x);
 						size+=x;
 					}
 					else
 					{
-						rmap.put(current.arg.get(i).name.trim(), bcounter);
-						bcounter+=4;
+						rmap.get(current.name).put(current.arg.get(i).name.trim(), rmapcounter.get(current.name));
+						rmapcounter.put(current.name,rmapcounter.get(current.name)+4);
 					}
-				}
+				}*/
 				funlabel.put(funid,token[1]);
 				funid--;
 				code_line="\tsub esp, "+size+"\n";
@@ -164,30 +168,43 @@ public class AssemblyCreator{
 			else if (":=".equals(token[0]))
 			{
 				token[3]=token[3].replaceAll("\n", "");
-				if(rmap.containsKey(token[1]))
+				if(rmap.get(current.name).containsKey(token[1]))
 				{
-					reg=rmap.get(token[1]);
-					if(rmap.containsKey(token[3]))
+					reg=rmap.get(current.name).get(token[1]);
+					if(rmap.get(current.name).containsKey(token[3]))
 					{
-						reg2=rmap.get(token[3]);
+						reg2=rmap.get(current.name).get(token[3]);
 						code_line="\tmov eax,DWORD PTR [ebp -"+reg2+"]\n";
+						final_code.get(thesi).add(code_line);
+					}
+					else if(current.findparameter(token[3]))
+					{
+						reg2=0;
+						for(int p=0;p<current.arg.size();p++)
+						{
+							if(token[3].trim().equals(current.get_parameter(p).name.trim()))
+							{		
+								reg2=p;
+							}
+						}
+						Integer calc=(reg2*4)+16;
+						code_line="\tmov eax,DWORD PTR [ebp +"+calc+"]\n";
 						final_code.get(thesi).add(code_line);
 					}
 					else if(!token[3].contains("$"))
 					{
+						
 						code_line="\tmov eax,"+token[3]+"\n";
 						final_code.get(thesi).add(code_line);
 					}
 					code_line="\tmov DWORD PTR [ebp -"+reg+"],eax\n";
 					final_code.get(thesi).add(code_line);
-					code_line="\tpush ebp\n";
-					final_code.get(thesi).add(code_line);
 				}
 				else
 				{
-					if(rmap.containsKey(token[3]))
+					if(rmap.get(current.name).containsKey(token[3]))
 					{
-						reg2=rmap.get(token[3]);
+						reg2=rmap.get(current.name).get(token[3]);
 						code_line="\tmov ebx,DWORD PTR [ebp -"+reg2+"]\n";
 						final_code.get(thesi).add(code_line);
 					}
@@ -196,14 +213,14 @@ public class AssemblyCreator{
 						code_line="\tmov eax,"+token[3]+"\n";
 						final_code.get(thesi).add(code_line);
 					}
-					bcounter+=4;
-					rmap.put(token[1],bcounter);
-					code_line="\tmov DWORD PTR [ebp -"+bcounter+"],eax\n";
+					rmapcounter.put(current.name,rmapcounter.get(current.name)+4);
+					rmap.get(current.name).put(token[1],rmapcounter.get(current.name));
+					code_line="\tmov DWORD PTR [ebp -"+rmapcounter.get(current.name)+"],eax\n";
 					final_code.get(thesi).add(code_line);
 				}
 			}
 			else if ("array".equals(token[0])) {
-				if(rmap.containsKey(token[2]))
+				if(rmap.get(current.name).containsKey(token[2]))
 				{
 					code_line="\tmov eax ,DWORD PTR[ebp -"+rmap.get(token[2])+"\n";
 					final_code.get(thesi).add(code_line);
@@ -243,9 +260,9 @@ public class AssemblyCreator{
 			}
 			else if ("/".equals(token[0]))
 			{
-				if(rmap.containsKey(token[1]))
+				if(rmap.get(current.name).containsKey(token[1]))
 				{
-					reg=rmap.get(token[1]);
+					reg=rmap.get(current.name).get(token[1]);
 					code_line="\tmov eax, DWORD PTR [ebp -"+reg+"]\n";;
 					final_code.get(thesi).add(code_line);
 				}
@@ -256,9 +273,9 @@ public class AssemblyCreator{
 				}
 				code_line="\tcdq\n";
 				final_code.get(thesi).add(code_line);
-				if(rmap.containsKey(token[2]))
+				if(rmap.get(current.name).containsKey(token[2]))
 				{
-					reg2=rmap.get(token[2]);
+					reg2=rmap.get(current.name).get(token[2]);
 					code_line="\tmov ebx, DWORD PTR [ebp -"+reg2+"]\n";;
 					final_code.get(thesi).add(code_line);
 				}
@@ -269,26 +286,26 @@ public class AssemblyCreator{
 				}
 				code_line="\tidiv ebx\n";
 				final_code.get(thesi).add(code_line);
-				if(rmap.containsKey(token[3]))
+				if(rmap.get(current.name).containsKey(token[3]))
 				{
-					code_line="\tmov DWORD PTR [ebp -"+bcounter+"],eax\n";
+					code_line="\tmov DWORD PTR [ebp -"+rmapcounter.get(current.name)+"],eax\n";
 					final_code.get(thesi).add(code_line);
 				}
 				else
 				{
 					
-					bcounter+=4;
-					rmap.put(token[3],bcounter);
-					code_line="\tmov DWORD PTR [ebp -"+bcounter+"],eax\n";
+					rmapcounter.put(current.name,rmapcounter.get(current.name)+4);
+					rmap.get(current.name).put(token[3],rmapcounter.get(current.name));
+					code_line="\tmov DWORD PTR [ebp -"+rmapcounter.get(current.name)+"],eax\n";
 					final_code.get(thesi).add(code_line);
 				}
 
 			}
 			else if ("mod".equals(token[0]))
 			{
-				if(rmap.containsKey(token[1]))
+				if(rmap.get(current.name).containsKey(token[1]))
 				{
-					reg=rmap.get(token[1]);
+					reg=rmap.get(current.name).get(token[1]);
 					code_line="\tmov eax, DWORD PTR [ebp -"+reg+"]\n";;
 					final_code.get(thesi).add(code_line);
 				}
@@ -299,9 +316,9 @@ public class AssemblyCreator{
 				}
 				code_line="\tcdq\n";
 				final_code.get(thesi).add(code_line);
-				if(rmap.containsKey(token[2]))
+				if(rmap.get(current.name).containsKey(token[2]))
 				{
-					reg2=rmap.get(token[2]);
+					reg2=rmap.get(current.name).get(token[2]);
 					code_line="\tmov ebx, DWORD PTR [ebp -"+reg2+"]\n";;
 					final_code.get(thesi).add(code_line);
 				}
@@ -312,17 +329,17 @@ public class AssemblyCreator{
 				}
 				code_line="\tidiv ebx\n";
 				final_code.get(thesi).add(code_line);
-				if(rmap.containsKey(token[3]))
+				if(rmap.get(current.name).containsKey(token[3]))
 				{
-					code_line="\tmov DWORD PTR [ebp -"+bcounter+"],edx\n";
+					code_line="\tmov DWORD PTR [ebp -"+rmapcounter.get(current.name)+"],edx\n";
 					final_code.get(thesi).add(code_line);
 				}
 				else
 				{
 					
-					bcounter+=4;
-					rmap.put(token[3],bcounter);
-					code_line="\tmov DWORD PTR [ebp -"+bcounter+"],edx\n";
+					rmapcounter.put(current.name,rmapcounter.get(current.name)+4);
+					rmap.get(current.name).put(token[3],rmapcounter.get(current.name));
+					code_line="\tmov DWORD PTR [ebp -"+rmapcounter.get(current.name)+"],edx\n";
 					final_code.get(thesi).add(code_line);
 				}
 
@@ -401,12 +418,12 @@ public class AssemblyCreator{
 				
 				if(current!=null)
 					temp_fun=current.getFunction(token[3]);
-				else if(temp_fun==null)
+				if(temp_fun==null)
 					temp_fun=library.getFunction(token[3].replaceAll("grace_",""));
 				
-				if(temp_fun==null || temp_fun.belongs==null)//isws
+				/*
+				if(temp_fun==null || temp_fun.belongs==null)
 				{
-					
 					code_line="\tpush esi\n";
 					final_code.get(thesi).add(code_line);
 					code_line="\tmov esi,DWORD PTR[ebp + 8]\n";
@@ -419,8 +436,9 @@ public class AssemblyCreator{
 				{
 					code_line="\tpush ebp\n";
 					final_code.get(thesi).add(code_line);
-				}
-		
+				}*/
+				//code_line="\tsub esp,12\n";
+				//final_code.get(thesi).add(code_line);
 				if(parameters!=null)
 				{
 					
@@ -429,14 +447,28 @@ public class AssemblyCreator{
 						if(parameters_kind.get(i-1).equals("V") )//Value
 						{
 							
-							if(current.findparameter(parameters.get(i-1))|| current.findvariable(parameters.get(i-1)))//an to exei i idia tin metavliti
+							if(current.findvariable(parameters.get(i-1)))//an to exei i idia tin metavliti
 							{
-								code_line="\tmov eax ,DWORD PTR[ebp -"+rmap.get(parameters.get(i-1))+"]\n";
+								code_line="\tmov eax ,DWORD PTR[ebp -"+rmap.get(current.name).get(parameters.get(i-1))+"]\n";
+								final_code.get(thesi).add(code_line);
+							}
+							else if(current.findparameter(parameters.get(i-1)))
+							{
+								reg2=0;
+								for(int p=0;p<current.arg.size();p++)
+								{
+									if(parameters.get(i-1).trim().equals(current.get_parameter(p).name.trim()))
+									{		
+										reg2=p;
+									}
+								}
+								Integer calc=(reg2*4)+16;
+								code_line="\tmov eax,DWORD PTR [ebp +"+calc+"]\n";
 								final_code.get(thesi).add(code_line);
 							}
 							else//an to exei allo
 							{
-								code_line="\tmov esi ,DWORD PTR[esi -"+rmap.get(parameters.get(i-1))+"]\n";
+								code_line="\tmov esi ,DWORD PTR[esi -"+rmap.get(current.belongs.name).get(parameters.get(i-1))+"]\n";
 								final_code.get(thesi).add(code_line);
 							}
 							code_line="\tpush eax \n";
@@ -485,14 +517,21 @@ public class AssemblyCreator{
 				final_code.get(thesi).add(code_line);
 				if(parameters!=null)
 				{
-					code_line="\tadd esp, "+(parameters.size()+1)*4+"\n";
+					FunctionSum f32=current.get_function_from_Symboltable(token[3]);
+					if(f32!=null)
+					{
+						code_line="\tadd esp, "+12+"\n";
+						final_code.get(thesi).add(code_line);
+					}
+					code_line="\tadd esp, "+(parameters.size())*4+"\n";
 					final_code.get(thesi).add(code_line);
 				}
+				/*
 				else
 				{
-					code_line="\tadd esp, "+4+"\n";
+					code_line="\tadd esp, "+4+"\n"; //na rwtisume
 					final_code.get(thesi).add(code_line);
-				}
+				}*/
 				parameter_flag=true;
 				parameters=new ArrayList<String>();
 				parameters_kind=new ArrayList<String>();
@@ -526,10 +565,25 @@ public class AssemblyCreator{
 	}
 	public void mycalc(String symbol)
 	{
-		if(rmap.containsKey(token[1]))
+		
+		if(rmap.get(current.name).containsKey(token[1]))
 		{
-			reg=rmap.get(token[1]);
+			reg=rmap.get(current.name).get(token[1]);
 			code_line="\tmov eax, DWORD PTR [ebp -"+reg+"]\n";;
+			final_code.get(thesi).add(code_line);
+		}
+		else if(current.findparameter(token[1]))
+		{
+			reg2=0;
+			for(int p=0;p<current.arg.size();p++)
+			{
+				if(token[1].trim().equals(current.get_parameter(p).name.trim()))
+				{		
+					reg2=p;
+				}
+			}
+			Integer calc=(reg2*4)+16;
+			code_line="\tmov eax,DWORD PTR [ebp +"+calc+"]\n";
 			final_code.get(thesi).add(code_line);
 		}
 		else
@@ -537,10 +591,24 @@ public class AssemblyCreator{
 			code_line="\tmov eax,"+token[1]+"\n";
 			final_code.get(thesi).add(code_line);
 		}
-		if(rmap.containsKey(token[2]))
+		if(rmap.get(current.name).containsKey(token[2]))
 		{
-			reg2=rmap.get(token[2]);
+			reg2=rmap.get(current.name).get(token[2]);
 			code_line="\tmov ebx, DWORD PTR [ebp -"+reg2+"]\n";;
+			final_code.get(thesi).add(code_line);
+		}
+		else if(current.findparameter(token[2]))
+		{
+			reg2=0;
+			for(int p=0;p<current.arg.size();p++)
+			{
+				if(token[2].trim().equals(current.get_parameter(p).name.trim()))
+				{		
+					reg2=p;
+				}
+			}
+			Integer calc=(reg2*4)+16;
+			code_line="\tmov ebx,DWORD PTR [ebp +"+calc+"]\n";
 			final_code.get(thesi).add(code_line);
 		}
 		else
@@ -551,17 +619,16 @@ public class AssemblyCreator{
 
 		code_line="\t"+symbol+" eax,ebx\n";
 		final_code.get(thesi).add(code_line);
-		if(rmap.containsKey(token[3]))
+		if(rmap.get(current.name).containsKey(token[3]))
 		{
-			code_line="\tmov DWORD PTR [ebp -"+bcounter+"],eax\n";
+			code_line="\tmov DWORD PTR [ebp -"+rmapcounter.get(current.name)+"],eax\n";
 			final_code.get(thesi).add(code_line);
 		}
 		else
 		{
-			
-			bcounter+=4;
-			rmap.put(token[3],bcounter);
-			code_line="\tmov DWORD PTR [ebp -"+bcounter+"],eax\n";
+			rmap.get(current.name).put(token[3],rmapcounter.get(current.name));
+			rmapcounter.put(current.name,rmapcounter.get(current.name)+4);
+			code_line="\tmov DWORD PTR [ebp -"+rmapcounter.get(current.name)+"],eax\n";
 			final_code.get(thesi).add(code_line);
 		}
 	}
@@ -570,10 +637,24 @@ public class AssemblyCreator{
 	
 		final_code.get(thesi).add("");
 		whilelabel.put(line,final_code.get(thesi).size());
-		if(rmap.containsKey(token[1]))
+		if(rmap.get(current.name).containsKey(token[1]))
 		{
-			reg=rmap.get(token[1]);
+			reg=rmap.get(current.name).get(token[1]);
 			code_line="\tmov eax, DWORD PTR [ebp -"+reg+"]\n";;
+			final_code.get(thesi).add(code_line);
+		}
+		else if(current.findparameter(token[1]))
+		{
+			reg2=0;
+			for(int p=0;p<current.arg.size();p++)
+			{
+				if(token[1].trim().equals(current.get_parameter(p).name.trim()))
+				{		
+					reg2=p;
+				}
+			}
+			Integer calc=(reg2*4)+16;
+			code_line="\tmov eax,DWORD PTR [ebp +"+calc+"]\n";
 			final_code.get(thesi).add(code_line);
 		}
 		else
@@ -581,10 +662,24 @@ public class AssemblyCreator{
 			code_line="\tmov eax,"+token[1]+"\n";
 			final_code.get(thesi).add(code_line);
 		}
-		if(rmap.containsKey(token[2]))
+		if(rmap.get(current.name).containsKey(token[2]))
 		{
-			reg2=rmap.get(token[2]);
+			reg2=rmap.get(current.name).get(token[2]);
 			code_line="\tmov ebx, DWORD PTR [ebp -"+reg2+"]\n";;
+			final_code.get(thesi).add(code_line);
+		}
+		else if(current.findparameter(token[2]))
+		{
+			reg2=0;
+			for(int p=0;p<current.arg.size();p++)
+			{
+				if(token[2].trim().equals(current.get_parameter(p).name.trim()))
+				{		
+					reg2=p;
+				}
+			}
+			Integer calc=(reg2*4)+16;
+			code_line="\tmov ebx,DWORD PTR [ebp +"+calc+"]\n";
 			final_code.get(thesi).add(code_line);
 		}
 		else
