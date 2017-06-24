@@ -42,7 +42,7 @@ public class AssemblyCreator{
 		labels = new HashMap<String, Integer>();
 		funlabel = new HashMap<Integer, String>();
 		data=new ArrayList<String>();
-		bcounter=0;
+		bcounter=4;
 		line=1;
 		funid=-1;
 		current=null;
@@ -98,16 +98,62 @@ public class AssemblyCreator{
 				final_code.get(thesi).add(code_line);
 				final_code.get(thesi).add(code_line2);
 				current=symboltable.get_function_from_Symboltable(token[1]);
-				int size=(current.vars.size()+current.arg.size())*4;//not sure
+				int size=0;//not sure
 				for(int i=0;i<current.vars.size();i++)
 				{
-					rmap.put(current.vars.get(i).name.trim(), bcounter);
-					bcounter+=4;
+					
+					if(current.vars.get(i).sizes.contains("["))
+					{
+						String s=current.vars.get(i).sizes;
+						s=s.replaceAll(" ", "");
+						s=s.replaceAll("\\[", "");
+						s=s.replaceAll("int", "");
+						s=s.replaceAll("char", "");
+						String sa[] = s.split("\\]");
+						Integer x=0;
+						Integer y;
+						for(int z=0;z<sa.length;z++)
+						{
+							y=Integer.parseInt(sa[z]);
+							x*=y;
+						}
+						rmap.put(current.vars.get(i).name.trim(),bcounter);
+						bcounter+=x;
+						size+=x;
+					}
+					else
+					{
+						rmap.put(current.vars.get(i).name.trim(), bcounter);
+						bcounter+=4;
+						size+=4;
+					}
 				}
 				for(int i=0;i<current.arg.size();i++)
 				{
-					rmap.put(current.arg.get(i).name.trim(), bcounter);
-					bcounter+=4;
+					if(current.arg.get(i).sizes.contains("["))
+					{
+						String s=current.arg.get(i).sizes;
+						s=s.replaceAll(" ", "");
+						s=s.replaceAll("\\[", "");
+						s=s.replaceAll("int", "");
+						s=s.replaceAll("char", "");
+						String sa[] = s.split("\\]");
+						Integer x=0;
+						Integer y;
+						for(int z=0;z<sa.length;z++)
+						{
+							y=Integer.parseInt(sa[z]);
+							x*=y;
+						}
+						rmap.put(current.arg.get(i).name.trim(),bcounter);
+						bcounter+=x;
+						size+=x;
+					}
+					else
+					{
+						rmap.put(current.arg.get(i).name.trim(), bcounter);
+						bcounter+=4;
+					}
 				}
 				funlabel.put(funid,token[1]);
 				funid--;
@@ -173,12 +219,16 @@ public class AssemblyCreator{
 				size=size.replaceAll("\\]", "");
 				size=size.replaceAll("int", "");
 				size=size.replaceAll("char", "");
-				System.err.println(size);
 				code_line="\tmov ecx ,"+size+"\n";
 				final_code.get(thesi).add(code_line);
 				code_line="\timul ecx\n";
 				final_code.get(thesi).add(code_line);
 				code_line="\tlea ecx,DWORD PTR[ebp-"+rmap.get(token[1])+"]\n";
+				final_code.get(thesi).add(code_line);
+				code_line="\tadd eax, ecx\n";
+				final_code.get(thesi).add(code_line);
+			
+				code_line="\tmov DWORD PTR[ebp-"+rmap.get(token[1])+"],eax\n";
 				final_code.get(thesi).add(code_line);
 				
 			}
@@ -191,7 +241,91 @@ public class AssemblyCreator{
 			else if ("-".equals(token[0])) {
 				mycalc("sub");
 			}
-			else if ("/".equals(token[0])) {
+			else if ("/".equals(token[0]))
+			{
+				if(rmap.containsKey(token[1]))
+				{
+					reg=rmap.get(token[1]);
+					code_line="\tmov eax, DWORD PTR [ebp -"+reg+"]\n";;
+					final_code.get(thesi).add(code_line);
+				}
+				else
+				{
+					code_line="\tmov eax,"+token[1]+"\n";
+					final_code.get(thesi).add(code_line);
+				}
+				code_line="\tcdq\n";
+				final_code.get(thesi).add(code_line);
+				if(rmap.containsKey(token[2]))
+				{
+					reg2=rmap.get(token[2]);
+					code_line="\tmov ebx, DWORD PTR [ebp -"+reg2+"]\n";;
+					final_code.get(thesi).add(code_line);
+				}
+				else
+				{
+					code_line="\tmov ebx,"+token[2]+"\n";
+					final_code.get(thesi).add(code_line);	
+				}
+				code_line="\tidiv ebx\n";
+				final_code.get(thesi).add(code_line);
+				if(rmap.containsKey(token[3]))
+				{
+					code_line="\tmov DWORD PTR [ebp -"+bcounter+"],eax\n";
+					final_code.get(thesi).add(code_line);
+				}
+				else
+				{
+					
+					bcounter+=4;
+					rmap.put(token[3],bcounter);
+					code_line="\tmov DWORD PTR [ebp -"+bcounter+"],eax\n";
+					final_code.get(thesi).add(code_line);
+				}
+
+			}
+			else if ("mod".equals(token[0]))
+			{
+				if(rmap.containsKey(token[1]))
+				{
+					reg=rmap.get(token[1]);
+					code_line="\tmov eax, DWORD PTR [ebp -"+reg+"]\n";;
+					final_code.get(thesi).add(code_line);
+				}
+				else
+				{
+					code_line="\tmov eax,"+token[1]+"\n";
+					final_code.get(thesi).add(code_line);
+				}
+				code_line="\tcdq\n";
+				final_code.get(thesi).add(code_line);
+				if(rmap.containsKey(token[2]))
+				{
+					reg2=rmap.get(token[2]);
+					code_line="\tmov ebx, DWORD PTR [ebp -"+reg2+"]\n";;
+					final_code.get(thesi).add(code_line);
+				}
+				else
+				{
+					code_line="\tmov ebx,"+token[2]+"\n";
+					final_code.get(thesi).add(code_line);	
+				}
+				code_line="\tidiv ebx\n";
+				final_code.get(thesi).add(code_line);
+				if(rmap.containsKey(token[3]))
+				{
+					code_line="\tmov DWORD PTR [ebp -"+bcounter+"],edx\n";
+					final_code.get(thesi).add(code_line);
+				}
+				else
+				{
+					
+					bcounter+=4;
+					rmap.put(token[3],bcounter);
+					code_line="\tmov DWORD PTR [ebp -"+bcounter+"],edx\n";
+					final_code.get(thesi).add(code_line);
+				}
+
 			}
 			else if ("endu".equals(token[0])) {
 			
@@ -267,10 +401,10 @@ public class AssemblyCreator{
 				
 				if(current!=null)
 					temp_fun=current.getFunction(token[3]);
-				else
-					System.out.print("unitialized current");
+				else if(temp_fun==null)
+					temp_fun=library.getFunction(token[3].replaceAll("grace_",""));
 				
-				if(temp_fun==null)
+				if(temp_fun==null || temp_fun.belongs==null)//isws
 				{
 					
 					code_line="\tpush esi\n";
@@ -286,68 +420,79 @@ public class AssemblyCreator{
 					code_line="\tpush ebp\n";
 					final_code.get(thesi).add(code_line);
 				}
-				if(temp_fun==null)
-					temp_fun=library.getFunction(token[3].replaceAll("grace_",""));
-				for (int i=parameters.size();i>0;i--)
+		
+				if(parameters!=null)
 				{
-					if(parameters_kind.get(i-1).equals("V") )//Value
+					
+					for (int i=parameters.size();i>0;i--)
 					{
-						
-						if(temp_fun.findparameter(parameters.get(i-1))|| temp_fun.findvariable(parameters.get(i-1)))//an to exei i idia tin metavliti
+						if(parameters_kind.get(i-1).equals("V") )//Value
 						{
-							code_line="\tmov eax ,DWORD PTR[esi -"+rmap.get(parameters.get(i-1))+"]\n";
-							final_code.get(thesi).add(code_line);
-						}
-						else//an to exei allo
-						{
-							code_line="\tmov esi ,DWORD PTR[ebp -"+rmap.get(parameters.get(i-1))+"]\n";
-							final_code.get(thesi).add(code_line);
-						}
-						code_line="\tpush eax \n";
-						final_code.get(thesi).add(code_line);
-					}
-					else// Reference 
-					{
-						if(parameters.get(i-1).startsWith("\""))
-						{
-							temp_fun=symboltable.get_function_from_Symboltable(token[3]);
-							if(temp_fun==null)
+							
+							if(current.findparameter(parameters.get(i-1))|| current.findvariable(parameters.get(i-1)))//an to exei i idia tin metavliti
 							{
-		//						System.out.println("Something went wrong ,may be library's"+token[3]);
-								temp_fun=library.getFunction(token[3].replaceAll("grace_",""));
+								code_line="\tmov eax ,DWORD PTR[ebp -"+rmap.get(parameters.get(i-1))+"]\n";
+								final_code.get(thesi).add(code_line);
+							}
+							else//an to exei allo
+							{
+								code_line="\tmov esi ,DWORD PTR[esi -"+rmap.get(parameters.get(i-1))+"]\n";
+								final_code.get(thesi).add(code_line);
+							}
+							code_line="\tpush eax \n";
+							final_code.get(thesi).add(code_line);
+						}
+						else// Reference 
+						{
+							if(parameters.get(i-1).startsWith("\""))
+							{
+								temp_fun=symboltable.get_function_from_Symboltable(token[3]);
 								if(temp_fun==null)
 								{
-									System.out.println("tha m fas ti zwi");
-									break;
+									temp_fun=library.getFunction(token[3].replaceAll("grace_",""));
+									if(temp_fun==null)
+									{
+										System.out.println("tha m fas ti zwi");
+										break;
+									}
 								}
+
+								temp_par="temp"+count_temp++;
+								code_line="\tmov eax, OFFSET FLAT:"+temp_par+"\n";
+								final_code.get(thesi).add(code_line);
+								code_line="\tpush eax\n";
+								final_code.get(thesi).add(code_line);
+								code_line="\t"+temp_par+":"+"\t.asciz\t"+parameters.get(i-1)+"\n";
+								data.add(code_line);
 							}
-							//temp_par=temp_fun.get_parameter(parameters.size()-i).name;
-							temp_par="temp"+count_temp++;
-							code_line="\tmov eax, OFFSET FLAT:"+temp_par+"\n";
-							final_code.get(thesi).add(code_line);
-							code_line="\tpush eax\n";
-							final_code.get(thesi).add(code_line);
-							code_line="\t"+temp_par+":"+"\t.asciz\t"+parameters.get(i-1)+"\n";
-							data.add(code_line);
-						}
-						else
-						{
-							code_line="\tmov eax, OFFSET FLAT:"+parameters.get(i-1)+"\n";
-							final_code.get(thesi).add(code_line);
-							code_line="\tpush eax\n";
-							final_code.get(thesi).add(code_line);
-							code_line="\t"+parameters.get(i-1)+":"+"\t.asciz\t"+parameters.get(i-1)+"\n";
-							data.add(code_line);
+							else
+							{
+								code_line="\tmov eax, OFFSET FLAT:"+parameters.get(i-1)+"\n";
+								final_code.get(thesi).add(code_line);
+								code_line="\tpush eax\n";
+								final_code.get(thesi).add(code_line);
+								code_line="\t"+parameters.get(i-1)+":"+"\t.asciz\t"+parameters.get(i-1)+"\n";
+								data.add(code_line);
+							}
 						}
 					}
 				}
+				
 				if(token[3].equals(main))
 					code_line="\tcall main\n";
 				else
 					code_line="\tcall "+token[3]+"\n";
 				final_code.get(thesi).add(code_line);
-				code_line="\tadd esp, "+(parameters.size()+1)*4+"\n";
-				final_code.get(thesi).add(code_line);
+				if(parameters!=null)
+				{
+					code_line="\tadd esp, "+(parameters.size()+1)*4+"\n";
+					final_code.get(thesi).add(code_line);
+				}
+				else
+				{
+					code_line="\tadd esp, "+4+"\n";
+					final_code.get(thesi).add(code_line);
+				}
 				parameter_flag=true;
 				parameters=new ArrayList<String>();
 				parameters_kind=new ArrayList<String>();
@@ -395,7 +540,7 @@ public class AssemblyCreator{
 		if(rmap.containsKey(token[2]))
 		{
 			reg2=rmap.get(token[2]);
-			code_line="\tmov ebx, DWORD PTR [ebp -"+reg+"]\n";;
+			code_line="\tmov ebx, DWORD PTR [ebp -"+reg2+"]\n";;
 			final_code.get(thesi).add(code_line);
 		}
 		else
