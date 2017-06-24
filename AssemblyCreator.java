@@ -157,6 +157,30 @@ public class AssemblyCreator{
 				}
 			}
 			else if ("array".equals(token[0])) {
+				if(rmap.containsKey(token[2]))
+				{
+					code_line="\tmov eax ,DWORD PTR[ebp -"+rmap.get(token[2])+"\n";
+					final_code.get(thesi).add(code_line);
+				}
+				else
+				{
+					code_line="\tmov eax ,"+token[2]+"\n";
+					final_code.get(thesi).add(code_line);
+				}	
+				String size=current.findvarsize(token[1]);//to-do gia diastasi >1
+				size=size.replaceAll(" ","");
+				size=size.replaceAll("\\[", "");
+				size=size.replaceAll("\\]", "");
+				size=size.replaceAll("int", "");
+				size=size.replaceAll("char", "");
+				System.err.println(size);
+				code_line="\tmov ecx ,"+size+"\n";
+				final_code.get(thesi).add(code_line);
+				code_line="\timul ecx\n";
+				final_code.get(thesi).add(code_line);
+				code_line="\tlea ecx,DWORD PTR[ebp-"+rmap.get(token[1])+"]\n";
+				final_code.get(thesi).add(code_line);
+				
 			}
 			else if ("*".equals(token[0])){
 				mycalc("imul");
@@ -188,6 +212,7 @@ public class AssemblyCreator{
 				labels.remove(funid);
 				funid++;
 				thesi--;
+				current=current.belongs;
 			}
 			else if ("jump".equals(token[0])) {
 			
@@ -244,11 +269,10 @@ public class AssemblyCreator{
 					temp_fun=current.getFunction(token[3]);
 				else
 					System.out.print("unitialized current");
-				if(temp_fun==null)
-					temp_fun=library.getFunction(token[3].replaceAll("grace_",""));
 				
-				if(temp_fun!=null)
+				if(temp_fun==null)
 				{
+					
 					code_line="\tpush esi\n";
 					final_code.get(thesi).add(code_line);
 					code_line="\tmov esi,DWORD PTR[ebp + 8]\n";
@@ -257,17 +281,24 @@ public class AssemblyCreator{
 					final_code.get(thesi).add(code_line);
 					esi_used=true;
 				}
-
+				else
+				{
+					code_line="\tpush ebp\n";
+					final_code.get(thesi).add(code_line);
+				}
+				if(temp_fun==null)
+					temp_fun=library.getFunction(token[3].replaceAll("grace_",""));
 				for (int i=parameters.size();i>0;i--)
 				{
 					if(parameters_kind.get(i-1).equals("V") )//Value
 					{
-						if(rmap.containsKey(parameters.get(i-1)))//sinartisi exei tovar i to exei i mama
+						
+						if(temp_fun.findparameter(parameters.get(i-1))|| temp_fun.findvariable(parameters.get(i-1)))//an to exei i idia tin metavliti
 						{
 							code_line="\tmov eax ,DWORD PTR[esi -"+rmap.get(parameters.get(i-1))+"]\n";
 							final_code.get(thesi).add(code_line);
 						}
-						else
+						else//an to exei allo
 						{
 							code_line="\tmov esi ,DWORD PTR[ebp -"+rmap.get(parameters.get(i-1))+"]\n";
 							final_code.get(thesi).add(code_line);
