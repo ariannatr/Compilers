@@ -180,7 +180,7 @@ public class AssemblyCreator{
 			
 				if(labels.containsKey(token[3]))
 				{
-					code_line="\tjmp L"+labels.get(line.toString())+"\n";
+					code_line="\tjmp L"+labels.get(token[3])+"\n";
 					final_code.get(thesi).add(code_line);//arianna added
 				}
 				else
@@ -238,12 +238,12 @@ public class AssemblyCreator{
 					{
 						if(rmap.containsKey(parameters.get(i-1)))//sinartisi exei tovar i to exei i mama
 						{
-							code_line="\tmov eax ,DWORD PTR[ebpt -"+rmap.get(parameters.get(i-1))+"]\n";
+							code_line="\tmov eax ,DWORD PTR[ebp -"+rmap.get(parameters.get(i-1))+"]\n";
 							final_code.get(thesi).add(code_line);
 						}
 						else//to exei i mama
 						{
-							code_line="\tmov esi ,DWORD PTR[ebpt -"+rmap.get(parameters.get(i-1))+"]\n";
+							code_line="\tmov esi ,DWORD PTR[ebp -"+rmap.get(parameters.get(i-1))+"]\n";
 							final_code.get(thesi).add(code_line);//arianna added
 						}
 						code_line="\tpush eax \n";
@@ -427,32 +427,46 @@ public class AssemblyCreator{
 	}
 	public void include_library_defs()
 	{
+		String code_line="";
 		if(library_calls.contains("grace_gets"))
 		{
 			grace_gets();
 		//	System.out.println("adding grace_gets");
 		}
 		if(library_calls.contains("grace_puti"))
+		{
 			grace_puti();
+			code_line="\t"+"int_par:"+"\t.asciz\t"+"\"%d\""+"\n";
+			data.add(code_line);
+		}
 		if(library_calls.contains("grace_puts"))
 			grace_puts();
+		if(library_calls.contains("grace_putc"))
+		{
+			grace_putc();
+			code_line="\t"+"char:"+"\t.asciz\t"+"\"%c\""+"\n";
+			data.add(code_line);
+		}
 	}
 	public void grace_puti()
 	{
 		String code_line="";
+		String int_par="int_par";
 		code_line="grace_puti:\n";
 		final_code.get(thesi).add(code_line);
     	code_line="\tpush ebp\n";
     	final_code.get(thesi).add(code_line);
 		code_line="\tmov ebp, esp\n";
 		final_code.get(thesi).add(code_line);
-		code_line="\tmov eax, DWORD PTR [ebp + 8]\n";
+		code_line="\tpush eax\n";
 		final_code.get(thesi).add(code_line);
-		code_line="\tpush [eax]\n";
+		code_line="\tmov eax, OFFSET FLAT:"+int_par+"\n";
+		final_code.get(thesi).add(code_line);
+		code_line="\tpush eax\n";
 		final_code.get(thesi).add(code_line);
 		code_line="\tcall printf\n";
 		final_code.get(thesi).add(code_line);		
-		code_line="\tadd esp, 4\n";
+		code_line="\tadd esp, 8\n";
 		final_code.get(thesi).add(code_line);		
 		code_line="\tmov esp, ebp\n";
 		final_code.get(thesi).add(code_line);
@@ -462,6 +476,32 @@ public class AssemblyCreator{
    		final_code.get(thesi).add(code_line);
 	}
 
+	public void grace_putc()
+	{
+		String code_line="";
+		code_line="grace_putc:\n";
+		final_code.get(thesi).add(code_line);
+    	code_line="\tpush ebp\n";
+    	final_code.get(thesi).add(code_line);
+		code_line="\tmov ebp, esp\n";
+		final_code.get(thesi).add(code_line);
+		code_line="\tpush eax\n";
+		final_code.get(thesi).add(code_line);
+		code_line="\tmov eax, OFFSET FLAT:char\n";
+		final_code.get(thesi).add(code_line);
+		code_line="\tpush eax\n";
+		final_code.get(thesi).add(code_line);
+		code_line="\tcall printf\n";
+		final_code.get(thesi).add(code_line);		
+		code_line="\tadd esp, 8\n";
+		final_code.get(thesi).add(code_line);		
+		code_line="\tmov esp, ebp\n";
+		final_code.get(thesi).add(code_line);
+  		code_line="\tpop ebp\n";
+		final_code.get(thesi).add(code_line);
+   		code_line="\tret\n";
+   		final_code.get(thesi).add(code_line);
+	}
 	public void grace_puts()
 	{
 		String code_line="";
