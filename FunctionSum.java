@@ -12,6 +12,7 @@ public class FunctionSum
 	public ArrayList<VarSum> arg;
 	public ArrayList<VarSum> vars;
 	public boolean dec;
+	public int deapth;
 	public FunctionSum(String n)
 	{
 		name=n;
@@ -20,6 +21,23 @@ public class FunctionSum
 		fun= new ArrayList<FunctionSum>();
 	}
 
+	public void calculate_deapths()
+	{	
+		for(FunctionSum function:this.fun)
+		{
+				function.deapth=function.belongs.deapth+1;
+				function.calculate_deapths();
+		}
+	}
+	public void print_deapths()
+	{	
+		System.out.println(this.name+" "+this.deapth);
+		for(FunctionSum function:this.fun)
+		{
+				//System.out.println(function.name+" "+function.deapth);
+				function.print_deapths();
+		}
+	}
 
 	public FunctionSum get_function_from_Symboltable(String function_name)
 	{

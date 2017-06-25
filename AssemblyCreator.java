@@ -34,6 +34,7 @@ public class AssemblyCreator{
 	ArrayList<String> library_calls;
 	Integer count_temp;
 	String main;
+	Helper helper;
 	public AssemblyCreator(ArrayList<String> lc,FunctionSum symboltable,FunctionSum library,ArrayList<String> library_calls)
 	{
 		lowering_code=lc;
@@ -46,6 +47,7 @@ public class AssemblyCreator{
 		funlabel = new HashMap<Integer, String>();
 		scopes =new HashMap<String, Integer>();
 		data=new ArrayList<String>();
+		helper=new Helper();
 		line=1;
 		funid=-1;
 		current=null;
@@ -70,7 +72,7 @@ public class AssemblyCreator{
 		final_code.get(thesi).add(code_line);
 		code_line="\t.global main\n";
 		final_code.get(thesi).add(code_line);
-		include_library_defs();//add code for library
+		helper.include_library_defs(final_code,thesi,data,library_calls);//add code for library
 		while(itr.hasNext())
 		{
 			if(labels.containsKey(line.toString()))
@@ -547,11 +549,13 @@ public class AssemblyCreator{
 			final_code.get(thesi).add(code_line);
 		}
 	}
+
 	public void add(String []token)
 	{
 		add(token);
 		return;
 	}
+
 	public void mycalc(String symbol)
 	{
 		
@@ -728,7 +732,7 @@ public class AssemblyCreator{
 		}
 		final_code.get(thesi).add(code_line);	
 	}
-	public void print_final()
+	/*ublic void print_final()
 	{
 		Iterator<String> itr;
 		for(int i=0;i<final_code.size();i++)
@@ -737,10 +741,7 @@ public class AssemblyCreator{
 			while(itr.hasNext())
 			{
 				String ret=itr.next();
-			//	if(ret.contains(":")|| ret.contains("."))
 					System.out.print(ret);
-			//	else
-			//		System.out.print("\t"+ret);
 			}
 		}
 		System.out.println(".data");
@@ -751,160 +752,6 @@ public class AssemblyCreator{
 			System.out.print(ret);
 		}
 		return;
-	}
+	}*/
 
-	public void include_library_defs()
-	{
-		String code_line="";
-		if(library_calls.contains("grace_gets"))
-		{
-			grace_gets();
-		//	System.out.println("adding grace_gets");
-		}
-		if(library_calls.contains("grace_puti"))
-		{
-			grace_puti();
-			code_line="\t"+"int_par:"+"\t.asciz\t"+"\"%d\""+"\n";
-			data.add(code_line);
-		}
-		if(library_calls.contains("grace_puts"))
-			grace_puts();
-		if(library_calls.contains("grace_putc"))
-		{
-			grace_putc();
-			code_line="\t"+"char:"+"\t.asciz\t"+"\"%c\""+"\n";
-			data.add(code_line);
-		}
-	}
-
-	public void grace_puti()
-	{
-		String code_line="";
-		String int_par="int_par";
-		code_line="grace_puti:\n";
-		final_code.get(thesi).add(code_line);
-    	code_line="\tpush ebp\n";
-    	final_code.get(thesi).add(code_line);
-		code_line="\tmov ebp, esp\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tpush eax\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tmov eax, OFFSET FLAT:"+int_par+"\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tpush eax\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tcall printf\n";
-		final_code.get(thesi).add(code_line);		
-		code_line="\tadd esp, 8\n";
-		final_code.get(thesi).add(code_line);		
-		code_line="\tmov esp, ebp\n";
-		final_code.get(thesi).add(code_line);
-  		code_line="\tpop ebp\n";
-		final_code.get(thesi).add(code_line);
-   		code_line="\tret\n";
-   		final_code.get(thesi).add(code_line);
-	}
-
-	public void grace_putc()
-	{
-		String code_line="";
-		code_line="grace_putc:\n";
-		final_code.get(thesi).add(code_line);
-    	code_line="\tpush ebp\n";
-    	final_code.get(thesi).add(code_line);
-		code_line="\tmov ebp, esp\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tpush eax\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tmov eax, OFFSET FLAT:char\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tpush eax\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tcall printf\n";
-		final_code.get(thesi).add(code_line);		
-		code_line="\tadd esp, 8\n";
-		final_code.get(thesi).add(code_line);		
-		code_line="\tmov esp, ebp\n";
-		final_code.get(thesi).add(code_line);
-  		code_line="\tpop ebp\n";
-		final_code.get(thesi).add(code_line);
-   		code_line="\tret\n";
-   		final_code.get(thesi).add(code_line);
-	}
-	public void grace_puts()
-	{
-		String code_line="";
-		code_line="grace_puts:\n";
-		final_code.get(thesi).add(code_line);
-    	code_line="\tpush ebp\n";
-    	final_code.get(thesi).add(code_line);
-		code_line="\tmov ebp, esp\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tmov eax, DWORD PTR [ebp + 8]\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tpush eax\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tcall printf\n";
-		final_code.get(thesi).add(code_line);		
-		code_line="\tadd esp, 4\n";
-		final_code.get(thesi).add(code_line);		
-		code_line="\tmov esp, ebp\n";
-		final_code.get(thesi).add(code_line);
-  		code_line="\tpop ebp\n";
-		final_code.get(thesi).add(code_line);
-   		code_line="\tret\n";
-   		final_code.get(thesi).add(code_line);
-	}
-	public void grace_gets()
-	{
-		String code_line="";
-		code_line="grace_gets:\n";
-		final_code.get(thesi).add(code_line);
-    	code_line="\tpush ebp\n";
-    	final_code.get(thesi).add(code_line);
-		code_line="\tmov ebp, esp\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tmov eax, DWORD PTR stdin\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tpush eax\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tmov eax, DWORD PTR [ebp + 8]\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tpush eax\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tmov eax, DWORD PTR [ebp + 12]\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tpush eax\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tcall fgets\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tadd esp, 12\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tmov eax, 10\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tpush eax\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tmov eax, DWORD PTR [ebp + 12]\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tpush eax\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tcall strchr\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tadd esp, 8\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tcmp eax, 0\n";
-		final_code.get(thesi).add(code_line);
-    	code_line="\tje grace_gets_no_newline\n";
-    	final_code.get(thesi).add(code_line);
-    	code_line="\tmov BYTE PTR [eax], 0\n";
-		final_code.get(thesi).add(code_line);
-		code_line="grace_gets_no_newline:\n";
-		final_code.get(thesi).add(code_line);
-    	code_line="\tmov esp, ebp\n";
-		final_code.get(thesi).add(code_line);
-  		code_line="\tpop ebp\n";
-		final_code.get(thesi).add(code_line);
-   		code_line="\tret\n";
-   		final_code.get(thesi).add(code_line);
-	}
 }
