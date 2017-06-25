@@ -43,7 +43,7 @@ class Main {
                     symboltable.current.print_deapths();
     				LoweringCode converter= new LoweringCode(symboltable.current,symboltable.standar_library);
     				tree.apply(converter);
-    				//converter.help.print_instructions();
+    				converter.help.print_instructions();
     				AssemblyCreator ascreator= new AssemblyCreator(converter.help.instruction_list,symboltable.current,symboltable.standar_library,converter.library_calls);
     				ascreator.produce();
                     Helper.print_final(ascreator.final_code,ascreator.data);

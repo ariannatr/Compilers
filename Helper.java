@@ -60,7 +60,7 @@ public class Helper{
     	final_code.get(thesi).add(code_line);
 		code_line="\tmov ebp, esp\n";
 		final_code.get(thesi).add(code_line);
-		code_line="\tmov eax, DWORD PTR [ebp + 8]\n";
+		code_line="\tmov eax, DWORD PTR [ebp + 12]\n";
 		final_code.get(thesi).add(code_line);
 		code_line="\tpush eax\n";
 		final_code.get(thesi).add(code_line);
