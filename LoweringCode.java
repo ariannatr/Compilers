@@ -10,6 +10,8 @@ public class LoweringCode extends DepthFirstAdapter {
 	public String mtype="";
 	public String code="";
 	public String name="";
+	public String currentf="";
+	public String kra="";
 	public int register=0;
 	public HelpfullMethods help;
 	public FunctionSum symboltable;
@@ -18,13 +20,11 @@ public class LoweringCode extends DepthFirstAdapter {
 	ArrayList<String> andjumps=new ArrayList<String>();
 	ArrayList<String> jumps=new ArrayList<String>();	
 	ArrayList<String> operator;
-	ArrayList<String> library_calls;
 
 	LoweringCode(FunctionSum symboltable,FunctionSum library)
 	{
 		this.symboltable=symboltable;
 		this.library=library;
-		this.library_calls=new ArrayList<String>();
 		help= new HelpfullMethods();
 	}
 	
@@ -89,6 +89,7 @@ public class LoweringCode extends DepthFirstAdapter {
 	    if(node.getVariable() != null)
 	    {
 	        name=node.getVariable().toString();
+	        currentf=name;
 	        String code_line=help.genquad("unit",name,"-","-");
 	        help.instruction_list.add(code_line);
 	    }
@@ -281,10 +282,84 @@ public class LoweringCode extends DepthFirstAdapter {
 	    inAExprStmt(node);
 	    String left="";
 	    String right="";
+	    kra="";
 	    if(node.getLValue() != null)
 	    {
-	        node.getLValue().apply(this);
-	        left=mtype;
+	    	 node.getLValue().apply(this);
+	    	if(node.getLValue() instanceof ALValueArrayLValue)
+	    	{
+	    		String cs=node.getLValue().toString();
+	    		String []s=cs.split(" ");
+	    		FunctionSum f=symboltable.get_function_from_Symboltable(currentf);
+	    		String ttype=f.findvarsize(s[0]);
+	    		if(ttype.equals("NULL"))
+	    		{
+	    			ttype=f.belongs.findvarsize(s[0]);
+	    		}
+	    		String []s2=ttype.split("]");
+	    		s2[0]=s2[0].replaceAll("int ","");
+	    		for(int i=0;i<s2.length-1;i++)
+	    		{
+	    			s2[i]=s2[i].replace("[","");
+	    			if(s2[i].length()>1)
+	    				s2[i]=s2[i].replaceAll(" ","");
+	    		}
+	    		
+	    		boolean addflag=false;
+	    		String prereg="";
+	    		for(int i=1;i<s.length-1;i++)
+	    		{
+	    			
+	    			String code_line="";
+	    			if(s2[i].equals(" "))
+	    				break;
+	    			for(int j=i;j<s2.length-1;j++)
+	    			{
+	    				register++;
+	    				if(j==i)
+	    					code_line=help.genquad("*",s[i],s2[j],"$"+register);
+	    				else
+	    					code_line=help.genquad("*","$"+(register-1),s2[j],"$"+register);
+	    				help.instruction_list.add(code_line);
+	    			}
+	    	        if(addflag==false)
+	    				addflag=true;
+	    	        else
+	    	        {
+	    	        	register++;
+	    	        	code_line=help.genquad("+",prereg,"$"+(register-1),"$"+register);
+		    	        help.instruction_list.add(code_line);
+		    	        prereg="$"+register;
+	    	        	addflag=false;
+	    	        }
+	    	        prereg="$"+register;
+	    		}
+	    		
+	    		register++;
+	    		String code_line="";
+	    		if(prereg.equals(""))
+	    		{
+	    			
+	    			if(!kra.equals(""))
+	    				code_line=help.genquad("+",kra,s[s.length-1],"$"+register);
+	    			else
+	    				code_line=help.genquad("+","0",mtype,"$"+register);
+	    		}
+	        	else
+	        	{
+	        		if(!kra.equals(""))
+	        			code_line=help.genquad("+",prereg,kra,"$"+register);
+	        		else
+	        			code_line=help.genquad("+",prereg,s[s.length-1],"$"+register);
+	        	}
+    	        help.instruction_list.add(code_line);
+    	        register++;
+    	        code_line=help.genquad("array",s[0],"$"+(register-1),"$"+register);
+   	         	help.instruction_list.add(code_line);
+		         mtype="[$"+register+"]";
+		         kra=mtype;
+	    	}	       
+	        	left=mtype;
 	    }
 	    
 	    if(node.getExpr() != null)
@@ -474,11 +549,6 @@ public class LoweringCode extends DepthFirstAdapter {
 	    if(fun==null)
 	    {
 	    	fun=library.getFunction(left);
-	    	if(!library_calls.contains("grace_"+left.trim()))
-	    	{
-	    		library_calls.add("grace_"+left.trim());
-	    	}
-	    	left="grace_"+left;
 	    }
 	    {
 	        List<PExpr> copy = new ArrayList<PExpr>(node.getExpr());
@@ -497,17 +567,20 @@ public class LoweringCode extends DepthFirstAdapter {
 		            help.instruction_list.add(code_line);
 	            }
 	            num_of_param++;
+	            
 	        }
-	        String code_line;
-	        if(fun.type!="nothing")
+	       
+	        String code_line="";
+	        if(!fun.type.replaceAll(" ","").equals("nothing"))
 	        {
-	        	code_line=help.genquad("par","$"+help.nextquad(),"RET","-");
+	        	 register++;
+	        	code_line=help.genquad("par","RET","$"+register,"-");
             	help.instruction_list.add(code_line);
 	        }
             code_line=help.genquad("call","-","-",left);
             help.instruction_list.add(code_line);
 	    }
-	    mtype="$$";
+	    mtype="$"+register;
 	    outAFuncCallFuncCall(node);
 	}
 	
@@ -670,23 +743,20 @@ public class LoweringCode extends DepthFirstAdapter {
 	public void caseALValueArrayLValueArray(ALValueArrayLValueArray node)
 	{
 	    inALValueArrayLValueArray(node);
-	    String left="";
-	    String right="";
+
 	    if(node.getLValue() != null)
 	    {
 	        node.getLValue().apply(this);
-	        left=mtype;
 	    }
 	    if(node.getExpr() != null)
 	    {
 	        node.getExpr().apply(this);
-	        right=mtype;
 	    }
-	    register++;
+	    /*register++;
 	    mtype="$"+register;
 	    String code_line=help.genquad("array",left,right,"$"+register);
 	    mtype="[$"+register+"]";
-        help.instruction_list.add(code_line);
+        help.instruction_list.add(code_line);*/
 	    outALValueArrayLValueArray(node);
 	}
 	
@@ -704,24 +774,18 @@ public class LoweringCode extends DepthFirstAdapter {
 	        left=""+help.nextquad();
 	    }
 	    int meta=jumps.size();
-
-	    	for(int i=0;i<meta-prin;i++)
-	    	{
-	    		Integer t=jumps.size()-i-1;
-		    	help.modifiyquad(jumps.get(t),left);
-		    	jumps.remove(t.toString());
-	    	}
-	    String mytemp=jumps.get(jumps.size()-1);
+    	for(int i=0;i<meta-prin;i++)
+    	{
+    		Integer t=jumps.size()-i-1;
+	    	help.modifiyquad(jumps.get(t),left);
+	    	jumps.remove(t.toString());
+    	}
 	    if(node.getRight() != null)
 	    {
 	        node.getRight().apply(this);
 	        right=""+help.nextquad();
 	    }
-	    
-	    	help.modifiyquad(mytemp,left);
-	    	jumps.remove(mytemp);
 	    	mtype=right;
-	   
 	    outACondOrExpr(node);
 	}
 	
@@ -747,15 +811,12 @@ public class LoweringCode extends DepthFirstAdapter {
 	    	conditions.remove(t.toString());
     	}
 
-	    String mytemp=conditions.get(conditions.size()-1);
 	    if(node.getRight() != null)
 	    {
 	        node.getRight().apply(this);
 	        right=""+help.nextquad();
 	    }
 	    
-    	help.modifiyquad(mytemp,left);
-	    conditions.remove(mytemp);
 	    mtype=right;
 	    outACompAndExpr(node);
 	}
@@ -1024,10 +1085,89 @@ public class LoweringCode extends DepthFirstAdapter {
 	public void caseATermValExpr(ATermValExpr node)
 	{
 	    inATermValExpr(node);
+	    kra="";
 	    if(node.getLValue() != null)
 	    {
-	        node.getLValue().apply(this);
+	    	 node.getLValue().apply(this);
+	    	if(node.getLValue() instanceof ALValueArrayLValue)
+	    	{
+	    		String cs=node.getLValue().toString();
+	    		String []s=cs.split(" ");
+	    		FunctionSum f=symboltable.get_function_from_Symboltable(currentf);
+	    		String ttype=f.findvarsize(s[0]);
+	    		if(ttype.equals("NULL"))
+	    		{
+	    			ttype=f.belongs.findvarsize(s[0]);
+	    		}
+	    		String []s2=ttype.split("]");
+	    		s2[0]=s2[0].replaceAll("int ","");
+	    		for(int i=0;i<s2.length-1;i++)
+	    		{
+	    			s2[i]=s2[i].replace("[","");
+	    			if(s2[i].length()>1)
+	    				s2[i]=s2[i].replaceAll(" ","");
+	    		}
+	    		
+	    		boolean addflag=false;
+	    		String prereg="";
+	    		
+	    		for(int i=1;i<s.length-1;i++)
+	    		{
+	    			
+	    			String code_line="";
+	    			if(s2[i].equals(" "))
+	    				break;
+	    			for(int j=i;j<s2.length-1;j++)
+	    			{
+	    				register++;
+	    				if(j==i)
+	    					code_line=help.genquad("*",s[i],s2[j],"$"+register);
+	    				else
+	    					code_line=help.genquad("*","$"+(register-1),s2[j],"$"+register);
+	    				help.instruction_list.add(code_line);
+	    			}
+
+	    	       
+	    	        if(addflag==false)
+	    				addflag=true;
+	    	        else
+	    	        {
+	    	        	register++;
+	    	        	code_line=help.genquad("+",prereg,"$"+(register-1),"$"+register);
+		    	        help.instruction_list.add(code_line);
+		    	        prereg="$"+register;
+	    	        	addflag=false;
+	    	        }
+	    	        prereg="$"+register;
+	    		}
+	    		
+	    		register++;
+	    		String code_line="";
+	    		
+	    		if(prereg.equals(""))
+	    		{
+	    			
+	    			if(!kra.equals(""))
+	    				code_line=help.genquad("+",kra,s[s.length-1],"$"+register);
+	    			else
+	    				code_line=help.genquad("+","0",mtype,"$"+register);
+	    		}
+	        	else
+	        	{
+	        		if(!kra.equals(""))
+	        			code_line=help.genquad("+",prereg,kra,"$"+register);
+	        		else
+	        			code_line=help.genquad("+",prereg,s[s.length-1],"$"+register);
+	        	}
+    	        help.instruction_list.add(code_line);
+    	        register++;
+    	        code_line=help.genquad("array",s[0],"$"+(register-1),"$"+register);
+   	         	help.instruction_list.add(code_line);
+		         mtype="[$"+register+"]";
+		         kra=mtype;
+	    	}
 	    }
+	    
 	    outATermValExpr(node);
 	}
 	
