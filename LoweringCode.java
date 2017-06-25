@@ -498,7 +498,13 @@ public class LoweringCode extends DepthFirstAdapter {
 	            }
 	            num_of_param++;
 	        }
-	        String code_line=help.genquad("call","-","-",left);
+	        String code_line;
+	        if(fun.type!="nothing")
+	        {
+	        	code_line=help.genquad("par","RET","$"+help.nextquad(),"-");
+            	help.instruction_list.add(code_line);
+	        }
+            code_line=help.genquad("call","-","-",left);
             help.instruction_list.add(code_line);
 	    }
 	    mtype="$$";
