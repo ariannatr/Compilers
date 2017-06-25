@@ -1199,7 +1199,8 @@ public class Collector extends DepthFirstAdapter {
 	            node.getRight().apply(this);
 	        }
 	        String right=mtype;
-	        if(!left.equals(right))
+	       
+	        if(!left.trim().equals(right.trim()))
 	        	error+="Error :Wrong on CompareExpression ( "+left+" op "+right+" ) !\n";
 	        else if(!left.equals("int") && !left.equals("int "))
 	        	error+="Error :Wrong on CompareExpression, was expecting integer ( "+left+" op "+right+" ) !\n";
