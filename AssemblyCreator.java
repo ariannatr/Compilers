@@ -15,6 +15,7 @@ public class AssemblyCreator{
 	HashMap<String, Integer> rmapcounter ;
 	HashMap<Integer, String> funlabel ;
 	HashMap<Integer, Integer> whilelabel ;
+	HashMap<String, Integer> scopes ;
 	FunctionSum symboltable;
 	FunctionSum library;
 	Integer reg=0;
@@ -22,6 +23,7 @@ public class AssemblyCreator{
 	Integer label=0;
 	Integer line;
 	Integer funid;
+	Integer scope;
 	Boolean esi_used;
 	String [] token;
 	String code_line;
@@ -42,11 +44,13 @@ public class AssemblyCreator{
 		rmapcounter = new HashMap<String, Integer>();
 		labels = new HashMap<String, Integer>();
 		funlabel = new HashMap<Integer, String>();
+		scopes =new HashMap<String, Integer>();
 		data=new ArrayList<String>();
 		line=1;
 		funid=-1;
 		current=null;
 		count_temp=0;
+		scope=0;
 		esi_used=false;
 		this.symboltable=symboltable;
 		this.library=library;
@@ -92,6 +96,8 @@ public class AssemblyCreator{
 					code_line="main:\n";
 				else
 					code_line=""+token[1]+":\n";
+				scope++;
+				scopes.put(token[1],scope);
 				final_code.get(thesi).add(code_line);
 				code_line="\tpush ebp\n";
 				String code_line2="\tmov ebp, esp\n";
@@ -147,7 +153,6 @@ public class AssemblyCreator{
 					{
 
 						reg2=rmap.get(current.name).get(token[3]);
-						System.err.println("eax"+token[3]+reg2);
 						code_line="\tmov eax,DWORD PTR [ebp -"+reg2+"]\n";
 						final_code.get(thesi).add(code_line);
 					}
@@ -171,7 +176,6 @@ public class AssemblyCreator{
 						code_line="\tmov eax,"+token[3]+"\n";
 						final_code.get(thesi).add(code_line);
 					}
-					System.err.println("reg "+reg);
 					code_line="\tmov DWORD PTR [ebp -"+reg+"],eax\n";
 					final_code.get(thesi).add(code_line);
 				}
@@ -336,6 +340,7 @@ public class AssemblyCreator{
 				labels.remove(funid);
 				funid++;
 				thesi--;
+				scope--;
 				current=current.belongs;
 			}
 			else if ("jump".equals(token[0])) {
@@ -389,34 +394,35 @@ public class AssemblyCreator{
 				String temp_par="";
 				FunctionSum temp_fun=null;
 				
-				if(current!=null)
-					temp_fun=symboltable.get_function_from_Symboltable(token[3]);
-				if(temp_fun==null)
-					temp_fun=library.getFunction(token[3].replaceAll("grace_",""));
-				
-				/*
-				if(temp_fun==null || temp_fun.belongs==null)
+			
+					
+				temp_fun=library.getFunction(token[3].replaceAll("grace_",""));
+				if(temp_fun!=null)
 				{
-					code_line="\tpush esi\n";
+					code_line="\tsub esp,4\n";
 					final_code.get(thesi).add(code_line);
-					code_line="\tmov esi,DWORD PTR[ebp + 8]\n";
-					final_code.get(thesi).add(code_line);
-					code_line="\tpush esi\n";
-					final_code.get(thesi).add(code_line);
-					esi_used=true;
 				}
 				else
 				{
-					code_line="\tpush ebp\n";
-					final_code.get(thesi).add(code_line);
-				}*/
-				//code_line="\tsub esp,12\n";
-				//final_code.get(thesi).add(code_line);
-				if(library.getFunction(token[3].replaceAll("grace_","").trim())==null)
-				{	
-					code_line="\tsub esp, 12\n";
-					final_code.get(thesi).add(code_line);
+					if(scopes.get(token[3])<scopes.get(current.name))//mikrotero scope
+					{
+						code_line="\t push ebp\n";
+						final_code.get(thesi).add(code_line);
+					}
+					else if(scopes.get(token[3])==scopes.get(current.name))//iso scope
+					{
+						code_line="\t push DWORD PTR [ebp +8]\n";
+						final_code.get(thesi).add(code_line);
+					}
+					else if(scopes.get(token[3])>scopes.get(current.name))
+					{
+						code_line="\tmov esi, DWORD PTR[ebp +8]\n";//while thelei mexri na ftasei -TODO
+						final_code.get(thesi).add(code_line);
+						code_line="\tpush esi\n";
+						final_code.get(thesi).add(code_line);
+					}
 				}
+
 				if(parameters!=null)
 				{
 					
@@ -448,14 +454,13 @@ public class AssemblyCreator{
 								code_line="\tpush eax \n";
 								final_code.get(thesi).add(code_line);
 							}
-							else//an to exei allo
+							else//an to exei allo //pali polles
 							{
-								code_line="\tpush esi \n";
+								
+								code_line="\tmov esi ,DWORD PTR[esi +"+8+"]\n";
 								final_code.get(thesi).add(code_line);
 								code_line="\tmov esi ,DWORD PTR[esi -"+rmap.get(current.belongs.name).get(parameters.get(i-1))+"]\n";
-								final_code.get(thesi).add(code_line);
-								code_line="\tpush esi \n";					//latermod
-								final_code.get(thesi).add(code_line);		//later mod
+								final_code.get(thesi).add(code_line);	
 							}
 						}
 						else// Reference 
@@ -468,7 +473,7 @@ public class AssemblyCreator{
 									temp_fun=library.getFunction(token[3].replaceAll("grace_",""));
 									if(temp_fun==null)
 									{
-										System.out.println("tha m fas ti zwi");
+										
 										break;
 									}
 								}
