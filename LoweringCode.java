@@ -20,12 +20,14 @@ public class LoweringCode extends DepthFirstAdapter {
 	ArrayList<String> andjumps=new ArrayList<String>();
 	ArrayList<String> jumps=new ArrayList<String>();	
 	ArrayList<String> operator;
+	ArrayList<String> library_calls;
 
 	LoweringCode(FunctionSum symboltable,FunctionSum library)
 	{
 		this.symboltable=symboltable;
 		this.library=library;
 		help= new HelpfullMethods();
+		this.library_calls=new ArrayList<String>();
 	}
 	
 	public void print_code()
@@ -549,6 +551,11 @@ public class LoweringCode extends DepthFirstAdapter {
 	    if(fun==null)
 	    {
 	    	fun=library.getFunction(left);
+	    	if(!library_calls.contains("grace_"+left.trim()))
+	    	{
+	    		library_calls.add("grace_"+left.trim());
+	    	}
+	    	left="grace_"+left;
 	    }
 	    {
 	        List<PExpr> copy = new ArrayList<PExpr>(node.getExpr());
@@ -574,7 +581,7 @@ public class LoweringCode extends DepthFirstAdapter {
 	        if(!fun.type.replaceAll(" ","").equals("nothing"))
 	        {
 	        	 register++;
-	        	code_line=help.genquad("par","RET","$"+register,"-");
+	        	code_line=help.genquad("par","$"+register,"RET","-");
             	help.instruction_list.add(code_line);
 	        }
             code_line=help.genquad("call","-","-",left);
