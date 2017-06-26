@@ -171,6 +171,7 @@ public class AssemblyCreator{
 						reg=rmap.get(current.name).get(token[1]);
 						if(rmap.get(current.name).containsKey(token[3]))
 						{
+							
 							code_line="\tmov eax,DWORD PTR [ebp -"+rmap.get(current.name).get(token[3])+"]\n";
 							final_code.get(thesi).add(code_line);
 							code_line="\tmov DWORD PTR [ebp -"+rmap.get(current.name).get(token[1])+"],eax\n";
@@ -186,7 +187,6 @@ public class AssemblyCreator{
 					}
 					else
 					{
-						
 						if(rmap.get(current.name).containsKey(token[3]))
 						{
 							code_line="\tmov eax,DWORD PTR [ebp -"+rmap.get(current.name).get(token[3])+"]\n";
@@ -480,8 +480,16 @@ public class AssemblyCreator{
 						parameters=new ArrayList<String>();
 						parameters_kind=new ArrayList<String>();
 					}
-					parameters.add(token[1]);
-					parameters_kind.add(token[2]);
+					if(token[2].equals("RET"))
+					{
+						parameters.add(0,token[1]);
+						parameters_kind.add(0,token[2]);
+					}
+					else
+					{
+						parameters.add(token[1]);
+						parameters_kind.add(token[2]);
+					}
 			}
 			else if("ret".equals(token[0]))
 			{
@@ -549,6 +557,7 @@ public class AssemblyCreator{
 		}
 		else if(name.startsWith("$"))//is a new temp
 		{
+			System.err.println("edw");
 			rmap.get(current.name).put(name,rmapcounter.get(current.name));
 			rmapcounter.put(current.name,rmapcounter.get(current.name)+4);
 		}
