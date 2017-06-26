@@ -24,6 +24,8 @@ public class AssemblyCreator{
 	Integer line;
 	Integer funid;
 	Integer scope;
+	Boolean refflag;
+	Boolean prakseis;
 	String [] token;
 	String code_line;
 	FunctionSum current;
@@ -49,6 +51,8 @@ public class AssemblyCreator{
 		helper=new Helper();
 		line=1;
 		funid=-1;
+		refflag=false;
+		prakseis=false;
 		current=null;
 		count_temp=0;
 		scope=0;
@@ -151,7 +155,6 @@ public class AssemblyCreator{
 			}
 			else if (":=".equals(token[0]))
 			{ 
-				
 				if(token[3].equals("$$"))//store the return value of the function
 				{
 					getvar(token[1],"eax");
@@ -163,7 +166,7 @@ public class AssemblyCreator{
 				else
 				{
 					token[3]=token[3].replaceAll("\n", "");
-					if(rmap.get(current.name).containsKey(token[1]))
+					if(rmap.get(current.name).containsKey(token[1]))//topiki
 					{
 						reg=rmap.get(current.name).get(token[1]);
 						if(rmap.get(current.name).containsKey(token[3]))
@@ -183,13 +186,24 @@ public class AssemblyCreator{
 					}
 					else
 					{
-						getvar(token[3],"eax");
-						rmap.get(current.name).put(token[1],rmapcounter.get(current.name));
-						rmapcounter.put(current.name,rmapcounter.get(current.name)+4);
-						code_line="\tmov DWORD PTR [ebp -"+rmap.get(current.name).get(token[1])+"],eax\n";
-						final_code.get(thesi).add(code_line);
-					}
+						
+						if(rmap.get(current.name).containsKey(token[3]))
+						{
+							code_line="\tmov eax,DWORD PTR [ebp -"+rmap.get(current.name).get(token[3])+"]\n";
+							final_code.get(thesi).add(code_line);
+						}
+						else
+							getvar(token[3],"eax");
 					
+						getvar(token[1],"eax");
+						if(refflag=false)
+						{
+							code_line="\tmov DWORD PTR [ebp -"+rmap.get(current.name).get(token[1])+"],eax\n";
+							final_code.get(thesi).add(code_line);
+						}
+						else 
+							refflag=false;
+					}	
 				}
 			}
 			else if ("array".equals(token[0])) {
@@ -375,7 +389,7 @@ public class AssemblyCreator{
 						}
 						else// Reference 
 						{
-							if(parameters.get(i-1).startsWith("\""))
+							if(parameters.get(i-1).startsWith("\""))//string
 							{
 								temp_fun=symboltable.get_function_from_Symboltable(token[3]);
 								if(temp_fun==null)
@@ -396,13 +410,12 @@ public class AssemblyCreator{
 								data.add(code_line);
 							}
 							else
-							{
-								code_line="\tmov eax, OFFSET FLAT:"+parameters.get(i-1)+"\n";
+							{ 
+								//while mamas na dume
+								code_line="\tlea esi,DWORD PTR [ebp-"+rmap.get(current.name).get(parameters.get(i-1))+"]\n";
 								final_code.get(thesi).add(code_line);
-								code_line="\tpush eax\n";
+								code_line="\tpush esi\n";
 								final_code.get(thesi).add(code_line);
-								code_line="\t"+parameters.get(i-1)+":"+"\t.asciz\t"+parameters.get(i-1)+"\n";
-								data.add(code_line);
 							}
 						}
 					}
@@ -419,7 +432,7 @@ public class AssemblyCreator{
 				{
 					if(scopes.get(token[3])>scopes.get(current.name))//mikrotero scope
 					{
-						if(symboltable.get_function_from_Symboltable(token[3]).type.equals("nothing"))
+						if(symboltable.get_function_from_Symboltable(token[3]).type.trim().equals("nothing"))
 						{
 								code_line="\tsub esp,4\n";
 								final_code.get(thesi).add(code_line);
@@ -429,7 +442,7 @@ public class AssemblyCreator{
 					}
 					else if(scopes.get(token[3])==scopes.get(current.name))//iso scope
 					{
-						if(symboltable.get_function_from_Symboltable(token[3]).type.equals("nothing"))
+						if(symboltable.get_function_from_Symboltable(token[3]).type.trim().equals("nothing "))
 						{
 								code_line="\tsub esp,4\n";
 								final_code.get(thesi).add(code_line);
@@ -492,22 +505,52 @@ public class AssemblyCreator{
 		}
 		else if(current.findparameter(name))
 		{
-			reg2=0;
+			reg2=0;	
+			
+			boolean reflag=false;
 			for(int p=0;p<current.arg.size();p++)
 			{
 				if(name.trim().equals(current.get_parameter(p).name.trim()))
 				{		
 					reg2=p;
+					if(!current.get_parameter(p).ref.equals(""))
+						reflag=true;
 				}
 			}
 			Integer calc=(reg2*4)+16;
-			code_line="\tmov "+calleeregister+",DWORD PTR [ebp +"+calc+"]\n";
-			final_code.get(thesi).add(code_line);
+			if(reflag==true && prakseis==false)//anathesi/fortwsi
+			{
+				
+				code_line="\tmov esi,DWORD PTR [ebp +"+calc+"]\n";
+				final_code.get(thesi).add(code_line);
+				code_line="\tmov DWORD PTR [esi],eax\n";
+				final_code.get(thesi).add(code_line);
+				refflag=true;
+			}
+			else if(reflag==true && prakseis==true)//prakseis
+			{
+				
+				code_line="\tmov esi,DWORD PTR [ebp +"+calc+"]\n";
+				final_code.get(thesi).add(code_line);
+				code_line="\tmov "+calleeregister+",DWORD PTR[esi]\n";
+				final_code.get(thesi).add(code_line);
+				refflag=true;
+			}
+			else
+			{
+				code_line="\tmov "+calleeregister+",DWORD PTR [ebp +"+calc+"]\n";
+				final_code.get(thesi).add(code_line);
+			}
 		}
 		else if(Character.isDigit(name.charAt(0)))
 		{
 			code_line="\tmov "+calleeregister+","+name+"\n";
 			final_code.get(thesi).add(code_line);
+		}
+		else if(name.startsWith("$"))//is a new temp
+		{
+			rmap.get(current.name).put(name,rmapcounter.get(current.name));
+			rmapcounter.put(current.name,rmapcounter.get(current.name)+4);
 		}
 		else if(name.startsWith("\'"))//is a char
 		{
@@ -533,8 +576,10 @@ public class AssemblyCreator{
 	public void mycalc(String symbol)
 	{
 		
+		prakseis=true;
 		getvar(token[1],"eax"); //load token[1] to "eax"	
 		getvar(token[2],"ebx"); //load token[2] to "ebx"
+		prakseis=false;
 		code_line="\t"+symbol+" eax,ebx\n";
 		final_code.get(thesi).add(code_line);
 		if(rmap.get(current.name).containsKey(token[3]))
