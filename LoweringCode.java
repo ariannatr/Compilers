@@ -550,7 +550,7 @@ public class LoweringCode extends DepthFirstAdapter {
 	    fun=symboltable.get_function_from_Symboltable(left);
 	    if(fun==null)
 	    {
-	    	fun=library.getFunction(left);
+	    	fun=library.getFunction(left.trim());
 	    	if(!library_calls.contains("grace_"+left.trim()))
 	    	{
 	    		library_calls.add("grace_"+left.trim());
@@ -576,11 +576,10 @@ public class LoweringCode extends DepthFirstAdapter {
 	            num_of_param++;
 	            
 	        }
-	       
 	        String code_line="";
 	        if(!fun.type.replaceAll(" ","").equals("nothing"))
 	        {
-	        	 register++;
+	        	register++;
 	        	code_line=help.genquad("par","$"+register,"RET","-");
             	help.instruction_list.add(code_line);
 	        }

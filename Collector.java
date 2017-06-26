@@ -52,6 +52,7 @@ public class Collector extends DepthFirstAdapter {
 		fun2.arg.add(var2);
 		standar_library.fun.add(fun2);
 		FunctionSum fun3 = new FunctionSum("putc");
+		fun3.type="nothing";
 		VarSum var3=new VarSum("c","char");
 		fun3.arg.add(var3);
 		standar_library.fun.add(fun3);

@@ -151,24 +151,21 @@ public class AssemblyCreator{
 			}
 			else if (":=".equals(token[0]))
 			{
-				if(token[3].equals("$$"))
+				if(token[3].equals("$$"))//store the return value of the function
 				{
-					if(rmap.get(current.name).containsKey(token[1]))
+					getvar(token[1],"eax");//load token[1] to "eax"
+					//code_line="\tmov eax ,DWORD PTR [ebp-12]\n";
+					//final_code.get(thesi).add(code_line);
+					if(Character.isDigit(token[1].charAt(0)))
 					{
-						reg=rmap.get(current.name).get(token[1]);
-					//	code_line="\tmov eax,DWORD PTR [ebp -"+reg+"]\n";
-					//	final_code.get(thesi).add(code_line);
-						code_line="\tmov esi,DWORD PTR [ebp +"+12+"]\n";
-						final_code.get(thesi).add(code_line);
-						code_line="\tmov DWORD PTR [esi ],eax\n";
-						final_code.get(thesi).add(code_line);
-						code_line="\tmov DWORD PTR [ebp -"+reg+"],esi\n";
+						code_line="\tmov DWORD PTR [ebp+12],eax\n";
 						final_code.get(thesi).add(code_line);
 					}
 					else
 					{
-						reg=rmap.get(current.name).get(token[1]);
-						code_line="\tmov DWORD PTR [ebp+12],"+token[1]+"\n";
+						code_line="\tmov esi,DWORD PTR [ebp+12]\n";
+						final_code.get(thesi).add(code_line);
+						code_line="\tmov DWORD PTR [esi],eax\n";
 						final_code.get(thesi).add(code_line);
 					}
 				}
@@ -190,6 +187,7 @@ public class AssemblyCreator{
 						code_line="\tmov DWORD PTR [ebp -"+rmap.get(current.name).get(token[1])+"],eax\n";
 						final_code.get(thesi).add(code_line);
 					}
+					
 				}
 			}
 			else if ("array".equals(token[0])) {
@@ -360,20 +358,24 @@ public class AssemblyCreator{
 					{
 						if(parameters_kind.get(i-1).equals("RET"))
 						{
-							if(rmap.get(current.name).containsKey(parameters.get(i-1)))
+							
+							if(rmap.get(current.name).containsKey(parameters.get(i-1))) //fiirst have to store te register that will keep the result
 							{
-								code_line="\tmov eax , DWORD PTR [ebp -"+rmap.get(current.name).get(parameters.get(i-1))+"]\n";
+								code_line="\tlea esi , DWORD PTR [ebp -"+rmap.get(current.name).get(parameters.get(i-1))+"]\n";
 								final_code.get(thesi).add(code_line);
-								
 							}
 							else
 							{
 								rmap.get(current.name).put(parameters.get(i-1),rmapcounter.get(current.name));
 								rmapcounter.put(current.name,rmapcounter.get(current.name)+4);
-								code_line="\tmov eax,  DWORD PTR [ebp -"+rmap.get(current.name).get(parameters.get(i-1))+"]\n";
+								code_line="\tlea esi,  DWORD PTR [ebp -"+rmap.get(current.name).get(parameters.get(i-1))+"]\n";
 								final_code.get(thesi).add(code_line);
 							}
-							code_line="\tpush [eax] \n";
+							final_code.get(thesi).add(code_line);
+						//	rmap.get(current.name).put(parameters.get(i-1),12);
+						//	code_line="\tlea eax ,DWORD PTR [ebp+12]\n";
+					//		final_code.get(thesi).add(code_line);
+							code_line="\tpush esi \n";
 							final_code.get(thesi).add(code_line);
 							//continue;
 						}
@@ -393,14 +395,14 @@ public class AssemblyCreator{
 									temp_fun=library.getFunction(token[3].replaceAll("grace_",""));
 									if(temp_fun==null)
 									{
-										break;
+										System.err.println("bad entrance\n");
 									}
 								}
 
 								temp_par="temp"+count_temp++;
-								code_line="\tmov eax, OFFSET FLAT:"+temp_par+"\n";
+								code_line="\tmov esi, OFFSET FLAT:"+temp_par+"\n";
 								final_code.get(thesi).add(code_line);
-								code_line="\tpush eax\n";
+								code_line="\tpush esi\n";
 								final_code.get(thesi).add(code_line);
 								code_line="\t"+temp_par+":"+"\t.asciz\t"+parameters.get(i-1)+"\n";
 								data.add(code_line);
@@ -513,11 +515,17 @@ public class AssemblyCreator{
 			code_line="\tmov "+calleeregister+","+name+"\n";
 			final_code.get(thesi).add(code_line);
 		}
+		else if(name.startsWith("\'"))//is a char
+		{
+			code_line="\tmov "+calleeregister+","+"ASCII("+name+")\n";
+			final_code.get(thesi).add(code_line);
+		}
 		else//an to exei i mama
 		{
 			
 			//code_line="\tpush esi\n";
 			//final_code.get(thesi).add(code_line);
+			System.err.println(calleeregister+" "+current.name+" "+name);
 			code_line="\tmov esi ,DWORD PTR[ebp +"+8+"]\n";
 			final_code.get(thesi).add(code_line);
 			code_line="\tmov "+calleeregister+" ,DWORD PTR[esi -"+rmap.get(current.belongs.name.trim()).get(name.trim())+"]\n";
