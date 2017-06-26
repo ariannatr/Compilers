@@ -106,11 +106,11 @@ public class AssemblyCreator{
 				final_code.get(thesi).add(code_line2);
 				current=symboltable.get_function_from_Symboltable(token[1]);
 				current.name=current.name.trim();
-				if(current.deapth>1)
+				/*if(current.deapth>1)
 				{
 					code_line="\tpush esi\n";
 					final_code.get(thesi).add(code_line);
-				}
+				}*/
 				int size=0;//not sure
 				for(int i=0;i<current.vars.size();i++)
 				{
@@ -150,24 +150,15 @@ public class AssemblyCreator{
 
 			}
 			else if (":=".equals(token[0]))
-			{
+			{ 
+				
 				if(token[3].equals("$$"))//store the return value of the function
 				{
-					getvar(token[1],"eax");//load token[1] to "eax"
-					//code_line="\tmov eax ,DWORD PTR [ebp-12]\n";
-					//final_code.get(thesi).add(code_line);
-					if(Character.isDigit(token[1].charAt(0)))
-					{
-						code_line="\tmov DWORD PTR [ebp+12],eax\n";
-						final_code.get(thesi).add(code_line);
-					}
-					else
-					{
-						code_line="\tmov esi,DWORD PTR [ebp+12]\n";
-						final_code.get(thesi).add(code_line);
-						code_line="\tmov DWORD PTR [esi],eax\n";
-						final_code.get(thesi).add(code_line);
-					}
+					getvar(token[1],"eax");
+					code_line="\tmov esi,DWORD PTR [ebp+12]\n";
+					final_code.get(thesi).add(code_line);
+					code_line="\tmov DWORD PTR [esi],eax\n";
+					final_code.get(thesi).add(code_line);
 				}
 				else
 				{
@@ -175,9 +166,20 @@ public class AssemblyCreator{
 					if(rmap.get(current.name).containsKey(token[1]))
 					{
 						reg=rmap.get(current.name).get(token[1]);
-						getvar(token[3],"eax");
-						code_line="\tmov DWORD PTR [ebp -"+reg+"],eax\n";
-						final_code.get(thesi).add(code_line);
+						if(rmap.get(current.name).containsKey(token[3]))
+						{
+							code_line="\tmov eax,DWORD PTR [ebp -"+rmap.get(current.name).get(token[3])+"]\n";
+							final_code.get(thesi).add(code_line);
+							code_line="\tmov DWORD PTR [ebp -"+rmap.get(current.name).get(token[1])+"],eax\n";
+							final_code.get(thesi).add(code_line);
+							
+						}
+						else
+						{
+							getvar(token[3],"eax");
+							code_line="\tmov DWORD PTR [ebp -"+reg+"],eax\n";
+							final_code.get(thesi).add(code_line);
+						}
 					}
 					else
 					{
@@ -358,26 +360,12 @@ public class AssemblyCreator{
 					{
 						if(parameters_kind.get(i-1).equals("RET"))
 						{
-							
-							if(rmap.get(current.name).containsKey(parameters.get(i-1))) //fiirst have to store te register that will keep the result
-							{
-								code_line="\tlea esi , DWORD PTR [ebp -"+rmap.get(current.name).get(parameters.get(i-1))+"]\n";
-								final_code.get(thesi).add(code_line);
-							}
-							else
-							{
-								rmap.get(current.name).put(parameters.get(i-1),rmapcounter.get(current.name));
-								rmapcounter.put(current.name,rmapcounter.get(current.name)+4);
-								code_line="\tlea esi,  DWORD PTR [ebp -"+rmap.get(current.name).get(parameters.get(i-1))+"]\n";
-								final_code.get(thesi).add(code_line);
-							}
+							rmap.get(current.name).put(parameters.get(i-1),rmapcounter.get(current.name));
+							rmapcounter.put(current.name,rmapcounter.get(current.name)+4);
+							code_line="\tlea esi ,DWORD PTR [ebp-"+rmap.get(current.name).get(parameters.get(i-1))+"]\n";
 							final_code.get(thesi).add(code_line);
-						//	rmap.get(current.name).put(parameters.get(i-1),12);
-						//	code_line="\tlea eax ,DWORD PTR [ebp+12]\n";
-					//		final_code.get(thesi).add(code_line);
 							code_line="\tpush esi \n";
 							final_code.get(thesi).add(code_line);
-							//continue;
 						}
 						else if(parameters_kind.get(i-1).equals("V") )//Value
 						{
@@ -431,15 +419,21 @@ public class AssemblyCreator{
 				{
 					if(scopes.get(token[3])>scopes.get(current.name))//mikrotero scope
 					{
-						code_line="\tsub esp,4\n";
-						final_code.get(thesi).add(code_line);
+						if(symboltable.get_function_from_Symboltable(token[3]).type.equals("nothing"))
+						{
+								code_line="\tsub esp,4\n";
+								final_code.get(thesi).add(code_line);
+						}
 						code_line="\tpush ebp\n";
 						final_code.get(thesi).add(code_line);
 					}
 					else if(scopes.get(token[3])==scopes.get(current.name))//iso scope
 					{
-						code_line="\tsub esp,4\n";
-						final_code.get(thesi).add(code_line);
+						if(symboltable.get_function_from_Symboltable(token[3]).type.equals("nothing"))
+						{
+								code_line="\tsub esp,4\n";
+								final_code.get(thesi).add(code_line);
+						}
 						code_line="\tpush DWORD PTR [ebp +8]\n";
 						final_code.get(thesi).add(code_line);
 					}
@@ -522,10 +516,7 @@ public class AssemblyCreator{
 		}
 		else//an to exei i mama
 		{
-			
-			//code_line="\tpush esi\n";
-			//final_code.get(thesi).add(code_line);
-			System.err.println(calleeregister+" "+current.name+" "+name);
+		
 			code_line="\tmov esi ,DWORD PTR[ebp +"+8+"]\n";
 			final_code.get(thesi).add(code_line);
 			code_line="\tmov "+calleeregister+" ,DWORD PTR[esi -"+rmap.get(current.belongs.name.trim()).get(name.trim())+"]\n";
