@@ -517,7 +517,7 @@ public class AssemblyCreator{
 		}
 		else if(name.startsWith("\'"))//is a char
 		{
-			code_line="\tmov "+calleeregister+","+"ASCII("+name+")\n";
+			code_line="\tmov "+calleeregister+","+name+"\n";
 			final_code.get(thesi).add(code_line);
 		}
 		else//an to exei i mama
