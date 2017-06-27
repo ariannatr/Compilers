@@ -116,6 +116,35 @@ public class FunctionSum
 		return "NULL";
 	}
 
+	public boolean is_ref(String name)
+	{
+		Iterator<VarSum> itr=this.arg.iterator();
+		while(itr.hasNext())
+		{
+			VarSum ret=itr.next();
+			if(ret.name.trim().equals(name.trim()))//
+			{
+				if(!ret.ref.trim().equals(""))
+					return true;
+				else
+					return false;
+			}   
+		}
+		Iterator<VarSum> itr2=this.belongs.arg.iterator();
+		while(itr2.hasNext())
+		{
+			VarSum ret=itr2.next();
+			if(ret.name.trim().equals(name.trim()))//
+			{
+				if(!ret.ref.trim().equals(""))
+					return true;
+				else
+					return false;
+			}   
+		}
+		return false;
+	}
+
 	public String findvariabletype(String var)
 	{
 		Iterator<VarSum> itr=this.vars.iterator();
@@ -196,6 +225,23 @@ public class FunctionSum
 			}   
 		}
 		return null;
+	}
+
+	public int get_parameter_num(String name)
+	{
+		Iterator<VarSum> itr=this.arg.iterator();
+		int num=0;
+		while(itr.hasNext())
+		{
+			VarSum ret=itr.next();
+			String var=ret.name.replaceAll(" ","");
+			if(var.equals(name.replaceAll(" ","")))
+			{
+				return num;
+			}   
+			num++;
+		}
+		return -1;
 	}
 	public boolean exist_name(String na)
 	{

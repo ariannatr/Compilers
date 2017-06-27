@@ -194,15 +194,28 @@ public class AssemblyCreator{
 						}
 						else
 							getvar(token[3],"eax");
-					
-						getvar(token[1],"eax");
-						if(refflag=false)
-						{
-							code_line="\tmov DWORD PTR [ebp -"+rmap.get(current.name).get(token[1])+"],eax\n";
+						
+						if((current.findparameter(token[1])) && !current.is_ref(token[1])) //parameter by value
+						{	
+							System.err.println("anathetw s parametro by value");
+							Integer calc=(current.get_parameter_num(token[1])*4)+16;
+							code_line="\tmov DWORD PTR [ebp +"+calc+"],eax\n";
 							final_code.get(thesi).add(code_line);
 						}
-						else 
-							refflag=false;
+						else
+						{
+							getvar(token[1],"eax");
+							if(refflag=false)
+							{
+								code_line="\tmov DWORD PTR [ebp -"+rmap.get(current.name).get(token[1])+"],eax\n";
+								final_code.get(thesi).add(code_line);
+							}
+							else 
+							{
+								System.err.println("bainw edw");
+								refflag=false;
+							}
+						}
 					}	
 				}
 			}
@@ -293,11 +306,11 @@ public class AssemblyCreator{
 			
 				code_line="L"+token[1]+":\n";
 				final_code.get(thesi).add(code_line);
-				if(token[1].equals(main))
-				{
+				//if(token[1].equals(main))
+			//	{
 					code_line="\tmov eax, 0\n";
 					final_code.get(thesi).add(code_line);
-				}
+			//	}
 				if(current.deapth>1)
 				{
 					code_line="\tpop esi\n";
@@ -508,7 +521,7 @@ public class AssemblyCreator{
 
 		if(rmap.get(current.name).containsKey(name))//an to exei i idia tin metavliti
 		{
-			code_line="\tmov "+calleeregister+" ,DWORD PTR[ebp -"+rmap.get(current.name).get(name)+"]\n";
+			code_line="\tmov "+calleeregister+" , DWORD PTR [ebp -"+rmap.get(current.name).get(name)+"]\n";
 			final_code.get(thesi).add(code_line);
 		}
 		else if(current.findparameter(name))
