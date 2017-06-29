@@ -41,7 +41,7 @@ class Main {
     			{
                     symboltable.current.deapth=1;
                     symboltable.current.calculate_deapths();
-                    symboltable.current.print_deapths();
+                    //symboltable.current.print_deapths();
     				LoweringCode converter= new LoweringCode(symboltable.current,symboltable.standar_library);
     				tree.apply(converter);
     				converter.help.print_instructions(output_ir);
