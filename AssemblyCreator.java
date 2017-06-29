@@ -93,7 +93,7 @@ public class AssemblyCreator{
 			{
 				thesi++;
 				arr=new ArrayList<String>();
-				HashMap tmap=new  HashMap<String,Integer>();
+				HashMap<String, Integer> tmap=new  HashMap<String,Integer>();
 				rmapcounter.put(token[1],4);
 				final_code.add(arr);
 				rmap.put(token[1],tmap);
