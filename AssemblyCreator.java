@@ -110,12 +110,7 @@ public class AssemblyCreator{
 				final_code.get(thesi).add(code_line2);
 				current=symboltable.get_function_from_Symboltable(token[1]);
 				current.name=current.name.trim();
-				/*if(current.deapth>1)
-				{
-					code_line="\tpush esi\n";
-					final_code.get(thesi).add(code_line);
-				}*/
-				int size=0;//not sure
+				int size=0;
 				for(int i=0;i<current.vars.size();i++)
 				{
 					
@@ -202,18 +197,40 @@ public class AssemblyCreator{
 							code_line="\tmov DWORD PTR [ebp +"+calc+"],eax\n";
 							final_code.get(thesi).add(code_line);
 						}
-						else
+						else if ((current.findparameter(token[1])) && current.is_ref(token[1]))//anathesi se ref
 						{
-							getvar(token[1],"eax");
-							if(refflag=false)
+								Integer calc=(current.get_parameter_num(token[1])*4)+16;
+								code_line="\tmov esi,DWORD PTR [ebp +"+calc+"]\n";
+								final_code.get(thesi).add(code_line);
+								code_line="\tmov DWORD PTR [esi],eax\n";
+								final_code.get(thesi).add(code_line);
+								refflag=true;	
+						}
+						else//anathesi eite s parametro mothers eite se metavliti
+						{
+							code_line="\tmov esi ,DWORD PTR[ebp +"+8+"]\n";//paw sti mama
+							final_code.get(thesi).add(code_line);
+							FunctionSum find;
+							find=current.belongs;
+							if (find.findparameter(token[1].trim())) //anathesi se mothers param
 							{
-								code_line="\tmov DWORD PTR [ebp -"+rmap.get(current.name).get(token[1])+"],eax\n";
+								Integer calc=(find.get_parameter_num(token[1].trim())*4)+16;
+								System.err.println("vrika to "+token[1]+" stin "+find.name+" sto "+calc);
+								code_line="\tmov DWORD PTR [esi +"+calc+"],eax\n";
 								final_code.get(thesi).add(code_line);
 							}
-							else 
+							else//push mothers or upper var
 							{
-								System.err.println("bainw edw");
-								refflag=false;
+								while(!rmap.get(find.name.trim()).containsKey(token[1].trim()))
+								{
+									System.err.println("bika s while mamas gia "+token[1]);
+									code_line="\tmov esi ,DWORD PTR[esi +"+8+"]\n";
+									final_code.get(thesi).add(code_line);
+									find=find.belongs;
+								}
+								System.err.println("vrika to "+token[1].trim()+" stin "+find.name+" sto "+rmap.get(find.name.trim()).get(token[1].trim()));
+								code_line="\tmov DWORD PTR [esi-"+rmap.get(find.name.trim()).get(token[1].trim())+"],eax\n";
+								final_code.get(thesi).add(code_line);
 							}
 						}
 					}	
@@ -258,16 +275,17 @@ public class AssemblyCreator{
 			else if ("-".equals(token[0])) {
 				mycalc("sub");
 			}
-			else if ("/".equals(token[0]))
+			else if ("div".equals(token[0]))
 			{
+				prakseis=true;
 				getvar(token[1],"eax");//load token[1] to "eax"
 				code_line="\tcdq\n";
 				final_code.get(thesi).add(code_line);
 				getvar(token[2],"ebx");//load token[2] to "ebx"
+				prakseis=false;
 				code_line="\tidiv ebx\n";
 				final_code.get(thesi).add(code_line);
-				if(rmap.get(current.name).containsKey(token[3]))
-				{
+				if(rmap.get(current.name).containsKey(token[3])){		
 					code_line="\tmov DWORD PTR [ebp -"+rmap.get(current.name).get(token[3])+"],eax\n";
 					final_code.get(thesi).add(code_line);
 				}
@@ -282,10 +300,12 @@ public class AssemblyCreator{
 			}
 			else if ("mod".equals(token[0]))
 			{
+				prakseis=true;
 				getvar(token[1],"eax");//load token[1] to "eax"
 				code_line="\tcdq\n";
 				final_code.get(thesi).add(code_line);
 				getvar(token[2],"ebx"); //load token[2] to "ebx"
+				prakseis=false;
 				code_line="\tidiv ebx\n";
 				final_code.get(thesi).add(code_line);
 				if(rmap.get(current.name).containsKey(token[3]))
@@ -306,11 +326,8 @@ public class AssemblyCreator{
 			
 				code_line="L"+token[1]+":\n";
 				final_code.get(thesi).add(code_line);
-				//if(token[1].equals(main))
-			//	{
-					code_line="\tmov eax, 0\n";
-					final_code.get(thesi).add(code_line);
-			//	}
+				code_line="\tmov eax, 0\n";
+				final_code.get(thesi).add(code_line);
 				if(current.deapth>1)
 				{
 					code_line="\tpop esi\n";
@@ -334,7 +351,7 @@ public class AssemblyCreator{
 				if(labels.containsKey(token[3]))
 				{
 					code_line="\tjmp L"+labels.get(token[3])+"\n";
-					final_code.get(thesi).add(code_line);//arianna added
+					final_code.get(thesi).add(code_line);
 				}
 				else
 				{
@@ -424,11 +441,52 @@ public class AssemblyCreator{
 							}
 							else
 							{ 
-								//while mamas na dume
-								code_line="\tlea esi,DWORD PTR [ebp-"+rmap.get(current.name).get(parameters.get(i-1))+"]\n";
-								final_code.get(thesi).add(code_line);
-								code_line="\tpush esi\n";
-								final_code.get(thesi).add(code_line);
+								FunctionSum find;
+								find=current;
+								if(rmap.get(find.name.trim()).containsKey(parameters.get(i-1)))//push a topic variable
+								{
+									code_line="\tlea esi,DWORD PTR [ebp-"+rmap.get(find.name.trim()).get(parameters.get(i-1).trim())+"]\n";
+									final_code.get(thesi).add(code_line);
+									code_line="\tpush esi\n";
+									final_code.get(thesi).add(code_line);
+								}
+								else if(current.findparameter(parameters.get(i-1).trim()))//push a parameter
+								{
+									Integer calc=(find.get_parameter_num(parameters.get(i-1).trim())*4)+16;
+									code_line="\tlea esi,DWORD PTR [ebp+"+calc+"]\n";
+									final_code.get(thesi).add(code_line);
+									code_line="\tpush esi\n";
+									final_code.get(thesi).add(code_line);
+								}
+								else//push mothers var
+								{
+									System.err.println("ksexases mia periptwsi");
+									code_line="\tmov esi ,DWORD PTR[ebp +"+8+"]\n";//paw sti mama
+									final_code.get(thesi).add(code_line);
+									find=current.belongs;
+									if (find.findparameter(parameters.get(i-1).trim())) //push a mother's parameter
+									{
+										Integer calc=(find.get_parameter_num(parameters.get(i-1).trim())*4)+16;
+										System.err.println("vrika to "+parameters.get(i-1).trim()+" stin "+find.name+" sto "+calc);
+										code_line="\tlea esi,DWORD PTR [esi +"+calc+"]\n";
+										final_code.get(thesi).add(code_line);
+									}
+									else//push mothers or upper var
+									{
+										while(!rmap.get(find.name.trim()).containsKey(parameters.get(i-1).trim()))
+										{
+											System.err.println("bika s while mamas gia "+parameters.get(i-1).trim());
+											code_line="\tmov esi ,DWORD PTR[esi +"+8+"]\n";
+											final_code.get(thesi).add(code_line);
+											find=find.belongs;
+										}
+										System.err.println("vrika to "+parameters.get(i-1).trim()+" stin "+find.name+" sto "+rmap.get(find.name.trim()).get(parameters.get(i-1).trim()));
+										code_line="\tlea esi,DWORD PTR [esi-"+rmap.get(find.name.trim()).get(parameters.get(i-1).trim())+"]\n";
+										final_code.get(thesi).add(code_line);
+									}
+									code_line="\tpush esi\n";
+									final_code.get(thesi).add(code_line);
+								}
 							}
 						}
 					}
@@ -443,7 +501,7 @@ public class AssemblyCreator{
 				
 				else
 				{
-					if(scopes.get(token[3])>scopes.get(current.name))//mikrotero scope
+					if(scopes.get(token[3])>scopes.get(current.name))
 					{
 						if(symboltable.get_function_from_Symboltable(token[3]).type.trim().equals("nothing"))
 						{
@@ -544,7 +602,7 @@ public class AssemblyCreator{
 				
 				code_line="\tmov esi,DWORD PTR [ebp +"+calc+"]\n";
 				final_code.get(thesi).add(code_line);
-				code_line="\tmov DWORD PTR [esi],eax\n";
+				code_line="\tmov "+calleeregister+",DWORD PTR [esi]\n";
 				final_code.get(thesi).add(code_line);
 				refflag=true;
 			}
@@ -553,7 +611,7 @@ public class AssemblyCreator{
 				
 				code_line="\tmov esi,DWORD PTR [ebp +"+calc+"]\n";
 				final_code.get(thesi).add(code_line);
-				code_line="\tmov "+calleeregister+",DWORD PTR[esi]\n";
+				code_line="\tmov "+calleeregister+" ,DWORD PTR[esi]\n";
 				final_code.get(thesi).add(code_line);
 				refflag=true;
 			}
@@ -581,11 +639,30 @@ public class AssemblyCreator{
 		}
 		else//an to exei i mama
 		{
-		
 			code_line="\tmov esi ,DWORD PTR[ebp +"+8+"]\n";
 			final_code.get(thesi).add(code_line);
-			code_line="\tmov "+calleeregister+" ,DWORD PTR[esi -"+rmap.get(current.belongs.name.trim()).get(name.trim())+"]\n";
-			final_code.get(thesi).add(code_line);
+			FunctionSum find;
+			find=current.belongs;
+			while(!rmap.get(find.name.trim()).containsKey(name.trim()) && !find.findparameter(name.trim()))
+			{
+				System.err.println("bika s while mamas gia "+name.trim());
+				code_line="\tmov esi ,DWORD PTR[esi +"+8+"]\n";
+				final_code.get(thesi).add(code_line);
+				find=find.belongs;
+			}
+			if(rmap.get(find.name.trim()).containsKey(name.trim()))
+			{
+				System.err.println("vrika to "+name+" stin "+find.name+" sto "+rmap.get(find.name.trim()).get(name.trim()));
+				code_line="\tmov "+calleeregister+" ,DWORD PTR[esi -"+rmap.get(find.name.trim()).get(name.trim())+"]\n";
+				final_code.get(thesi).add(code_line);
+			}
+			else if (find.findparameter(name.trim())) 
+			{
+				Integer calc=(find.get_parameter_num(name.trim())*4)+16;
+				System.err.println("vrika to "+name+" stin "+find.name+" sto "+calc);
+				code_line="\tmov "+calleeregister+" ,DWORD PTR[esi +"+calc+"]\n";
+				final_code.get(thesi).add(code_line);
+			}
 		}
 	}
 
