@@ -1,6 +1,7 @@
 package compiler;
 
 import java.util.ArrayList;
+import java.io.PrintStream;
 import java.util.*;
 
 public class HelpfullMethods 
@@ -62,13 +63,13 @@ public class HelpfullMethods
 		return list;
 	}
 
-	public void print_instructions()
+	public void print_instructions(PrintStream output_ir)
 	{
 		Iterator<String> itr=this.instruction_list.iterator();
 		while(itr.hasNext())
 		{
 			String ret=itr.next();
-			System.out.print(ret);
+			output_ir.print(ret);
 		}
 		return;
 	}

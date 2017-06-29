@@ -1,12 +1,13 @@
 package compiler;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
 public class Helper{
 
-	public static void print_final(ArrayList<ArrayList<String>> final_code,ArrayList<String> data)
+	public static void print_final(PrintStream output,ArrayList<ArrayList<String>> final_code,ArrayList<String> data)
 	{
 		Iterator<String> itr;
 		for(int i=0;i<final_code.size();i++)
@@ -15,16 +16,16 @@ public class Helper{
 			while(itr.hasNext())
 			{
 				String ret=itr.next();
-				System.out.print(ret);
+				output.print(ret);
 			}
 		}
 		Iterator<String> itr2=data.iterator();
 		if(data.size()>0)
-			System.out.println(".data");
+				output.println(".data");
 		while(itr2.hasNext())
 		{
 			String ret=itr2.next();
-			System.out.print(ret);
+			output.print(ret);
 		}
 		return;
 	}
@@ -39,6 +40,14 @@ public class Helper{
 		{
 			grace_puti(final_code,thesi);
 			code_line="\t"+"int_par:"+"\t.asciz\t"+"\"%d\""+"\n";
+			data.add(code_line);
+		}
+		if(library_calls.contains("grace_geti"))
+		{
+			grace_geti(final_code,thesi);
+			code_line="\t"+"int_par:"+"\t.asciz\t"+"\"%d\""+"\n";
+			data.add(code_line);
+			code_line="\t"+"int_par2:"+"\t.asciz\t"+"\"%d\""+"\n";
 			data.add(code_line);
 		}
 		if(library_calls.contains("grace_puts"))
@@ -183,5 +192,43 @@ public class Helper{
    		code_line="\tret\n";
    		final_code.get(thesi).add(code_line);
 	}
-
+	private void grace_geti(ArrayList<ArrayList<String>> final_code,Integer thesi) {
+		String code_line="";
+		code_line="\tpush ebp\n";
+		final_code.get(thesi).add(code_line);
+		code_line="\tmov ebp, esp\n";
+		final_code.get(thesi).add(code_line);
+		code_line="\tsub esp, 4\n";
+		final_code.get(thesi).add(code_line);
+		code_line="\tlea esi, DWORD PTR [ebp-4]\n";
+		final_code.get(thesi).add(code_line);
+		code_line="\tpush esi\n\tmov eax, OFFSET FLAT:int_par\n";
+		final_code.get(thesi).add(code_line);
+		code_line="\tpush eax\n";
+		final_code.get(thesi).add(code_line);
+		code_line="\tcall scanf\n";
+		final_code.get(thesi).add(code_line);
+		code_line="\tadd esp, 8\n";
+		final_code.get(thesi).add(code_line);
+		code_line="\tmov esi, DWORD PTR [ebp+8]\n";
+		final_code.get(thesi).add(code_line);
+		code_line="\tmov eax, DWORD PTR [ebp-4]\n";
+		final_code.get(thesi).add(code_line);
+		code_line="\tmov DWORD PTR [esi], eax\n";
+		final_code.get(thesi).add(code_line);
+		code_line="\tpush eax\n";
+		final_code.get(thesi).add(code_line);
+		code_line="\tmov eax, OFFSET FLAT:int_par2\n";
+		final_code.get(thesi).add(code_line);
+		code_line="\tpush eax\n";
+		final_code.get(thesi).add(code_line);
+		code_line="\tcall printf\n";
+		final_code.get(thesi).add(code_line);
+		code_line="\tadd esp, 8\n";
+		final_code.get(thesi).add(code_line);
+		code_line="\tmov esp, ebp\n";
+		final_code.get(thesi).add(code_line);
+		code_line="\tpop ebp\n\tret\n";
+		final_code.get(thesi).add(code_line);
+	 }
 }
