@@ -45,8 +45,6 @@ public class Helper{
 		if(library_calls.contains("grace_geti"))
 		{
 			grace_geti(final_code,thesi);
-			code_line="\t"+"int_par:"+"\t.asciz\t"+"\"%d\""+"\n";
-			data.add(code_line);
 			code_line="\t"+"int_par2:"+"\t.asciz\t"+"\"%d\""+"\n";
 			data.add(code_line);
 		}
@@ -194,13 +192,15 @@ public class Helper{
 	}
 	private void grace_geti(ArrayList<ArrayList<String>> final_code,Integer thesi) {
 		String code_line="";
+		code_line="grace_geti:\n";
+		final_code.get(thesi).add(code_line);
 		code_line="\tpush ebp\n";
 		final_code.get(thesi).add(code_line);
 		code_line="\tmov ebp, esp\n";
 		final_code.get(thesi).add(code_line);
 		code_line="\tsub esp, 4\n";
 		final_code.get(thesi).add(code_line);
-		code_line="\tlea esi, DWORD PTR [ebp-4]\n";
+		code_line="\tlea esi, DWORD PTR [ebp+12]\n";
 		final_code.get(thesi).add(code_line);
 		code_line="\tpush esi\n\tmov eax, OFFSET FLAT:int_par\n";
 		final_code.get(thesi).add(code_line);
@@ -208,23 +208,7 @@ public class Helper{
 		final_code.get(thesi).add(code_line);
 		code_line="\tcall scanf\n";
 		final_code.get(thesi).add(code_line);
-		code_line="\tadd esp, 8\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tmov esi, DWORD PTR [ebp+8]\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tmov eax, DWORD PTR [ebp-4]\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tmov DWORD PTR [esi], eax\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tpush eax\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tmov eax, OFFSET FLAT:int_par2\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tpush eax\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tcall printf\n";
-		final_code.get(thesi).add(code_line);
-		code_line="\tadd esp, 8\n";
+		code_line="\tadd esp, 12\n";
 		final_code.get(thesi).add(code_line);
 		code_line="\tmov esp, ebp\n";
 		final_code.get(thesi).add(code_line);
